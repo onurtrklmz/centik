@@ -104,27 +104,28 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 .day-head{display:flex;align-items:center;gap:8px}
 .day-head h2{font-size:1.75rem;line-height:1.15;flex:1}
 .nav{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--paper);font-size:1.1rem}
-.sub{color:var(--muted);margin:0;min-height:1.5em;flex:1;min-width:0}
-.sub-row{display:flex;align-items:center;gap:10px;margin:4px 0 0;min-height:2rem}
-.today-inline{
-  flex:0 0 auto;border:1px solid var(--notice-today-border);background:var(--notice-today-bg);
-  color:var(--notice-today-accent);border-radius:999px;padding:6px 10px;font-size:.82rem;font-weight:700;
-  white-space:nowrap;line-height:1;transition:background .14s,border-color .14s,transform .14s;
-}
-.today-inline:hover{background:color-mix(in srgb,var(--notice-today-accent) 14%,var(--paper));transform:translateY(-1px)}
+.sub{color:var(--muted);margin:0;min-height:1.5em;flex:1;min-width:0;display:flex;align-items:center}
+.sub-row{display:flex;align-items:stretch;gap:10px;margin:4px 0 0;min-height:44px}
 
 .jump-notice{
   width:100%;padding:11px 14px;border-radius:12px;color:var(--ink);
-  display:flex;align-items:center;justify-content:space-between;text-align:left;font-weight:600;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;font-weight:600;
   box-shadow:var(--shadow);transition:background .14s,border-color .14s,transform .14s;
 }
-.jump-notice::after{content:"›";font-size:1.25rem;line-height:1}
+.jump-notice::after{content:"›";font-size:1.25rem;line-height:1;flex:none}
 .jump-notice:hover{transform:translateY(-1px)}
 .tomorrow-notice{
   margin:0 0 14px;border:1px solid var(--notice-tomorrow-border);background:var(--notice-tomorrow-bg);
 }
 .tomorrow-notice::after{color:var(--notice-tomorrow-accent)}
 .tomorrow-notice:hover{background:color-mix(in srgb,var(--notice-tomorrow-accent) 14%,var(--paper))}
+.today-inline{
+  flex:0 0 auto;width:auto;align-self:stretch;margin:0;padding:0 12px;min-width:116px;
+  border:1px solid var(--notice-today-border);background:var(--notice-today-bg);color:var(--ink);
+  border-radius:12px;font-size:.82rem;font-weight:700;white-space:nowrap;
+}
+.today-inline::after{color:var(--notice-today-accent)}
+.today-inline:hover{background:color-mix(in srgb,var(--notice-today-accent) 14%,var(--paper))}
 
 .tally{margin:20px 0 12px;display:flex;align-items:baseline;gap:10px}
 .tally b{font-family:var(--serif);font-weight:600;font-size:3.2rem;line-height:1;color:var(--done)}
@@ -190,6 +191,7 @@ dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px sol
 .theme-choice[aria-pressed="true"]{border-color:var(--focus);box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 20%,transparent);background:color-mix(in srgb,var(--focus) 9%,var(--paper))}.theme-swatch{width:18px;height:18px;border-radius:50%;flex:0 0 18px;border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 0 0 4px rgba(255,255,255,.06)}.theme-swatch.navy{background:#5B7CFF}.theme-swatch.purple{background:#A66BFF}
 .admin-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.admin-head h3{margin:0;font-size:1rem}.admin-badge{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:color-mix(in srgb,var(--focus) 16%,transparent);color:var(--focus);font-size:.76rem;font-weight:700}
 .admin-list{display:grid;gap:10px;max-height:320px;overflow:auto}.admin-user{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg)}.admin-user strong,.admin-user small{display:block}.admin-user small{margin-top:3px;color:var(--muted);overflow-wrap:anywhere}.admin-actions{display:flex;gap:8px;margin-top:10px}.admin-actions button{flex:1;border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--paper);color:var(--ink);font-weight:600}.admin-actions .approve{background:linear-gradient(135deg,var(--accent-start),var(--accent-end));border-color:transparent;color:#fff}.admin-actions .reject{color:#b42318;border-color:rgba(180,35,24,.25)}.admin-empty{color:var(--muted);font-size:.88rem;padding:8px 0}.admin-meta{color:var(--muted);font-size:.78rem;margin:8px 0 0}.admin-refresh{margin-top:10px;border:0;background:transparent;color:var(--marka);padding:4px 0;font-weight:600}
+.registered-users-block{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}.registered-role{display:inline-flex;align-items:center;width:max-content;margin-top:7px;padding:3px 8px;border-radius:999px;background:color-mix(in srgb,var(--focus) 12%,transparent);color:var(--focus);font-size:.72rem;font-weight:700}.registered-role.admin{background:color-mix(in srgb,var(--accent-end) 16%,transparent);color:var(--accent-end)}
 @media(max-width:560px){.user-chip{display:none!important}.auth-card{padding:20px;border-radius:18px}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -216,7 +218,7 @@ dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px sol
   </div>
   <div class="sub-row">
     <p class="sub" id="daySub"></p>
-    <button class="today-inline" id="todayNotice" type="button" hidden>Bugüne dön</button>
+    <button class="jump-notice today-inline" id="todayNotice" type="button" hidden>Bugüne dön</button>
   </div>
 
   <div class="tally"><b id="count">0</b><span id="countLabel">iş bitti</span></div>
@@ -258,8 +260,14 @@ dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px sol
         <div class="admin-list" id="adminList"><p class="admin-empty">Bekleyen başvurular yükleniyor…</p></div>
         <p class="admin-meta" id="adminMeta"></p>
         <button class="admin-refresh" type="button" id="refreshAdmin">Listeyi yenile</button>
+        <section class="registered-users-block" aria-labelledby="registeredUsersTitle">
+          <div class="admin-head"><h3 id="registeredUsersTitle">Kayıtlı kullanıcılar</h3><span class="admin-badge" id="registeredBadge">0/10</span></div>
+          <div class="admin-list" id="registeredList"><p class="admin-empty">Kullanıcı listesi yükleniyor…</p></div>
+          <p class="admin-meta" id="registeredMeta"></p>
+          <button class="admin-refresh" type="button" id="refreshRegistered">Kullanıcı listesini yenile</button>
+        </section>
       </section>
-      <div class="row"><button type="button" id="closeAccount">Kapat</button><button type="button" class="danger" id="logoutBtn">Çıkış yap</button></div>
+      <div class="row"><button type="button" class="primary" id="closeAccount">Kaydet / Kapat</button><button type="button" class="danger" id="logoutBtn">Çıkış yap</button></div>
     </div>
   </dialog>
 </main>
@@ -318,19 +326,27 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhq
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null;
+let adminApprovals=null, adminApprovalsAt=0, adminLoadPromise=null;
+let registeredUsers=null, registeredUsersAt=0, registeredUsersLoadPromise=null;
 const $=id=>document.getElementById(id), $foot=()=>$("foot");
 const getToken=()=>{try{return localStorage.getItem(AUTH_TOKEN)||""}catch(e){return ""}};
 const getCachedUser=()=>{try{return JSON.parse(localStorage.getItem(AUTH_USER)||"null")}catch(e){return null}};
 const userKey=suffix=>currentUser?`${LS_PREFIX}${currentUser.id}-${suffix}`:`${LS_PREFIX}anon-${suffix}`;
 
-async function api(action,data={}){
+async function api(action,data={},options={}){
   if(!SCRIPT_URL||SCRIPT_URL.startsWith("BURAYA")) throw new Error("adres");
-  const r=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action,...data})});
-  let j; try{j=await r.json()}catch(e){throw new Error("sunucu")}
-  return j;
+  const timeout=Math.max(5000,Number(options.timeout)||20000),ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),timeout);
+  try{
+    const r=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action,...data}),signal:ctrl.signal});
+    let j; try{j=await r.json()}catch(e){throw new Error("sunucu")}
+    return j;
+  }catch(e){
+    if(e?.name==="AbortError")throw new Error("zaman_asimi");
+    throw e;
+  }finally{clearTimeout(timer)}
 }
 function authMessage(code){
-  const map={giris:"E-posta veya parola hatalı.",kilitli:"Çok fazla hatalı deneme yapıldı. Hesap geçici olarak kilitlendi.",pasif:"Bu hesap aktif değil.",bekliyor:"Hesabınız yönetici onayı bekliyor.",reddedildi:"Hesap başvurunuz onaylanmadı.",eposta:"Geçerli bir e-posta yazın.",parola:"Parola en az 10 karakter olmalı.",ad:"Adınızı yazın.",hesap_var:"Bu e-posta ile zaten bir hesap var.",kayit_limiti:"Yeni hesap başvurusu şu anda alınamıyor.",basvuru_limiti:"Çok sayıda bekleyen başvuru var. Yönetici onayından sonra tekrar deneyin.",admin_ayarsiz:"Süper yönetici e-posta adresi henüz yapılandırılmamış.",yetki:"Bu işlem için yönetici yetkisi gerekli.",oturum:"Oturum süresi doldu. Yeniden giriş yapın.",eposta_gonderilemedi:"Sıfırlama e-postası gönderilemedi.",sifirlama:"Kod geçersiz veya süresi dolmuş.",tema:"Geçersiz tema seçimi.",sunucu:"Sunucu hatası oluştu."};
+  const map={giris:"E-posta veya parola hatalı.",kilitli:"Çok fazla hatalı deneme yapıldı. Hesap geçici olarak kilitlendi.",pasif:"Bu hesap aktif değil.",bekliyor:"Hesabınız yönetici onayı bekliyor.",reddedildi:"Hesap başvurunuz onaylanmadı.",eposta:"Geçerli bir e-posta yazın.",parola:"Parola en az 10 karakter olmalı.",ad:"Adınızı yazın.",hesap_var:"Bu e-posta ile zaten bir hesap var.",kayit_limiti:"Yeni hesap başvurusu şu anda alınamıyor.",basvuru_limiti:"Çok sayıda bekleyen başvuru var. Yönetici onayından sonra tekrar deneyin.",admin_ayarsiz:"Süper yönetici e-posta adresi henüz yapılandırılmamış.",yetki:"Bu işlem için yönetici yetkisi gerekli.",oturum:"Oturum süresi doldu. Yeniden giriş yapın.",eposta_gonderilemedi:"Sıfırlama e-postası gönderilemedi.",sifirlama:"Kod geçersiz veya süresi dolmuş.",tema:"Geçersiz tema seçimi.",sunucu:"Sunucu hatası oluştu.",zaman_asimi:"Sunucu yanıtı gecikti. Yeniden deneyin."};
   return map[code]||"İşlem tamamlanamadı.";
 }
 function setAuthStatus(text,error=false){$("authStatus").textContent=text||"";$("authStatus").classList.toggle("error",!!error)}
@@ -375,13 +391,15 @@ async function connectNow(){
     const j=await api("sync",{token});
     if(!j.ok){if(j.error==="oturum"){expireSession();return}throw new Error(j.error||"hata")}
     currentUser=j.user||currentUser;setSession(token,currentUser);applyUserTheme(true);updateUserUI();await syncThemePreference();
+    if(currentUser?.role==="admin"&&j.adminApprovals)cacheAdminApprovals(j.adminApprovals);
+    if(currentUser?.role==="admin"&&j.adminUsers)cacheRegisteredUsers(j.adminUsers);
     const fresh=j.days||{};pending.forEach(k=>{if(days[k]&&days[k].length)fresh[k]=days[k];else delete fresh[k]});
     days=fresh;saveLocal();render();
     const waiting=[...pending];if(waiting.length)await Promise.all(waiting.map(k=>push(k)));
     if(!pending.size)$foot().textContent="Tüm kayıtlar hesabınıza kaydedildi.";
   }catch(e){$foot().textContent="Sunucuya ulaşılamadı; bu cihazdaki son kopya gösteriliyor."}
 }
-function expireSession(){setSession("",null);days={};pending=new Set();render();showGate(true);setAuthStatus("Oturum süresi doldu. Yeniden giriş yapın.",true)}
+function expireSession(){setSession("",null);days={};pending=new Set();adminApprovals=null;registeredUsers=null;render();showGate(true);setAuthStatus("Oturum süresi doldu. Yeniden giriş yapın.",true)}
 
 function addTask(t){t=t.trim();if(!t||!currentUser)return;(days[current]=days[current]||[]).push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,8),t:t.slice(0,1000),done:false});persist(current);render()}
 function toggle(id){const it=(days[current]||[]).find(x=>x.id===id);if(!it)return;it.done=!it.done;lastPop=it.done?id:null;persist(current);render()}
@@ -416,34 +434,113 @@ function renderCal(){
   let k=tk,s=0;if(!doneCount(k))k=addDays(k,-1);while(doneCount(k)){s++;k=addDays(k,-1)}const monthDone=Object.keys(days).filter(x=>x.startsWith(`${y}-${pad(m+1)}`)).reduce((a,x)=>a+doneCount(x),0);$("streak").textContent=`${AYLAR[m]} ayında ${monthDone} iş bitti. `+(s?`Üst üste ${s} gündür boş gün yok.`:"Bugün bir iş bitirince seri başlar.");
 }
 
-async function loadAdminPending(){
+function cacheAdminApprovals(data){
+  if(!data)return;
+  adminApprovals={
+    users:Array.isArray(data.users)?data.users:[],
+    count:Number(data.count)||0,
+    maxPending:Number(data.maxPending)||5,
+    maxUsers:Number(data.maxUsers)||10
+  };
+  adminApprovalsAt=Date.now();
+  renderAdminPending(adminApprovals);
+}
+function renderAdminPending(data,{loading=false,message=""}={}){
   if(currentUser?.role!=="admin")return;
   const list=$("adminList"),badge=$("pendingBadge"),meta=$("adminMeta");
-  list.innerHTML='<p class="admin-empty">Bekleyen başvurular yükleniyor…</p>';
-  try{
-    const j=await api("adminPending",{token:getToken()});
-    if(!j.ok){list.innerHTML=`<p class="admin-empty">${authMessage(j.error)}</p>`;return}
-    badge.textContent=String(j.count||0);meta.textContent=`Bekleyen sınırı: ${j.maxPending} · Toplam kullanıcı sınırı: ${j.maxUsers}`;
-    list.innerHTML="";
-    if(!j.users?.length){list.innerHTML='<p class="admin-empty">Bekleyen hesap başvurusu yok.</p>';return}
-    j.users.forEach(u=>{
-      const card=document.createElement("div");card.className="admin-user";
-      const name=document.createElement("strong");name.textContent=u.name||"İsimsiz";
-      const email=document.createElement("small");email.textContent=u.email||"";
-      const date=document.createElement("small");date.textContent=u.createdAt?`Başvuru: ${new Date(u.createdAt).toLocaleString("tr-TR")}`:"";
-      const actions=document.createElement("div");actions.className="admin-actions";
-      const approve=document.createElement("button");approve.className="approve";approve.type="button";approve.textContent="Onayla";approve.onclick=()=>setUserApproval(u.id,"aktif",approve);
-      const reject=document.createElement("button");reject.className="reject";reject.type="button";reject.textContent="Reddet";reject.onclick=()=>setUserApproval(u.id,"reddedildi",reject);
-      actions.append(approve,reject);card.append(name,email,date,actions);list.append(card);
-    });
-  }catch(e){list.innerHTML='<p class="admin-empty">Sunucuya ulaşılamadı.</p>'}
+  if(!data){
+    badge.textContent="0";
+    list.innerHTML=`<p class="admin-empty">${loading?"Bekleyen başvurular yükleniyor…":(message||"Başvuru listesi henüz alınamadı.")}</p>`;
+    meta.textContent=message&&loading?message:"";
+    return;
+  }
+  badge.textContent=String(data.count||0);
+  meta.textContent=message||`Bekleyen sınırı: ${data.maxPending} · Toplam kullanıcı sınırı: ${data.maxUsers}`;
+  list.innerHTML="";
+  if(!data.users?.length){list.innerHTML='<p class="admin-empty">Bekleyen hesap başvurusu yok.</p>';return}
+  data.users.forEach(u=>{
+    const card=document.createElement("div");card.className="admin-user";
+    const name=document.createElement("strong");name.textContent=u.name||"İsimsiz";
+    const email=document.createElement("small");email.textContent=u.email||"";
+    const date=document.createElement("small");date.textContent=u.createdAt?`Başvuru: ${new Date(u.createdAt).toLocaleString("tr-TR")}`:"";
+    const actions=document.createElement("div");actions.className="admin-actions";
+    const approve=document.createElement("button");approve.className="approve";approve.type="button";approve.textContent="Onayla";approve.onclick=()=>setUserApproval(u.id,"aktif",approve);
+    const reject=document.createElement("button");reject.className="reject";reject.type="button";reject.textContent="Reddet";reject.onclick=()=>setUserApproval(u.id,"reddedildi",reject);
+    actions.append(approve,reject);card.append(name,email,date,actions);list.append(card);
+  });
 }
+async function loadAdminPending({force=false}={}){
+  if(currentUser?.role!=="admin")return;
+  if(adminLoadPromise)return adminLoadPromise;
+  if(adminApprovals)renderAdminPending(adminApprovals,{message:"Liste güncelleniyor…"});
+  else renderAdminPending(null,{loading:true});
+  adminLoadPromise=(async()=>{
+    try{
+      const j=await api("adminPending",{token:getToken()},{timeout:18000});
+      if(!j.ok){
+        const msg=authMessage(j.error);
+        if(adminApprovals)renderAdminPending(adminApprovals,{message:msg});
+        else renderAdminPending(null,{message:msg});
+        return false;
+      }
+      cacheAdminApprovals(j);return true;
+    }catch(e){
+      const msg=e.message==="zaman_asimi"?"Sunucu gecikti. Son liste korunuyor; isterseniz yeniden deneyin.":"Sunucuya ulaşılamadı. Listeyi yeniden deneyin.";
+      if(adminApprovals)renderAdminPending(adminApprovals,{message:msg});
+      else renderAdminPending(null,{message:msg});
+      return false;
+    }finally{adminLoadPromise=null}
+  })();
+  return adminLoadPromise;
+}
+function cacheRegisteredUsers(data){
+  if(!data)return;
+  registeredUsers={users:Array.isArray(data.users)?data.users:[],count:Number(data.count)||0,maxUsers:Number(data.maxUsers)||10};
+  registeredUsersAt=Date.now();renderRegisteredUsers(registeredUsers);
+}
+function renderRegisteredUsers(data,{loading=false,message=""}={}){
+  if(currentUser?.role!=="admin")return;
+  const list=$("registeredList"),badge=$("registeredBadge"),meta=$("registeredMeta");
+  if(!data){badge.textContent="0/10";list.innerHTML=`<p class="admin-empty">${loading?"Kullanıcı listesi yükleniyor…":(message||"Kullanıcı listesi henüz alınamadı.")}</p>`;meta.textContent=message&&loading?message:"";return}
+  badge.textContent=`${data.count||0}/${data.maxUsers||10}`;
+  meta.textContent=message||`Aktif hesap: ${data.count||0} · Toplam kullanıcı sınırı: ${data.maxUsers||10}`;
+  list.innerHTML="";
+  if(!data.users?.length){list.innerHTML='<p class="admin-empty">Aktif kayıtlı kullanıcı yok.</p>';return}
+  data.users.forEach(u=>{
+    const card=document.createElement("div");card.className="admin-user";
+    const name=document.createElement("strong");name.textContent=u.name||"İsimsiz";
+    const email=document.createElement("small");email.textContent=u.email||"";
+    const date=document.createElement("small");date.textContent=u.approvedAt?`Onay: ${new Date(u.approvedAt).toLocaleString("tr-TR")}`:(u.createdAt?`Kayıt: ${new Date(u.createdAt).toLocaleString("tr-TR")}`:"");
+    const role=document.createElement("span");role.className=`registered-role${u.role==="admin"?" admin":""}`;role.textContent=u.role==="admin"?"Süper yönetici":"Kullanıcı";
+    card.append(name,email,date,role);list.append(card);
+  });
+}
+async function loadRegisteredUsers({force=false}={}){
+  if(currentUser?.role!=="admin")return;
+  if(registeredUsersLoadPromise)return registeredUsersLoadPromise;
+  if(registeredUsers)renderRegisteredUsers(registeredUsers,{message:"Liste güncelleniyor…"});else renderRegisteredUsers(null,{loading:true});
+  registeredUsersLoadPromise=(async()=>{
+    try{
+      const j=await api("adminUsers",{token:getToken()},{timeout:18000});
+      if(!j.ok){const msg=authMessage(j.error);if(registeredUsers)renderRegisteredUsers(registeredUsers,{message:msg});else renderRegisteredUsers(null,{message:msg});return false}
+      cacheRegisteredUsers(j);return true;
+    }catch(e){const msg=e.message==="zaman_asimi"?"Sunucu gecikti. Son kullanıcı listesi korunuyor.":"Sunucuya ulaşılamadı. Kullanıcı listesini yeniden deneyin.";if(registeredUsers)renderRegisteredUsers(registeredUsers,{message:msg});else renderRegisteredUsers(null,{message:msg});return false}
+    finally{registeredUsersLoadPromise=null}
+  })();
+  return registeredUsersLoadPromise;
+}
+
 async function setUserApproval(userId,status,button){
   const card=button.closest(".admin-user");card?.querySelectorAll("button").forEach(b=>b.disabled=true);
   try{
-    const j=await api("adminSetStatus",{token:getToken(),userId,status});
+    const j=await api("adminSetStatus",{token:getToken(),userId,status},{timeout:20000});
     if(!j.ok)throw new Error(j.error||"hata");
-    await loadAdminPending();
+    if(adminApprovals){
+      adminApprovals.users=adminApprovals.users.filter(u=>u.id!==userId);
+      adminApprovals.count=adminApprovals.users.length;
+      adminApprovalsAt=Date.now();renderAdminPending(adminApprovals,{message:"Liste güncelleniyor…"});
+    }
+    await Promise.all([loadAdminPending({force:true}),loadRegisteredUsers({force:true})]);
   }catch(e){if(card)card.querySelectorAll("button").forEach(b=>b.disabled=false);alert(authMessage(e.message))}
 }
 
@@ -459,8 +556,10 @@ $("addForm").addEventListener("submit",e=>{e.preventDefault();const i=$("newTask
 $("tomorrowNotice").onclick=()=>go(addDays(todayKey(),1));
 $("todayNotice").onclick=()=>go(todayKey());
 $("prev").onclick=()=>go(addDays(current,-1));$("next").onclick=()=>go(addDays(current,1));$("mPrev").onclick=()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);renderCal()};$("mNext").onclick=()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);renderCal()};
-$("refresh").onclick=()=>connect();$("settings").onclick=()=>{updateUserUI();refreshThemeButtons();$("accountDialog").showModal();if(currentUser?.role==="admin")loadAdminPending()};$("refreshAdmin").onclick=()=>loadAdminPending();$("closeAccount").onclick=()=>$("accountDialog").close();
-$("logoutBtn").onclick=async()=>{const token=getToken();try{if(token)await api("logout",{token})}catch(e){}$("accountDialog").close();setSession("",null);applyTheme("lacivert");days={};pending=new Set();render();showGate(true);showPane("loginPane")};
+$("refresh").onclick=()=>connect();$("settings").onclick=()=>{updateUserUI();refreshThemeButtons();$("accountDialog").showModal();if(currentUser?.role==="admin"){if(adminApprovals)renderAdminPending(adminApprovals);else renderAdminPending(null,{loading:true});if(registeredUsers)renderRegisteredUsers(registeredUsers);else renderRegisteredUsers(null,{loading:true});if(!adminApprovals||Date.now()-adminApprovalsAt>60000)loadAdminPending();if(!registeredUsers||Date.now()-registeredUsersAt>60000)loadRegisteredUsers()}};$("refreshAdmin").onclick=()=>loadAdminPending({force:true});$("refreshRegistered").onclick=()=>loadRegisteredUsers({force:true});
+async function saveAndCloseAccount(){const b=$("closeAccount"),old=b.textContent;b.disabled=true;b.textContent="Kaydediliyor…";try{await syncThemePreference()}finally{b.disabled=false;b.textContent=old;$("accountDialog").close()}}
+$("closeAccount").onclick=()=>saveAndCloseAccount();$("accountDialog").addEventListener("cancel",e=>{e.preventDefault();saveAndCloseAccount()});
+$("logoutBtn").onclick=async()=>{const token=getToken();try{if(token)await api("logout",{token})}catch(e){}$("accountDialog").close();setSession("",null);applyTheme("lacivert");days={};pending=new Set();adminApprovals=null;registeredUsers=null;render();showGate(true);showPane("loginPane")};
 const brandEl=$("brand");brandEl.onclick=()=>{go(todayKey());window.scrollTo({top:0,behavior:"smooth"})};brandEl.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();brandEl.onclick()}};
 window.addEventListener("online",async()=>{await connect()});
 
@@ -484,8 +583,8 @@ async function syncThemePreference(){
   if(!currentUser?.id)return;const wanted=pendingTheme(currentUser);if(!wanted)return;const token=getToken();if(!token)return;
   try{const j=await api("setTheme",{token,theme:cleanTheme(wanted)});if(!j.ok){if(j.error==="oturum")expireSession();return}currentUser={...currentUser,theme:cleanTheme(j.theme||wanted)};setSession(token,currentUser);rememberTheme(currentUser.theme,currentUser,false);applyTheme(currentUser.theme)}catch(e){}
 }
-async function chooseTheme(t){
-  if(!currentUser)return;t=cleanTheme(t);currentUser={...currentUser,theme:t};setSession(getToken(),currentUser);rememberTheme(t,currentUser,true);applyTheme(t);await syncThemePreference();
+function chooseTheme(t){
+  if(!currentUser)return;t=cleanTheme(t);currentUser={...currentUser,theme:t};setSession(getToken(),currentUser);rememberTheme(t,currentUser,true);applyTheme(t);
 }
 $("themeNavy").onclick=()=>chooseTheme("lacivert");$("themePurple").onclick=()=>chooseTheme("mor");
 
