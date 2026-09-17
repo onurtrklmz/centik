@@ -8,58 +8,63 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <title>Çentik</title>
-<meta name="theme-color" content="#EDF2FF" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0B1226" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#0B1226">
 <link rel="manifest" href="manifest.json">
 <meta name="application-name" content="Çentik">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Çentik">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
+<script>
+/* Kullanıcı temasını ilk boyamadan önce uygula. */
+try{
+  const __u=JSON.parse(localStorage.getItem("centik-auth-user-v2")||"null");
+  if(__u&&__u.id){
+    const __pending=localStorage.getItem(`centik-theme-pending-v1-${__u.id}`);
+    const __local=localStorage.getItem(`centik-theme-v1-${__u.id}`);
+    const __theme=(__pending||__local||__u.theme||"lacivert")==="mor"?"mor":"lacivert";
+    document.documentElement.setAttribute("data-theme",__theme);
+  }else document.documentElement.setAttribute("data-theme","lacivert");
+}catch(e){document.documentElement.setAttribute("data-theme","lacivert");}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* Kitaplık ile aynı görsel dil */
-:root{
-  --bg:#EDF2FF; --paper:#FFFFFF; --ink:#0A1633; --muted:#5C6B8E; --faint:#8C99B8; --line:#E0E8FA;
-  --marka:#2E5BFF; --focus:#2E5BFF;
-  --done:#2E5BFF; --l1:#D6E0FF; --l2:#8FA8FF; --l3:#2E5BFF;
-  --bar:rgba(237,242,255,.84); --bar-line:rgba(224,232,250,.9); --glow:1;
-  --shadow:0 1px 2px rgba(10,22,51,.05), 0 6px 18px -10px rgba(46,91,255,.28);
-  color-scheme:light;
+/* Çentik kalıcı koyu tema sistemi — varsayılan Lacivert */
+:root, :root[data-theme="lacivert"]{
+  --bg:#0B1226; --paper:#131C36; --ink:#E6ECFF; --muted:#9AA8CC; --faint:#6C7A9E; --line:#243056;
+  --marka:#7D9BFF; --focus:#7D9BFF; --done:#7D9BFF; --l1:#1E2C5C; --l2:#2F48A8; --l3:#5B7CFF;
+  --bar:rgba(11,18,38,.86); --bar-line:rgba(36,48,86,.92);
+  --accent-start:#5B7CFF; --accent-end:#7D5CFF; --accent-soft:rgba(125,155,255,.12);
+  --glow-a:rgba(46,91,255,.30); --glow-b:rgba(6,174,207,.22); --glow-c:rgba(124,77,255,.18);
+  --shadow:0 1px 2px rgba(0,0,0,.30),0 6px 18px -10px rgba(0,0,0,.62);
+  --theme-color:#0B1226; color-scheme:dark;
   --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
   --serif:"Fraunces",Georgia,serif;
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-  --bg:#0B1226; --paper:#131C36; --ink:#E6ECFF; --muted:#9AA8CC; --faint:#6C7A9E; --line:#243056;
-  --marka:#7D9BFF; --focus:#7D9BFF;
-  --done:#7D9BFF; --l1:#1E2C5C; --l2:#2F48A8; --l3:#5B7CFF;
-  --bar:rgba(11,18,38,.82); --bar-line:rgba(36,48,86,.9); --glow:.55;
-  --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 18px -10px rgba(0,0,0,.6);
-  color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#0B1226; --paper:#131C36; --ink:#E6ECFF; --muted:#9AA8CC; --faint:#6C7A9E; --line:#243056;
-  --marka:#7D9BFF; --focus:#7D9BFF;
-  --done:#7D9BFF; --l1:#1E2C5C; --l2:#2F48A8; --l3:#5B7CFF;
-  --bar:rgba(11,18,38,.82); --bar-line:rgba(36,48,86,.9); --glow:.55;
-  --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 18px -10px rgba(0,0,0,.6);
-  color-scheme:dark;
+:root[data-theme="mor"]{
+  --bg:#150D27; --paper:#211635; --ink:#F4EEFF; --muted:#B9A8D2; --faint:#8976A8; --line:#3A2954;
+  --marka:#C49BFF; --focus:#C49BFF; --done:#C49BFF; --l1:#38225A; --l2:#68409C; --l3:#A66BFF;
+  --bar:rgba(21,13,39,.87); --bar-line:rgba(58,41,84,.94);
+  --accent-start:#9A5CFF; --accent-end:#D05CFF; --accent-soft:rgba(196,155,255,.12);
+  --glow-a:rgba(142,69,255,.32); --glow-b:rgba(214,82,255,.22); --glow-c:rgba(84,71,255,.20);
+  --shadow:0 1px 2px rgba(0,0,0,.32),0 6px 18px -10px rgba(0,0,0,.66);
+  --theme-color:#150D27; color-scheme:dark;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --serif:"Fraunces",Georgia,serif;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
 body::before{
-  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:var(--glow);
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   background:
-    radial-gradient(52% 42% at 12% -6%, rgba(46,91,255,.30), transparent 62%),
-    radial-gradient(46% 38% at 88% -2%, rgba(6,174,207,.30), transparent 60%),
-    radial-gradient(40% 34% at 62% 8%, rgba(124,77,255,.16), transparent 65%);
+    radial-gradient(52% 42% at 12% -6%, var(--glow-a), transparent 62%),
+    radial-gradient(46% 38% at 88% -2%, var(--glow-b), transparent 60%),
+    radial-gradient(40% 34% at 62% 8%, var(--glow-c), transparent 65%);
 }
 /* ——— Marka çubuğu (Kitaplık ile aynı) ——— */
 .ust-cubuk{
@@ -73,7 +78,7 @@ body::before{
 .brand:focus-visible{outline:2px solid var(--marka);outline-offset:4px;border-radius:6px}
 .brand-logo{width:1.75rem;height:1.75rem;object-fit:contain;flex-shrink:0}
 .brand h1{margin:0;font-family:var(--serif);font-weight:600;font-size:1.6rem;letter-spacing:-.02em;color:var(--ink)}
-.brand .count{font-size:.74rem;font-weight:600;letter-spacing:.02em;color:var(--marka);background:rgba(46,91,255,.10);border-radius:999px;padding:4px 11px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.brand .count{font-size:.74rem;font-weight:600;letter-spacing:.02em;color:var(--marka);background:var(--accent-soft);border-radius:999px;padding:4px 11px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .ubtn{
   font:600 .78rem/1 var(--sans);color:var(--marka);
   background:var(--paper);border:1px solid var(--line);border-radius:999px;
@@ -82,9 +87,6 @@ body::before{
 }
 .ubtn:hover{transform:translateY(-1px)}
 .ubtn svg{width:1.15em;height:1.15em;fill:currentColor}
-#themeBtn[data-mode="light"] svg{transform:none}
-#themeBtn[data-mode="dark"] svg{transform:rotate(180deg)}
-#themeBtn[data-mode="auto"] svg{transform:rotate(90deg)}
 @media (max-width:760px){
   .brand{padding:9px 0 8px}
   .brand-logo{width:1.4rem;height:1.4rem}
@@ -116,7 +118,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 .sheet{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:6px 0;box-shadow:var(--shadow)}
 .add{display:flex;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
 .add input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;padding:8px 4px}
-.add button{border:0;border-radius:999px;background:linear-gradient(135deg,#2E5BFF,#6C4BFF);color:#fff;font-weight:600;padding:8px 14px;font-weight:500}
+.add button{border:0;border-radius:999px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));color:#fff;font-weight:600;padding:8px 14px;font-weight:500}
 ul{list-style:none;margin:0;padding:0}
 li{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--line)}
 li:last-child{border-bottom:0}
@@ -157,7 +159,7 @@ dialog label{display:block;margin:14px 0;font-weight:500}
 dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
 .row{display:flex;justify-content:flex-end;gap:8px}
 .row button{border:1px solid var(--line);background:none;border-radius:8px;padding:8px 14px}
-.row .primary{background:linear-gradient(135deg,#2E5BFF,#6C4BFF);color:#fff;border-color:transparent}
+.row .primary{background:linear-gradient(135deg,var(--accent-start),var(--accent-end));color:#fff;border-color:transparent}
 
 .user-chip{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.76rem;color:var(--muted)}
 .row .danger{color:#b42318;border-color:rgba(180,35,24,.25)}
@@ -165,10 +167,14 @@ dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px sol
 .auth-card{width:min(430px,100%);background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:var(--shadow)}
 .auth-brand{display:flex;align-items:center;gap:14px;margin-bottom:22px}.auth-brand img{width:52px;height:52px;border-radius:14px}.auth-brand h1{font-size:2rem}.auth-brand p{margin:2px 0 0;color:var(--muted)}
 .auth-tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:18px}.auth-tabs button{border:0;background:transparent;padding:9px;border-radius:9px;color:var(--muted);font-weight:600}.auth-tabs button.active{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
-.auth-pane label{display:block;margin:13px 0;font-size:.88rem;font-weight:600}.auth-pane input{display:block;width:100%;margin-top:6px;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}.auth-pane small{display:block;color:var(--muted);margin:-6px 0 12px}.auth-primary{width:100%;border:0;border-radius:11px;background:linear-gradient(135deg,#2E5BFF,#6C4BFF);color:#fff;font-weight:700;padding:12px 14px;margin-top:7px}.auth-link{display:block;margin:12px auto 0;border:0;background:transparent;color:var(--marka);font-size:.88rem}.auth-status{min-height:1.4em;color:var(--muted);font-size:.86rem;margin:14px 0 0}.auth-status.error{color:#b42318}.account-box{padding:4px}.account-box .row{margin-top:20px}
+.auth-pane label{display:block;margin:13px 0;font-size:.88rem;font-weight:600}.auth-pane input{display:block;width:100%;margin-top:6px;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}.auth-pane small{display:block;color:var(--muted);margin:-6px 0 12px}.auth-primary{width:100%;border:0;border-radius:11px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));color:#fff;font-weight:700;padding:12px 14px;margin-top:7px}.auth-link{display:block;margin:12px auto 0;border:0;background:transparent;color:var(--marka);font-size:.88rem}.auth-status{min-height:1.4em;color:var(--muted);font-size:.86rem;margin:14px 0 0}.auth-status.error{color:#b42318}.account-box{padding:4px}.account-box .row{margin-top:20px}
 .admin-panel{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.theme-settings{margin:18px 0 4px;padding:14px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--paper) 88%,transparent)}
+.theme-settings h3{margin:0 0 4px;font-size:.96rem}.theme-settings p{margin:0 0 12px;color:var(--muted);font-size:.82rem}
+.theme-options{display:grid;grid-template-columns:1fr 1fr;gap:9px}.theme-choice{border:1px solid var(--line);border-radius:11px;padding:10px 11px;background:var(--bg);color:var(--ink);display:flex;align-items:center;gap:9px;text-align:left;font-weight:600}
+.theme-choice[aria-pressed="true"]{border-color:var(--focus);box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 20%,transparent);background:color-mix(in srgb,var(--focus) 9%,var(--paper))}.theme-swatch{width:18px;height:18px;border-radius:50%;flex:0 0 18px;border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 0 0 4px rgba(255,255,255,.06)}.theme-swatch.navy{background:#5B7CFF}.theme-swatch.purple{background:#A66BFF}
 .admin-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.admin-head h3{margin:0;font-size:1rem}.admin-badge{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:color-mix(in srgb,var(--focus) 16%,transparent);color:var(--focus);font-size:.76rem;font-weight:700}
-.admin-list{display:grid;gap:10px;max-height:320px;overflow:auto}.admin-user{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg)}.admin-user strong,.admin-user small{display:block}.admin-user small{margin-top:3px;color:var(--muted);overflow-wrap:anywhere}.admin-actions{display:flex;gap:8px;margin-top:10px}.admin-actions button{flex:1;border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--paper);color:var(--ink);font-weight:600}.admin-actions .approve{background:linear-gradient(135deg,#2E5BFF,#6C4BFF);border-color:transparent;color:#fff}.admin-actions .reject{color:#b42318;border-color:rgba(180,35,24,.25)}.admin-empty{color:var(--muted);font-size:.88rem;padding:8px 0}.admin-meta{color:var(--muted);font-size:.78rem;margin:8px 0 0}.admin-refresh{margin-top:10px;border:0;background:transparent;color:var(--marka);padding:4px 0;font-weight:600}
+.admin-list{display:grid;gap:10px;max-height:320px;overflow:auto}.admin-user{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg)}.admin-user strong,.admin-user small{display:block}.admin-user small{margin-top:3px;color:var(--muted);overflow-wrap:anywhere}.admin-actions{display:flex;gap:8px;margin-top:10px}.admin-actions button{flex:1;border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--paper);color:var(--ink);font-weight:600}.admin-actions .approve{background:linear-gradient(135deg,var(--accent-start),var(--accent-end));border-color:transparent;color:#fff}.admin-actions .reject{color:#b42318;border-color:rgba(180,35,24,.25)}.admin-empty{color:var(--muted);font-size:.88rem;padding:8px 0}.admin-meta{color:var(--muted);font-size:.78rem;margin:8px 0 0}.admin-refresh{margin-top:10px;border:0;background:transparent;color:var(--marka);padding:4px 0;font-weight:600}
 @media(max-width:560px){.user-chip{display:none!important}.auth-card{padding:20px;border-radius:18px}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -181,7 +187,6 @@ dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px sol
     <h1>Çentik</h1>
     <span class="count" id="plateMeta"></span>
   </div>
-  <button class="ubtn" id="themeBtn" type="button" aria-label="Tema: otomatik"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 15A7 7 0 1 0 8 1zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16"/></svg></button>
   <button class="ubtn" id="refresh" type="button" aria-label="Yenile"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/></svg></button>
   <span class="user-chip" id="userChip" hidden></span>
   <button class="ubtn" id="settings" type="button" aria-label="Hesap" title="Hesap"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/><path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"/></svg></button>
@@ -222,6 +227,14 @@ dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px sol
     <div class="account-box">
       <h2>Hesap</h2>
       <p class="sub" id="accountText"></p>
+      <section class="theme-settings" aria-labelledby="themeSettingsTitle">
+        <h3 id="themeSettingsTitle">Tema</h3>
+        <p>Çentik görünümünü hesabınız için seçin.</p>
+        <div class="theme-options">
+          <button class="theme-choice" id="themeNavy" type="button" data-theme-choice="lacivert" aria-pressed="true"><span class="theme-swatch navy" aria-hidden="true"></span><span>Lacivert</span></button>
+          <button class="theme-choice" id="themePurple" type="button" data-theme-choice="mor" aria-pressed="false"><span class="theme-swatch purple" aria-hidden="true"></span><span>Mor</span></button>
+        </div>
+      </section>
       <section class="admin-panel" id="adminPanel" hidden>
         <div class="admin-head"><h3>Kullanıcı onayları</h3><span class="admin-badge" id="pendingBadge">0</span></div>
         <div class="admin-list" id="adminList"><p class="admin-empty">Bekleyen başvurular yükleniyor…</p></div>
@@ -299,7 +312,7 @@ async function api(action,data={}){
   return j;
 }
 function authMessage(code){
-  const map={giris:"E-posta veya parola hatalı.",kilitli:"Çok fazla hatalı deneme yapıldı. Hesap geçici olarak kilitlendi.",pasif:"Bu hesap aktif değil.",bekliyor:"Hesabınız yönetici onayı bekliyor.",reddedildi:"Hesap başvurunuz onaylanmadı.",eposta:"Geçerli bir e-posta yazın.",parola:"Parola en az 10 karakter olmalı.",ad:"Adınızı yazın.",hesap_var:"Bu e-posta ile zaten bir hesap var.",kayit_limiti:"Yeni hesap başvurusu şu anda alınamıyor.",basvuru_limiti:"Çok sayıda bekleyen başvuru var. Yönetici onayından sonra tekrar deneyin.",admin_ayarsiz:"Süper yönetici e-posta adresi henüz yapılandırılmamış.",yetki:"Bu işlem için yönetici yetkisi gerekli.",oturum:"Oturum süresi doldu. Yeniden giriş yapın.",eposta_gonderilemedi:"Sıfırlama e-postası gönderilemedi.",sifirlama:"Kod geçersiz veya süresi dolmuş.",sunucu:"Sunucu hatası oluştu."};
+  const map={giris:"E-posta veya parola hatalı.",kilitli:"Çok fazla hatalı deneme yapıldı. Hesap geçici olarak kilitlendi.",pasif:"Bu hesap aktif değil.",bekliyor:"Hesabınız yönetici onayı bekliyor.",reddedildi:"Hesap başvurunuz onaylanmadı.",eposta:"Geçerli bir e-posta yazın.",parola:"Parola en az 10 karakter olmalı.",ad:"Adınızı yazın.",hesap_var:"Bu e-posta ile zaten bir hesap var.",kayit_limiti:"Yeni hesap başvurusu şu anda alınamıyor.",basvuru_limiti:"Çok sayıda bekleyen başvuru var. Yönetici onayından sonra tekrar deneyin.",admin_ayarsiz:"Süper yönetici e-posta adresi henüz yapılandırılmamış.",yetki:"Bu işlem için yönetici yetkisi gerekli.",oturum:"Oturum süresi doldu. Yeniden giriş yapın.",eposta_gonderilemedi:"Sıfırlama e-postası gönderilemedi.",sifirlama:"Kod geçersiz veya süresi dolmuş.",tema:"Geçersiz tema seçimi.",sunucu:"Sunucu hatası oluştu."};
   return map[code]||"İşlem tamamlanamadı.";
 }
 function setAuthStatus(text,error=false){$("authStatus").textContent=text||"";$("authStatus").classList.toggle("error",!!error)}
@@ -338,7 +351,7 @@ async function connect(){
   try{
     const j=await api("sync",{token});
     if(!j.ok){if(j.error==="oturum"){expireSession();return}throw new Error(j.error||"hata")}
-    currentUser=j.user||currentUser;setSession(token,currentUser);updateUserUI();
+    currentUser=j.user||currentUser;setSession(token,currentUser);applyUserTheme(true);updateUserUI();await syncThemePreference();
     const fresh=j.days||{};pending.forEach(k=>{if(days[k]&&days[k].length)fresh[k]=days[k];else delete fresh[k]});
     days=fresh;saveLocal();render();for(const k of [...pending])await push(k);
     if(!pending.size)$foot().textContent="Tüm kayıtlar hesabınıza kaydedildi.";
@@ -414,25 +427,46 @@ function showPane(id){["loginPane","registerPane","resetPane"].forEach(x=>$(x).h
 document.querySelectorAll("#authTabs button").forEach(b=>b.onclick=()=>showPane(b.dataset.pane));
 $("forgotBtn").onclick=()=>{resetStage=1;$("resetCodeFields").hidden=true;$("resetSubmit").textContent="Kod gönder";$("resetEmail").value=$("loginEmail").value;showPane("resetPane")};
 $("backLoginBtn").onclick=()=>showPane("loginPane");
-$("loginPane").addEventListener("submit",async e=>{e.preventDefault();setAuthStatus("Giriş yapılıyor…");try{const j=await api("login",{email:$("loginEmail").value,password:$("loginPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}setSession(j.token,j.user);loadLocal();updateUserUI();showGate(false);render();await connect()}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
+$("loginPane").addEventListener("submit",async e=>{e.preventDefault();setAuthStatus("Giriş yapılıyor…");try{const j=await api("login",{email:$("loginEmail").value,password:$("loginPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}setSession(j.token,j.user);applyUserTheme(true);loadLocal();updateUserUI();showGate(false);render();await syncThemePreference();await connect()}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
 $("registerPane").addEventListener("submit",async e=>{e.preventDefault();setAuthStatus("Başvuru gönderiliyor…");try{const email=$("registerEmail").value;const j=await api("register",{name:$("registerName").value,email,password:$("registerPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}if(j.pending){showPane("loginPane");$("loginEmail").value=email;$("registerPassword").value="";setAuthStatus("Başvurunuz alındı. Yönetici onayından sonra giriş yapabilirsiniz.");return}if(j.admin&&j.approved){showPane("loginPane");$("loginEmail").value=email;$("registerPassword").value="";setAuthStatus("Süper yönetici hesabınız oluşturuldu ve etkinleştirildi. Parolanızla giriş yapabilirsiniz.");return}setAuthStatus("Hesap oluşturuldu. Giriş yapabilirsiniz.")}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
 $("resetPane").addEventListener("submit",async e=>{e.preventDefault();try{if(resetStage===1){setAuthStatus("Kod gönderiliyor…");const j=await api("resetRequest",{email:$("resetEmail").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}resetStage=2;$("resetCodeFields").hidden=false;$("resetSubmit").textContent="Parolayı değiştir";setAuthStatus("Hesap varsa sıfırlama kodu e-posta adresine gönderildi.")}else{setAuthStatus("Parola değiştiriliyor…");const j=await api("resetConfirm",{email:$("resetEmail").value,code:$("resetCode").value,password:$("resetPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}showPane("loginPane");$("loginEmail").value=$("resetEmail").value;setAuthStatus("Parola değiştirildi. Yeni parolanızla giriş yapın.")}}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
 
 $("addForm").addEventListener("submit",e=>{e.preventDefault();const i=$("newTask");addTask(i.value);i.value="";i.focus()});
 $("tomorrowNotice").onclick=()=>go(addDays(todayKey(),1));
 $("prev").onclick=()=>go(addDays(current,-1));$("next").onclick=()=>go(addDays(current,1));$("mPrev").onclick=()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);renderCal()};$("mNext").onclick=()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);renderCal()};
-$("refresh").onclick=()=>connect();$("settings").onclick=()=>{updateUserUI();$("accountDialog").showModal();if(currentUser?.role==="admin")loadAdminPending()};$("refreshAdmin").onclick=()=>loadAdminPending();$("closeAccount").onclick=()=>$("accountDialog").close();
-$("logoutBtn").onclick=async()=>{const token=getToken();try{if(token)await api("logout",{token})}catch(e){}$("accountDialog").close();setSession("",null);days={};pending=new Set();render();showGate(true);showPane("loginPane")};
+$("refresh").onclick=()=>connect();$("settings").onclick=()=>{updateUserUI();refreshThemeButtons();$("accountDialog").showModal();if(currentUser?.role==="admin")loadAdminPending()};$("refreshAdmin").onclick=()=>loadAdminPending();$("closeAccount").onclick=()=>$("accountDialog").close();
+$("logoutBtn").onclick=async()=>{const token=getToken();try{if(token)await api("logout",{token})}catch(e){}$("accountDialog").close();setSession("",null);applyTheme("lacivert");days={};pending=new Set();render();showGate(true);showPane("loginPane")};
 const brandEl=$("brand");brandEl.onclick=()=>{go(todayKey());window.scrollTo({top:0,behavior:"smooth"})};brandEl.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();brandEl.onclick()}};
-window.addEventListener("online",()=>connect());
+window.addEventListener("online",async()=>{await syncThemePreference();await connect()});
 
-const THEME_KEY="galle-tema",THEMES=["auto","light","dark"],THEME_AD={auto:"otomatik",light:"açık",dark:"koyu"};
-function applyTheme(t){if(t==="auto")document.documentElement.removeAttribute("data-theme");else document.documentElement.setAttribute("data-theme",t);const dark=t==="dark"||(t==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches),m=document.querySelector('meta[name="theme-color"]');if(m)m.content=dark?"#0B1226":"#EDF2FF";const b=$("themeBtn");b.setAttribute("aria-label",`Tema: ${THEME_AD[t]}`);b.title=`Tema: ${THEME_AD[t]}`;b.dataset.mode=t}
-let theme="auto";try{theme=localStorage.getItem(THEME_KEY)||"auto"}catch(e){}applyTheme(theme);$("themeBtn").onclick=()=>{theme=THEMES[(THEMES.indexOf(theme)+1)%3];try{localStorage.setItem(THEME_KEY,theme)}catch(e){}applyTheme(theme)};matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>applyTheme(theme));
+const THEMES=["lacivert","mor"],THEME_COLORS={lacivert:"#0B1226",mor:"#150D27"};
+const themeLocalKey=u=>u?.id?`centik-theme-v1-${u.id}`:"centik-theme-v1-default";
+const themePendingKey=u=>u?.id?`centik-theme-pending-v1-${u.id}`:"centik-theme-pending-v1-default";
+const cleanTheme=t=>t==="mor"?"mor":"lacivert";
+let theme="lacivert";
+function localTheme(u=currentUser){try{return localStorage.getItem(themeLocalKey(u))||""}catch(e){return ""}}
+function pendingTheme(u=currentUser){try{return localStorage.getItem(themePendingKey(u))||""}catch(e){return ""}}
+function rememberTheme(t,u=currentUser,pending=false){if(!u?.id)return;try{localStorage.setItem(themeLocalKey(u),t);if(pending)localStorage.setItem(themePendingKey(u),t);else localStorage.removeItem(themePendingKey(u))}catch(e){}}
+function applyTheme(t){theme=cleanTheme(t);document.documentElement.setAttribute("data-theme",theme);const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=THEME_COLORS[theme];refreshThemeButtons()}
+function refreshThemeButtons(){document.querySelectorAll("[data-theme-choice]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.themeChoice===theme)))}
+function applyUserTheme(preferServer=false){
+  if(!currentUser){applyTheme("lacivert");return}
+  const pending=pendingTheme(currentUser),local=localTheme(currentUser),server=cleanTheme(currentUser.theme);
+  const chosen=pending||((preferServer&&currentUser.theme)?server:(local||server));
+  rememberTheme(chosen,currentUser,!!pending);applyTheme(chosen);
+}
+async function syncThemePreference(){
+  if(!currentUser?.id)return;const wanted=pendingTheme(currentUser);if(!wanted)return;const token=getToken();if(!token)return;
+  try{const j=await api("setTheme",{token,theme:cleanTheme(wanted)});if(!j.ok){if(j.error==="oturum")expireSession();return}currentUser={...currentUser,theme:cleanTheme(j.theme||wanted)};setSession(token,currentUser);rememberTheme(currentUser.theme,currentUser,false);applyTheme(currentUser.theme)}catch(e){}
+}
+async function chooseTheme(t){
+  if(!currentUser)return;t=cleanTheme(t);currentUser={...currentUser,theme:t};setSession(getToken(),currentUser);rememberTheme(t,currentUser,true);applyTheme(t);await syncThemePreference();
+}
+$("themeNavy").onclick=()=>chooseTheme("lacivert");$("themePurple").onclick=()=>chooseTheme("mor");
 
 async function boot(){
-  currentUser=getCachedUser();if(currentUser){loadLocal();updateUserUI();render();showGate(false);const token=getToken();if(token){try{const j=await api("me",{token});if(j.ok){currentUser=j.user;setSession(token,currentUser);updateUserUI();await connect();return}if(j.error==="oturum")expireSession()}catch(e){$foot().textContent="Çevrimdışı: bu cihazdaki son kayıtlar gösteriliyor.";return}}}
-  showGate(true);showPane("loginPane");render();
+  currentUser=getCachedUser();if(currentUser){applyUserTheme(false);loadLocal();updateUserUI();render();showGate(false);const token=getToken();if(token){try{const j=await api("me",{token});if(j.ok){currentUser=j.user;setSession(token,currentUser);applyUserTheme(true);updateUserUI();await syncThemePreference();await connect();return}if(j.error==="oturum")expireSession()}catch(e){$foot().textContent="Çevrimdışı: bu cihazdaki son kayıtlar gösteriliyor.";return}}}
+  applyTheme("lacivert");showGate(true);showPane("loginPane");render();
 }
 boot();
 if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
