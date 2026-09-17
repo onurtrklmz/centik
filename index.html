@@ -9,6 +9,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <title>Çentik</title>
 <meta name="theme-color" content="#0B1226">
+<meta name="color-scheme" content="light dark">
 <link rel="manifest" href="manifest.json">
 <meta name="application-name" content="Çentik">
 <meta name="mobile-web-app-capable" content="yes">
@@ -17,52 +18,88 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
 <script>
-/* Kullanıcı temasını ilk boyamadan önce uygula. */
+/* Renk ailesini ve cihazın açık/koyu görünümünü ilk boyamadan önce uygula. */
 try{
   const __u=JSON.parse(localStorage.getItem("centik-auth-user-v2")||"null");
+  let __theme="lacivert";
   if(__u&&__u.id){
     const __pending=localStorage.getItem(`centik-theme-pending-v1-${__u.id}`);
     const __local=localStorage.getItem(`centik-theme-v1-${__u.id}`);
-    const __theme=(__pending||__local||__u.theme||"lacivert")==="mor"?"mor":"lacivert";
-    document.documentElement.setAttribute("data-theme",__theme);
-  }else document.documentElement.setAttribute("data-theme","lacivert");
-}catch(e){document.documentElement.setAttribute("data-theme","lacivert");}
+    __theme=(__pending||__local||__u.theme||"lacivert")==="mor"?"mor":"lacivert";
+  }
+  const __dark=!!(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const __mode=__dark?"dark":"light";
+  document.documentElement.setAttribute("data-theme",__theme);
+  document.documentElement.setAttribute("data-mode",__mode);
+  const __colors={dark:{lacivert:"#0B1226",mor:"#150D27"},light:{lacivert:"#F7F9FF",mor:"#FBF8FF"}};
+  const __meta=document.querySelector('meta[name="theme-color"]');
+  if(__meta)__meta.content=__colors[__mode][__theme];
+  const __apple=document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+  if(__apple)__apple.content=__dark?"black-translucent":"default";
+}catch(e){
+  document.documentElement.setAttribute("data-theme","lacivert");
+  document.documentElement.setAttribute("data-mode","light");
+}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* Çentik kalıcı koyu tema sistemi — varsayılan Lacivert */
-:root, :root[data-theme="lacivert"]{
+/* Çentik tema sistemi: renk ailesi kullanıcıya ait, açık/koyu görünüm cihazı izler. */
+:root, :root[data-theme="lacivert"][data-mode="dark"]{
   --bg:#0B1226; --paper:#131C36; --ink:#E6ECFF; --muted:#9AA8CC; --faint:#6C7A9E; --line:#243056;
   --marka:#7D9BFF; --focus:#7D9BFF; --done:#7D9BFF; --l1:#1E2C5C; --l2:#2F48A8; --l3:#5B7CFF;
   --bar:rgba(11,18,38,.86); --bar-line:rgba(36,48,86,.92);
   --accent-start:#5B7CFF; --accent-end:#7D5CFF; --accent-soft:rgba(125,155,255,.12);
   --glow-a:rgba(46,91,255,.30); --glow-b:rgba(6,174,207,.22); --glow-c:rgba(124,77,255,.18);
+  --body-base:linear-gradient(180deg,#0B1226 0%,#0D1530 58%,#0A1124 100%);
   --shadow:0 1px 2px rgba(0,0,0,.30),0 6px 18px -10px rgba(0,0,0,.62);
-  --theme-color:#0B1226; color-scheme:dark;
+  --theme-color:#0B1226; --swatch-ring:rgba(255,255,255,.22); --swatch-inner:rgba(255,255,255,.06); color-scheme:dark;
   --notice-tomorrow-bg:rgba(32,112,166,.18); --notice-tomorrow-border:rgba(91,177,232,.42); --notice-tomorrow-accent:#78C8FF;
   --notice-today-bg:rgba(96,78,176,.18); --notice-today-border:rgba(145,126,235,.42); --notice-today-accent:#B3A6FF;
   --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
   --serif:"Fraunces",Georgia,serif;
 }
-:root[data-theme="mor"]{
+:root[data-theme="mor"][data-mode="dark"]{
   --bg:#150D27; --paper:#211635; --ink:#F4EEFF; --muted:#B9A8D2; --faint:#8976A8; --line:#3A2954;
   --marka:#C49BFF; --focus:#C49BFF; --done:#C49BFF; --l1:#38225A; --l2:#68409C; --l3:#A66BFF;
   --bar:rgba(21,13,39,.87); --bar-line:rgba(58,41,84,.94);
   --accent-start:#9A5CFF; --accent-end:#D05CFF; --accent-soft:rgba(196,155,255,.12);
   --glow-a:rgba(142,69,255,.32); --glow-b:rgba(214,82,255,.22); --glow-c:rgba(84,71,255,.20);
+  --body-base:linear-gradient(180deg,#150D27 0%,#1B1131 58%,#120A22 100%);
   --shadow:0 1px 2px rgba(0,0,0,.32),0 6px 18px -10px rgba(0,0,0,.66);
-  --theme-color:#150D27; color-scheme:dark;
+  --theme-color:#150D27; --swatch-ring:rgba(255,255,255,.22); --swatch-inner:rgba(255,255,255,.06); color-scheme:dark;
   --notice-tomorrow-bg:rgba(102,76,164,.20); --notice-tomorrow-border:rgba(159,126,220,.42); --notice-tomorrow-accent:#CBB1FF;
   --notice-today-bg:rgba(156,68,143,.18); --notice-today-border:rgba(211,119,199,.42); --notice-today-accent:#F0AFE7;
-  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --serif:"Fraunces",Georgia,serif;
+}
+:root[data-theme="lacivert"][data-mode="light"]{
+  --bg:#F5F7FC; --paper:#FFFFFF; --ink:#1B294B; --muted:#627092; --faint:#8793AE; --line:#D8E0EF;
+  --marka:#3F5FD6; --focus:#4568E8; --done:#4568E8; --l1:#E8EDFF; --l2:#B6C5F8; --l3:#6D89E8;
+  --bar:rgba(255,255,255,.88); --bar-line:rgba(63,95,214,.16);
+  --accent-start:#4367E8; --accent-end:#6E5BE6; --accent-soft:rgba(67,103,232,.09);
+  --glow-a:rgba(82,116,232,.12); --glow-b:rgba(45,165,195,.08); --glow-c:rgba(110,91,230,.08);
+  --body-base:linear-gradient(180deg,#FFFFFF 0%,#F8FAFF 52%,#F2F5FC 100%);
+  --shadow:0 1px 2px rgba(31,46,82,.06),0 10px 28px -18px rgba(45,62,112,.28);
+  --theme-color:#F7F9FF; --swatch-ring:rgba(27,41,75,.16); --swatch-inner:rgba(255,255,255,.42); color-scheme:light;
+  --notice-tomorrow-bg:#EEF8FC; --notice-tomorrow-border:#B9DCEB; --notice-tomorrow-accent:#25799D;
+  --notice-today-bg:#F1EFFF; --notice-today-border:#CEC8F4; --notice-today-accent:#6656C8;
+}
+:root[data-theme="mor"][data-mode="light"]{
+  --bg:#F9F6FC; --paper:#FFFFFF; --ink:#342047; --muted:#78688A; --faint:#9A8BA8; --line:#E4DCEC;
+  --marka:#7E46B7; --focus:#8B50C9; --done:#8B50C9; --l1:#F1E7FA; --l2:#D8BAEC; --l3:#B17AD5;
+  --bar:rgba(255,255,255,.89); --bar-line:rgba(126,70,183,.16);
+  --accent-start:#8650C5; --accent-end:#B44FC8; --accent-soft:rgba(139,80,201,.09);
+  --glow-a:rgba(151,91,202,.12); --glow-b:rgba(210,94,184,.08); --glow-c:rgba(103,88,205,.07);
+  --body-base:linear-gradient(180deg,#FFFFFF 0%,#FCF9FF 52%,#F7F1FB 100%);
+  --shadow:0 1px 2px rgba(62,37,82,.06),0 10px 28px -18px rgba(91,55,116,.26);
+  --theme-color:#FBF8FF; --swatch-ring:rgba(52,32,71,.16); --swatch-inner:rgba(255,255,255,.42); color-scheme:light;
+  --notice-tomorrow-bg:#F3EEFA; --notice-tomorrow-border:#D7C8E9; --notice-tomorrow-accent:#744AA1;
+  --notice-today-bg:#FCEFF8; --notice-today-border:#E8C9DE; --notice-today-accent:#9B477F;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--body-base,var(--bg));color:var(--ink);font:16px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
 body::before{
   content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   background:
@@ -187,8 +224,8 @@ dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px sol
 .admin-panel{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
 .theme-settings{margin:18px 0 4px;padding:14px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--paper) 88%,transparent)}
 .theme-settings h3{margin:0 0 4px;font-size:.96rem}.theme-settings p{margin:0 0 12px;color:var(--muted);font-size:.82rem}
-.theme-options{display:grid;grid-template-columns:1fr 1fr;gap:9px}.theme-choice{border:1px solid var(--line);border-radius:11px;padding:10px 11px;background:var(--bg);color:var(--ink);display:flex;align-items:center;gap:9px;text-align:left;font-weight:600}
-.theme-choice[aria-pressed="true"]{border-color:var(--focus);box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 20%,transparent);background:color-mix(in srgb,var(--focus) 9%,var(--paper))}.theme-swatch{width:18px;height:18px;border-radius:50%;flex:0 0 18px;border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 0 0 4px rgba(255,255,255,.06)}.theme-swatch.navy{background:#5B7CFF}.theme-swatch.purple{background:#A66BFF}
+.theme-mode-note{margin:-5px 0 12px!important;font-size:.78rem!important;color:var(--marka)!important;font-weight:600}.theme-options{display:grid;grid-template-columns:1fr 1fr;gap:9px}.theme-choice{border:1px solid var(--line);border-radius:11px;padding:10px 11px;background:var(--bg);color:var(--ink);display:flex;align-items:center;gap:9px;text-align:left;font-weight:600}
+.theme-choice[aria-pressed="true"]{border-color:var(--focus);box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 20%,transparent);background:color-mix(in srgb,var(--focus) 9%,var(--paper))}.theme-swatch{width:18px;height:18px;border-radius:50%;flex:0 0 18px;border:1px solid var(--swatch-ring);box-shadow:inset 0 0 0 4px var(--swatch-inner)}.theme-swatch.navy{background:#5B7CFF}.theme-swatch.purple{background:#A66BFF}
 .admin-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.admin-head h3{margin:0;font-size:1rem}.admin-badge{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:color-mix(in srgb,var(--focus) 16%,transparent);color:var(--focus);font-size:.76rem;font-weight:700}
 .admin-list{display:grid;gap:10px;max-height:320px;overflow:auto}.admin-user{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg)}.admin-user strong,.admin-user small{display:block}.admin-user small{margin-top:3px;color:var(--muted);overflow-wrap:anywhere}.admin-actions{display:flex;gap:8px;margin-top:10px}.admin-actions button{flex:1;border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--paper);color:var(--ink);font-weight:600}.admin-actions .approve{background:linear-gradient(135deg,var(--accent-start),var(--accent-end));border-color:transparent;color:#fff}.admin-actions .reject{color:#b42318;border-color:rgba(180,35,24,.25)}.admin-empty{color:var(--muted);font-size:.88rem;padding:8px 0}.admin-meta{color:var(--muted);font-size:.78rem;margin:8px 0 0}.admin-refresh{margin-top:10px;border:0;background:transparent;color:var(--marka);padding:4px 0;font-weight:600}
 .registered-users-block{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}.registered-role{display:inline-flex;align-items:center;width:max-content;margin-top:7px;padding:3px 8px;border-radius:999px;background:color-mix(in srgb,var(--focus) 12%,transparent);color:var(--focus);font-size:.72rem;font-weight:700}.registered-role.admin{background:color-mix(in srgb,var(--accent-end) 16%,transparent);color:var(--accent-end)}
@@ -249,7 +286,8 @@ dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px sol
       <p class="sub" id="accountText"></p>
       <section class="theme-settings" aria-labelledby="themeSettingsTitle">
         <h3 id="themeSettingsTitle">Tema</h3>
-        <p>Çentik görünümünü hesabınız için seçin.</p>
+        <p>Renk ailesini seçin. Açık/koyu görünüm cihazınızın sistem temasını otomatik izler.</p>
+        <p class="theme-mode-note" id="themeModeText">Sistem görünümü: —</p>
         <div class="theme-options">
           <button class="theme-choice" id="themeNavy" type="button" data-theme-choice="lacivert" aria-pressed="true"><span class="theme-swatch navy" aria-hidden="true"></span><span>Lacivert</span></button>
           <button class="theme-choice" id="themePurple" type="button" data-theme-choice="mor" aria-pressed="false"><span class="theme-swatch purple" aria-hidden="true"></span><span>Mor</span></button>
@@ -563,7 +601,13 @@ $("logoutBtn").onclick=async()=>{const token=getToken();try{if(token)await api("
 const brandEl=$("brand");brandEl.onclick=()=>{go(todayKey());window.scrollTo({top:0,behavior:"smooth"})};brandEl.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();brandEl.onclick()}};
 window.addEventListener("online",async()=>{await connect()});
 
-const THEMES=["lacivert","mor"],THEME_COLORS={lacivert:"#0B1226",mor:"#150D27"};
+const THEMES=["lacivert","mor"];
+const THEME_COLORS={
+  dark:{lacivert:"#0B1226",mor:"#150D27"},
+  light:{lacivert:"#F7F9FF",mor:"#FBF8FF"}
+};
+const systemThemeQuery=window.matchMedia?window.matchMedia("(prefers-color-scheme: dark)"):null;
+let appearanceMode=systemThemeQuery&&systemThemeQuery.matches?"dark":"light";
 const themeLocalKey=u=>u?.id?`centik-theme-v1-${u.id}`:"centik-theme-v1-default";
 const themePendingKey=u=>u?.id?`centik-theme-pending-v1-${u.id}`:"centik-theme-pending-v1-default";
 const cleanTheme=t=>t==="mor"?"mor":"lacivert";
@@ -571,7 +615,18 @@ let theme="lacivert";
 function localTheme(u=currentUser){try{return localStorage.getItem(themeLocalKey(u))||""}catch(e){return ""}}
 function pendingTheme(u=currentUser){try{return localStorage.getItem(themePendingKey(u))||""}catch(e){return ""}}
 function rememberTheme(t,u=currentUser,pending=false){if(!u?.id)return;try{localStorage.setItem(themeLocalKey(u),t);if(pending)localStorage.setItem(themePendingKey(u),t);else localStorage.removeItem(themePendingKey(u))}catch(e){}}
-function applyTheme(t){theme=cleanTheme(t);document.documentElement.setAttribute("data-theme",theme);const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=THEME_COLORS[theme];refreshThemeButtons()}
+function refreshThemeModeText(){const el=$("themeModeText");if(el)el.textContent=`Sistem görünümü: ${appearanceMode==="dark"?"Koyu":"Açık"} · otomatik`;}
+function updateThemeChrome(){
+  const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=THEME_COLORS[appearanceMode][theme];
+  const a=document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');if(a)a.content=appearanceMode==="dark"?"black-translucent":"default";
+  refreshThemeModeText();
+}
+function applySystemAppearance(){
+  appearanceMode=systemThemeQuery&&systemThemeQuery.matches?"dark":"light";
+  document.documentElement.setAttribute("data-mode",appearanceMode);
+  updateThemeChrome();
+}
+function applyTheme(t){theme=cleanTheme(t);document.documentElement.setAttribute("data-theme",theme);updateThemeChrome();refreshThemeButtons()}
 function refreshThemeButtons(){document.querySelectorAll("[data-theme-choice]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.themeChoice===theme)))}
 function applyUserTheme(preferServer=false){
   if(!currentUser){applyTheme("lacivert");return}
@@ -586,6 +641,11 @@ async function syncThemePreference(){
 function chooseTheme(t){
   if(!currentUser)return;t=cleanTheme(t);currentUser={...currentUser,theme:t};setSession(getToken(),currentUser);rememberTheme(t,currentUser,true);applyTheme(t);
 }
+if(systemThemeQuery){
+  if(systemThemeQuery.addEventListener)systemThemeQuery.addEventListener("change",applySystemAppearance);
+  else if(systemThemeQuery.addListener)systemThemeQuery.addListener(applySystemAppearance);
+}
+applySystemAppearance();
 $("themeNavy").onclick=()=>chooseTheme("lacivert");$("themePurple").onclick=()=>chooseTheme("mor");
 
 async function boot(){
