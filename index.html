@@ -147,6 +147,15 @@ dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px sol
 .row{display:flex;justify-content:flex-end;gap:8px}
 .row button{border:1px solid var(--line);background:none;border-radius:8px;padding:8px 14px}
 .row .primary{background:linear-gradient(135deg,#2E5BFF,#6C4BFF);color:#fff;border-color:transparent}
+
+.user-chip{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.76rem;color:var(--muted)}
+.row .danger{color:#b42318;border-color:rgba(180,35,24,.25)}
+.auth-gate{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:22px;overflow:auto}
+.auth-card{width:min(430px,100%);background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:var(--shadow)}
+.auth-brand{display:flex;align-items:center;gap:14px;margin-bottom:22px}.auth-brand img{width:52px;height:52px;border-radius:14px}.auth-brand h1{font-size:2rem}.auth-brand p{margin:2px 0 0;color:var(--muted)}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:18px}.auth-tabs button{border:0;background:transparent;padding:9px;border-radius:9px;color:var(--muted);font-weight:600}.auth-tabs button.active{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
+.auth-pane label{display:block;margin:13px 0;font-size:.88rem;font-weight:600}.auth-pane input{display:block;width:100%;margin-top:6px;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}.auth-pane small{display:block;color:var(--muted);margin:-6px 0 12px}.auth-primary{width:100%;border:0;border-radius:11px;background:linear-gradient(135deg,#2E5BFF,#6C4BFF);color:#fff;font-weight:700;padding:12px 14px;margin-top:7px}.auth-link{display:block;margin:12px auto 0;border:0;background:transparent;color:var(--marka);font-size:.88rem}.auth-status{min-height:1.4em;color:var(--muted);font-size:.86rem;margin:14px 0 0}.auth-status.error{color:#b42318}.account-box{padding:4px}.account-box .row{margin-top:20px}
+@media(max-width:560px){.user-chip{display:none!important}.auth-card{padding:20px;border-radius:18px}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -154,13 +163,14 @@ dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px sol
 
 <div class="ust-cubuk"><div class="wrap">
   <div class="brand" id="brand" role="button" tabindex="0" aria-label="Bugüne dön">
-    <img class="brand-logo" src="data:image/png;base64,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" alt="">
+    <img class="brand-logo" src="icon-192.png" alt="">
     <h1>Çentik</h1>
     <span class="count" id="plateMeta"></span>
   </div>
   <button class="ubtn" id="themeBtn" type="button" aria-label="Tema: otomatik"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 15A7 7 0 1 0 8 1zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16"/></svg></button>
   <button class="ubtn" id="refresh" type="button" aria-label="Yenile"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/></svg></button>
-  <button class="ubtn" id="settings" type="button" aria-label="Bağlantı ayarları"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/><path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"/></svg></button>
+  <span class="user-chip" id="userChip" hidden></span>
+  <button class="ubtn" id="settings" type="button" aria-label="Hesap" title="Hesap"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/><path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"/></svg></button>
 </div></div>
 
 <main>
@@ -193,229 +203,172 @@ dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px sol
 
   <p class="foot"><span id="foot">Kayıtlar yükleniyor…</span></p>
 
-  <dialog id="setup">
-    <form method="dialog" id="setupForm">
-      <h2>Bağlantı ayarları</h2>
-      <p class="sub">Google E-Tablo betiğinde belirlediğin şifreyi gir. Bu cihazda bir kez girmen yeterli.</p>
-      <label>Şifre<input id="tokenIn" type="password" autocomplete="current-password" required></label>
-      <div class="row"><button value="cancel" type="button" id="cancelSetup">Vazgeç</button><button value="ok" class="primary">Kaydet</button></div>
-    </form>
+  <dialog id="accountDialog">
+    <div class="account-box">
+      <h2>Hesap</h2>
+      <p class="sub" id="accountText"></p>
+      <div class="row"><button type="button" id="closeAccount">Kapat</button><button type="button" class="danger" id="logoutBtn">Çıkış yap</button></div>
+    </div>
   </dialog>
 </main>
+
+<div class="auth-gate" id="authGate" hidden>
+  <div class="auth-card">
+    <div class="auth-brand"><img src="icon-192.png" alt=""><div><h1>Çentik</h1><p>Kendi gününü işaretle.</p></div></div>
+
+    <div class="auth-tabs" id="authTabs">
+      <button type="button" class="active" data-pane="loginPane">Giriş</button>
+      <button type="button" data-pane="registerPane">Kayıt ol</button>
+    </div>
+
+    <form class="auth-pane" id="loginPane">
+      <label>E-posta<input id="loginEmail" type="email" autocomplete="email" required></label>
+      <label>Parola<input id="loginPassword" type="password" autocomplete="current-password" required minlength="10"></label>
+      <button class="auth-primary" type="submit">Giriş yap</button>
+      <button class="auth-link" type="button" id="forgotBtn">Parolamı unuttum</button>
+    </form>
+
+    <form class="auth-pane" id="registerPane" hidden>
+      <label>Adınız<input id="registerName" type="text" autocomplete="name" required minlength="2" maxlength="60"></label>
+      <label>E-posta<input id="registerEmail" type="email" autocomplete="email" required></label>
+      <label>Parola<input id="registerPassword" type="password" autocomplete="new-password" required minlength="10"></label>
+      <small>En az 10 karakter kullanın.</small>
+      <button class="auth-primary" type="submit">Hesap oluştur</button>
+    </form>
+
+    <form class="auth-pane" id="resetPane" hidden>
+      <h2>Parolayı sıfırla</h2>
+      <p class="sub">E-postanıza 6 haneli bir kod göndereceğiz.</p>
+      <label>E-posta<input id="resetEmail" type="email" autocomplete="email" required></label>
+      <div id="resetCodeFields" hidden>
+        <label>Kod<input id="resetCode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code"></label>
+        <label>Yeni parola<input id="resetPassword" type="password" autocomplete="new-password" minlength="10"></label>
+      </div>
+      <button class="auth-primary" type="submit" id="resetSubmit">Kod gönder</button>
+      <button class="auth-link" type="button" id="backLoginBtn">Girişe dön</button>
+    </form>
+    <p class="auth-status" id="authStatus" aria-live="polite"></p>
+  </div>
+</div>
 
 <script>
 const AYLAR=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
 const WD=["Pt","Sa","Ça","Pe","Cu","Ct","Pz"];
 const DAYNAMES=["Pazar","Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi"];
-
 const pad=n=>String(n).padStart(2,"0");
 const key=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const fromKey=k=>{const [y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d)};
 const todayKey=()=>key(new Date());
 const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)};
 
-let days={};            // "YYYY-MM-DD" -> [{id,t,done}]
-let current=todayKey();
-let viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})();
-let lastPop=null;
-
-// ---- storage ----
-// Google Apps Script web uygulamasının /exec adresini buraya yapıştır:
+// Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
+const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
+let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
+let pending=new Set(), timers={}, currentUser=null, resetStage=1;
+const $=id=>document.getElementById(id), $foot=()=>$("foot");
+const getToken=()=>{try{return localStorage.getItem(AUTH_TOKEN)||""}catch(e){return ""}};
+const getCachedUser=()=>{try{return JSON.parse(localStorage.getItem(AUTH_USER)||"null")}catch(e){return null}};
+const userKey=suffix=>currentUser?`${LS_PREFIX}${currentUser.id}-${suffix}`:`${LS_PREFIX}anon-${suffix}`;
 
-const LS="gunluk-kayit-v1", LS_PENDING="gunluk-bekleyen-v1", LS_TOKEN="gunluk-sifre-v1";
-let pending=new Set(), timers={};
-const $foot=()=>document.getElementById("foot");
-const getToken=()=>{try{return localStorage.getItem(LS_TOKEN)||""}catch(e){return ""}};
-
+async function api(action,data={}){
+  if(!SCRIPT_URL||SCRIPT_URL.startsWith("BURAYA")) throw new Error("adres");
+  const r=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action,...data})});
+  let j; try{j=await r.json()}catch(e){throw new Error("sunucu")}
+  return j;
+}
+function authMessage(code){
+  const map={giris:"E-posta veya parola hatalı.",kilitli:"Çok fazla hatalı deneme yapıldı. Hesap geçici olarak kilitlendi.",pasif:"Bu hesap aktif değil.",eposta:"Geçerli bir e-posta yazın.",parola:"Parola en az 10 karakter olmalı.",ad:"Adınızı yazın.",hesap_var:"Bu e-posta ile zaten bir hesap var.",oturum:"Oturum süresi doldu. Yeniden giriş yapın.",eposta_gonderilemedi:"Sıfırlama e-postası gönderilemedi.",sifirlama:"Kod geçersiz veya süresi dolmuş.",sunucu:"Sunucu hatası oluştu."};
+  return map[code]||"İşlem tamamlanamadı.";
+}
+function setAuthStatus(text,error=false){$("authStatus").textContent=text||"";$("authStatus").classList.toggle("error",!!error)}
+function setSession(token,user){
+  currentUser=user||null;
+  try{if(token)localStorage.setItem(AUTH_TOKEN,token); else localStorage.removeItem(AUTH_TOKEN); if(user)localStorage.setItem(AUTH_USER,JSON.stringify(user)); else localStorage.removeItem(AUTH_USER)}catch(e){}
+}
+function showGate(show){$("authGate").hidden=!show;document.body.style.overflow=show?"hidden":""}
+function updateUserUI(){
+  const name=currentUser?.name||currentUser?.email||"";$("userChip").textContent=name;$("userChip").hidden=!name;
+  $("accountText").textContent=currentUser?`${currentUser.name} · ${currentUser.email}`:"";
+}
 function loadLocal(){
-  try{const v=localStorage.getItem(LS);if(v)days=JSON.parse(v)||{}}catch(e){}
-  try{pending=new Set(JSON.parse(localStorage.getItem(LS_PENDING)||"[]"))}catch(e){}
+  days={};pending=new Set();if(!currentUser)return;
+  try{const v=localStorage.getItem(userKey("days"));if(v)days=JSON.parse(v)||{}}catch(e){}
+  try{pending=new Set(JSON.parse(localStorage.getItem(userKey("pending"))||"[]"))}catch(e){}
 }
-function saveLocal(){
-  try{localStorage.setItem(LS,JSON.stringify(days));localStorage.setItem(LS_PENDING,JSON.stringify([...pending]))}catch(e){}
-}
-function persist(k){
-  pending.add(k);saveLocal();
-  clearTimeout(timers[k]);
-  timers[k]=setTimeout(()=>push(k),700);   // hızlı işaretlemeleri tek yazmada topla
-}
+function saveLocal(){if(!currentUser)return;try{localStorage.setItem(userKey("days"),JSON.stringify(days));localStorage.setItem(userKey("pending"),JSON.stringify([...pending]))}catch(e){}}
+function clearUserLocal(){if(!currentUser)return;try{localStorage.removeItem(userKey("days"));localStorage.removeItem(userKey("pending"))}catch(e){}}
+function persist(k){if(!currentUser)return;pending.add(k);saveLocal();clearTimeout(timers[k]);timers[k]=setTimeout(()=>push(k),700)}
 async function push(k){
-  const token=getToken();
-  if(!token||SCRIPT_URL.startsWith("BURAYA")){$foot().textContent="Bağlantı kurulmadı; kayıtlar şimdilik bu cihazda.";return false}
+  const token=getToken();if(!token||!currentUser)return false;
   try{
-    const r=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body:JSON.stringify({token,date:k,items:days[k]||[]})});
-    const j=await r.json();
-    if(!j.ok)throw new Error(j.error||"hata");
-    pending.delete(k);saveLocal();
-    $foot().textContent=pending.size?`${pending.size} gün gönderilmeyi bekliyor.`:"Tüm kayıtlar E-Tabloya kaydedildi.";
-    return true;
+    const j=await api("saveDay",{token,date:k,items:days[k]||[]});
+    if(!j.ok){if(j.error==="oturum"){expireSession();return false}throw new Error(j.error||"hata")}
+    pending.delete(k);saveLocal();$foot().textContent=pending.size?`${pending.size} gün gönderilmeyi bekliyor.`:"Tüm kayıtlar hesabınıza kaydedildi.";return true;
   }catch(e){
-    $foot().textContent=e.message==="yetki"?"Şifre hatalı; bağlantı ayarlarını kontrol et.":"E-Tabloya ulaşılamadı; değişiklik bu cihazda bekliyor, bağlantı gelince gönderilecek.";
-    return false;
+    if(e.message==="adres")$foot().textContent="Sunucu adresi ayarlanmamış.";
+    else $foot().textContent="Sunucuya ulaşılamadı; değişiklik bu cihazda bekliyor.";return false;
   }
 }
 async function connect(){
-  const token=getToken();
-  if(SCRIPT_URL.startsWith("BURAYA")){$foot().textContent="Betik adresi girilmemiş; kayıtlar şimdilik bu cihazda.";return}
-  if(!token){openSetup();$foot().textContent="Şifre girilmedi; kayıtlar şimdilik bu cihazda.";return}
-  $foot().textContent="E-Tablodan yükleniyor…";
+  const token=getToken();if(!token||!currentUser)return;
+  $foot().textContent="Kayıtlar yükleniyor…";
   try{
-    const r=await fetch(`${SCRIPT_URL}?token=${encodeURIComponent(token)}`);
-    const j=await r.json();
-    if(!j.ok)throw new Error(j.error||"hata");
-    const fresh=j.days||{};
-    pending.forEach(k=>{ if(days[k]&&days[k].length) fresh[k]=days[k]; else delete fresh[k]; }); // bekleyen yerel değişiklikler öncelikli
-    days=fresh;saveLocal();render();
-    for(const k of [...pending]) await push(k);
-    if(!pending.size)$foot().textContent="Tüm kayıtlar E-Tabloya kaydedildi.";
-  }catch(e){
-    $foot().textContent=e.message==="yetki"?"Şifre hatalı; bağlantı ayarlarını kontrol et.":"E-Tabloya ulaşılamadı; bu cihazdaki son kopya gösteriliyor.";
-  }
+    const j=await api("sync",{token});
+    if(!j.ok){if(j.error==="oturum"){expireSession();return}throw new Error(j.error||"hata")}
+    currentUser=j.user||currentUser;setSession(token,currentUser);updateUserUI();
+    const fresh=j.days||{};pending.forEach(k=>{if(days[k]&&days[k].length)fresh[k]=days[k];else delete fresh[k]});
+    days=fresh;saveLocal();render();for(const k of [...pending])await push(k);
+    if(!pending.size)$foot().textContent="Tüm kayıtlar hesabınıza kaydedildi.";
+  }catch(e){$foot().textContent="Sunucuya ulaşılamadı; bu cihazdaki son kopya gösteriliyor."}
 }
-function openSetup(){const d=document.getElementById("setup");document.getElementById("tokenIn").value=getToken();if(!d.open)d.showModal()}
+function expireSession(){setSession("",null);days={};pending=new Set();render();showGate(true);setAuthStatus("Oturum süresi doldu. Yeniden giriş yapın.",true)}
+
+function addTask(t){t=t.trim();if(!t||!currentUser)return;(days[current]=days[current]||[]).push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,8),t:t.slice(0,1000),done:false});persist(current);render()}
+function toggle(id){const it=(days[current]||[]).find(x=>x.id===id);if(!it)return;it.done=!it.done;lastPop=it.done?id:null;persist(current);render()}
+function remove(id){days[current]=(days[current]||[]).filter(x=>x.id!==id);if(!days[current].length)delete days[current];persist(current);render()}
+function go(k){current=k;const d=fromKey(k);viewMonth=new Date(d.getFullYear(),d.getMonth(),1);render()}
+const doneCount=k=>(days[k]||[]).filter(x=>x.done).length;
+function render(){
+  const d=fromKey(current),tk=todayKey(),rel=current===tk?"Bugün":current===addDays(tk,-1)?"Dün":current===addDays(tk,1)?"Yarın":null;
+  $("dayTitle").textContent=rel||`${d.getDate()} ${AYLAR[d.getMonth()]}`;const sub=$("daySub");sub.textContent=`${d.getDate()} ${AYLAR[d.getMonth()]} ${d.getFullYear()}, ${DAYNAMES[d.getDay()]}`;
+  if(current!==tk){const b=document.createElement("button");b.className="today-link";b.textContent="Bugüne dön";b.onclick=()=>go(tk);sub.append("  ",b)}
+  const items=days[current]||[],n=doneCount(current);$("count").textContent=n;$("countLabel").textContent=current>tk?`/ ${items.length} planlandı`:items.length>n?`iş bitti, ${items.length-n} açık`:"iş bitti";
+  const ul=$("list");ul.innerHTML="";if(!items.length){const p=document.createElement("li");p.className="empty";p.textContent=current>=tk?"Henüz görev yok. Yarım saatte bitecek bir şeyle başla.":"Bu güne kayıt girilmemiş.";ul.append(p)}
+  items.forEach(it=>{const li=document.createElement("li");if(it.done)li.classList.add("done");if(it.id===lastPop)li.classList.add("pop");const c=document.createElement("button");c.className="check";c.setAttribute("aria-label",it.done?"Tamamlandı işaretini kaldır":"Tamamlandı olarak işaretle");c.setAttribute("aria-pressed",it.done);c.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3L13 4.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';c.onclick=()=>toggle(it.id);const span=document.createElement("span");span.className="txt";span.textContent=it.t;const x=document.createElement("button");x.className="del";x.textContent="×";x.setAttribute("aria-label","Sil");x.onclick=()=>remove(it.id);li.append(c,span,x);ul.append(li)});
+  lastPop=null;$("plateMeta").textContent=`Bugün ${doneCount(todayKey())} iş`;renderCal();
+}
+function renderCal(){
+  const y=viewMonth.getFullYear(),m=viewMonth.getMonth(),tk=todayKey();$("monthTitle").textContent=`${AYLAR[m]} ${y}`;const g=$("grid");g.innerHTML="";WD.forEach(w=>{const e=document.createElement("div");e.className="wd";e.textContent=w;g.append(e)});const lead=(new Date(y,m,1).getDay()+6)%7;for(let i=0;i<lead;i++){const e=document.createElement("div");e.className="cell blank";g.append(e)}const last=new Date(y,m+1,0).getDate();
+  for(let dd=1;dd<=last;dd++){const k=`${y}-${pad(m+1)}-${pad(dd)}`,n=doneCount(k),planned=(days[k]||[]).length,b=document.createElement("button");b.className="cell";if(n>=5)b.classList.add("l3");else if(n>=3)b.classList.add("l2");else if(n>=1)b.classList.add("l1");if(k>tk)b.classList.add("future");if(k===tk)b.classList.add("today");if(k===current)b.classList.add("sel");b.innerHTML=`<span>${dd}</span>`;if(n)b.insertAdjacentHTML("beforeend",`<small>${n}</small>`);else if(k>tk&&planned)b.insertAdjacentHTML("beforeend",`<small>·${planned}</small>`);b.setAttribute("aria-label",`${dd} ${AYLAR[m]}: ${n} tamamlandı`);b.onclick=()=>go(k);g.append(b)}
+  let k=tk,s=0;if(!doneCount(k))k=addDays(k,-1);while(doneCount(k)){s++;k=addDays(k,-1)}const monthDone=Object.keys(days).filter(x=>x.startsWith(`${y}-${pad(m+1)}`)).reduce((a,x)=>a+doneCount(x),0);$("streak").textContent=`${AYLAR[m]} ayında ${monthDone} iş bitti. `+(s?`Üst üste ${s} gündür boş gün yok.`:"Bugün bir iş bitirince seri başlar.");
+}
+
+function showPane(id){["loginPane","registerPane","resetPane"].forEach(x=>$(x).hidden=x!==id);$("authTabs").hidden=id==="resetPane";document.querySelectorAll("#authTabs button").forEach(b=>b.classList.toggle("active",b.dataset.pane===id));setAuthStatus("")}
+document.querySelectorAll("#authTabs button").forEach(b=>b.onclick=()=>showPane(b.dataset.pane));
+$("forgotBtn").onclick=()=>{resetStage=1;$("resetCodeFields").hidden=true;$("resetSubmit").textContent="Kod gönder";$("resetEmail").value=$("loginEmail").value;showPane("resetPane")};
+$("backLoginBtn").onclick=()=>showPane("loginPane");
+$("loginPane").addEventListener("submit",async e=>{e.preventDefault();setAuthStatus("Giriş yapılıyor…");try{const j=await api("login",{email:$("loginEmail").value,password:$("loginPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}setSession(j.token,j.user);loadLocal();updateUserUI();showGate(false);render();await connect()}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
+$("registerPane").addEventListener("submit",async e=>{e.preventDefault();setAuthStatus("Hesap oluşturuluyor…");try{const j=await api("register",{name:$("registerName").value,email:$("registerEmail").value,password:$("registerPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}setSession(j.token,j.user);loadLocal();updateUserUI();showGate(false);render();await connect()}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
+$("resetPane").addEventListener("submit",async e=>{e.preventDefault();try{if(resetStage===1){setAuthStatus("Kod gönderiliyor…");const j=await api("resetRequest",{email:$("resetEmail").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}resetStage=2;$("resetCodeFields").hidden=false;$("resetSubmit").textContent="Parolayı değiştir";setAuthStatus("Hesap varsa sıfırlama kodu e-posta adresine gönderildi.")}else{setAuthStatus("Parola değiştiriliyor…");const j=await api("resetConfirm",{email:$("resetEmail").value,code:$("resetCode").value,password:$("resetPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}showPane("loginPane");$("loginEmail").value=$("resetEmail").value;setAuthStatus("Parola değiştirildi. Yeni parolanızla giriş yapın.")}}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
+
+$("addForm").addEventListener("submit",e=>{e.preventDefault();const i=$("newTask");addTask(i.value);i.value="";i.focus()});
+$("prev").onclick=()=>go(addDays(current,-1));$("next").onclick=()=>go(addDays(current,1));$("mPrev").onclick=()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);renderCal()};$("mNext").onclick=()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);renderCal()};
+$("refresh").onclick=()=>connect();$("settings").onclick=()=>{updateUserUI();$("accountDialog").showModal()};$("closeAccount").onclick=()=>$("accountDialog").close();
+$("logoutBtn").onclick=async()=>{const token=getToken();try{if(token)await api("logout",{token})}catch(e){}$("accountDialog").close();setSession("",null);days={};pending=new Set();render();showGate(true);showPane("loginPane")};
+const brandEl=$("brand");brandEl.onclick=()=>{go(todayKey());window.scrollTo({top:0,behavior:"smooth"})};brandEl.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();brandEl.onclick()}};
 window.addEventListener("online",()=>connect());
 
-// ---- actions ----
-function addTask(t){
-  t=t.trim(); if(!t) return;
-  (days[current]=days[current]||[]).push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),t,done:false});
-  persist(current);render();
+const THEME_KEY="galle-tema",THEMES=["auto","light","dark"],THEME_AD={auto:"otomatik",light:"açık",dark:"koyu"};
+function applyTheme(t){if(t==="auto")document.documentElement.removeAttribute("data-theme");else document.documentElement.setAttribute("data-theme",t);const dark=t==="dark"||(t==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches),m=document.querySelector('meta[name="theme-color"]');if(m)m.content=dark?"#0B1226":"#EDF2FF";const b=$("themeBtn");b.setAttribute("aria-label",`Tema: ${THEME_AD[t]}`);b.title=`Tema: ${THEME_AD[t]}`;b.dataset.mode=t}
+let theme="auto";try{theme=localStorage.getItem(THEME_KEY)||"auto"}catch(e){}applyTheme(theme);$("themeBtn").onclick=()=>{theme=THEMES[(THEMES.indexOf(theme)+1)%3];try{localStorage.setItem(THEME_KEY,theme)}catch(e){}applyTheme(theme)};matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>applyTheme(theme));
+
+async function boot(){
+  currentUser=getCachedUser();if(currentUser){loadLocal();updateUserUI();render();showGate(false);const token=getToken();if(token){try{const j=await api("me",{token});if(j.ok){currentUser=j.user;setSession(token,currentUser);updateUserUI();await connect();return}if(j.error==="oturum")expireSession()}catch(e){$foot().textContent="Çevrimdışı: bu cihazdaki son kayıtlar gösteriliyor.";return}}}
+  showGate(true);showPane("loginPane");render();
 }
-function toggle(id){
-  const it=(days[current]||[]).find(x=>x.id===id); if(!it) return;
-  it.done=!it.done; lastPop=it.done?id:null;
-  persist(current);render();
-}
-function remove(id){
-  days[current]=(days[current]||[]).filter(x=>x.id!==id);
-  if(!days[current].length) delete days[current];
-  persist(current);render();
-}
-function go(k){
-  current=k;const d=fromKey(k);
-  viewMonth=new Date(d.getFullYear(),d.getMonth(),1);
-  render();
-}
-
-// ---- render ----
-const doneCount=k=>(days[k]||[]).filter(x=>x.done).length;
-
-function render(){
-  const d=fromKey(current), tk=todayKey();
-  const rel=current===tk?"Bugün":current===addDays(tk,-1)?"Dün":current===addDays(tk,1)?"Yarın":null;
-  document.getElementById("dayTitle").textContent=rel||`${d.getDate()} ${AYLAR[d.getMonth()]}`;
-  const sub=document.getElementById("daySub");
-  sub.textContent=`${d.getDate()} ${AYLAR[d.getMonth()]} ${d.getFullYear()}, ${DAYNAMES[d.getDay()]}`;
-  if(current!==tk){const b=document.createElement("button");b.className="today-link";b.textContent="Bugüne dön";b.onclick=()=>go(tk);sub.append("  ",b)}
-
-  const items=days[current]||[], n=doneCount(current);
-  document.getElementById("count").textContent=n;
-  document.getElementById("countLabel").textContent=
-    current>tk?`/ ${items.length} planlandı`:items.length>n?`iş bitti, ${items.length-n} açık`:"iş bitti";
-
-  const ul=document.getElementById("list");ul.innerHTML="";
-  if(!items.length){
-    const p=document.createElement("li");p.className="empty";
-    p.textContent=current>=tk?"Henüz görev yok. Yarım saatte bitecek bir şeyle başla.":"Bu güne kayıt girilmemiş. Yaptığın bir şeyi ekleyip işaretleyebilirsin.";
-    ul.append(p);
-  }
-  items.forEach(it=>{
-    const li=document.createElement("li");
-    if(it.done)li.classList.add("done");
-    if(it.id===lastPop)li.classList.add("pop");
-    const c=document.createElement("button");c.className="check";
-    c.setAttribute("aria-label",it.done?"Tamamlandı işaretini kaldır":"Tamamlandı olarak işaretle");
-    c.setAttribute("aria-pressed",it.done);
-    c.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3L13 4.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    c.onclick=()=>toggle(it.id);
-    const s=document.createElement("span");s.className="txt";s.textContent=it.t;
-    const x=document.createElement("button");x.className="del";x.textContent="×";x.setAttribute("aria-label","Sil");
-    x.onclick=()=>remove(it.id);
-    li.append(c,s,x);ul.append(li);
-  });
-  lastPop=null;
-  const tn=doneCount(todayKey());
-  document.getElementById("plateMeta").textContent=`Bugün ${tn} iş`;
-  renderCal();
-}
-
-function renderCal(){
-  const y=viewMonth.getFullYear(), m=viewMonth.getMonth(), tk=todayKey();
-  document.getElementById("monthTitle").textContent=`${AYLAR[m]} ${y}`;
-  const g=document.getElementById("grid");g.innerHTML="";
-  WD.forEach(w=>{const e=document.createElement("div");e.className="wd";e.textContent=w;g.append(e)});
-  const lead=(new Date(y,m,1).getDay()+6)%7;
-  for(let i=0;i<lead;i++){const e=document.createElement("div");e.className="cell blank";g.append(e)}
-  const last=new Date(y,m+1,0).getDate();
-  for(let dd=1;dd<=last;dd++){
-    const k=`${y}-${pad(m+1)}-${pad(dd)}`, n=doneCount(k), planned=(days[k]||[]).length;
-    const b=document.createElement("button");b.className="cell";
-    if(n>=5)b.classList.add("l3");else if(n>=3)b.classList.add("l2");else if(n>=1)b.classList.add("l1");
-    if(k>tk)b.classList.add("future");
-    if(k===tk)b.classList.add("today");
-    if(k===current)b.classList.add("sel");
-    b.innerHTML=`<span>${dd}</span>`;
-    if(n) b.insertAdjacentHTML("beforeend",`<small>${n}</small>`);
-    else if(k>tk&&planned) b.insertAdjacentHTML("beforeend",`<small>·${planned}</small>`);
-    b.setAttribute("aria-label",`${dd} ${AYLAR[m]}: ${n} tamamlandı`);
-    b.onclick=()=>go(k);
-    g.append(b);
-  }
-  // streak: consecutive days with ≥1 done, ending today (or yesterday if today empty)
-  let k=tk, s=0;
-  if(!doneCount(k))k=addDays(k,-1);
-  while(doneCount(k)){s++;k=addDays(k,-1)}
-  const monthDone=Object.keys(days).filter(x=>x.startsWith(`${y}-${pad(m+1)}`)).reduce((a,x)=>a+doneCount(x),0);
-  document.getElementById("streak").textContent=
-    `${AYLAR[m]} ayında ${monthDone} iş bitti. `+(s?`Üst üste ${s} gündür boş gün yok.`:"Bugün bir iş bitirince seri başlar.");
-}
-
-// ---- wire up ----
-document.getElementById("addForm").addEventListener("submit",e=>{e.preventDefault();const i=document.getElementById("newTask");addTask(i.value);i.value="";i.focus()});
-document.getElementById("prev").onclick=()=>go(addDays(current,-1));
-document.getElementById("next").onclick=()=>go(addDays(current,1));
-document.getElementById("mPrev").onclick=()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);renderCal()};
-document.getElementById("mNext").onclick=()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);renderCal()};
-
-document.getElementById("settings").onclick=openSetup;
-document.getElementById("refresh").onclick=()=>connect();
-const brandEl=document.getElementById("brand");
-brandEl.onclick=()=>{go(todayKey());window.scrollTo({top:0,behavior:"smooth"})};
-brandEl.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();brandEl.onclick()}};
-document.getElementById("cancelSetup").onclick=()=>document.getElementById("setup").close();
-document.getElementById("setupForm").addEventListener("submit",()=>{
-  try{localStorage.setItem(LS_TOKEN,document.getElementById("tokenIn").value.trim())}catch(e){}
-  connect();
-});
-
-// ---- tema: otomatik → açık → koyu ----
-const THEME_KEY="galle-tema", THEMES=["auto","light","dark"], THEME_AD={auto:"otomatik",light:"açık",dark:"koyu"};
-function applyTheme(t){
-  if(t==="auto")document.documentElement.removeAttribute("data-theme");
-  else document.documentElement.setAttribute("data-theme",t);
-  const dark=t==="dark"||(t==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches);
-  const m=document.querySelector('meta[name="theme-color"]'); if(m)m.content=dark?"#0B1226":"#EDF2FF";
-  const b=document.getElementById("themeBtn");
-  b.setAttribute("aria-label",`Tema: ${THEME_AD[t]}`); b.title=`Tema: ${THEME_AD[t]}`;
-  b.dataset.mode=t;
-}
-let theme="auto"; try{theme=localStorage.getItem(THEME_KEY)||"auto"}catch(e){}
-applyTheme(theme);
-document.getElementById("themeBtn").onclick=()=>{
-  theme=THEMES[(THEMES.indexOf(theme)+1)%3];
-  try{localStorage.setItem(THEME_KEY,theme)}catch(e){}
-  applyTheme(theme);
-};
-matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>applyTheme(theme));
-
-loadLocal();render();connect();
-
-// ---- PWA: çevrimdışı açılış ----
-if("serviceWorker" in navigator && location.protocol.startsWith("http")){
-  window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
-}
+boot();
+if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 </script>
 </body>
 </html>
