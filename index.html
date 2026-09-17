@@ -383,7 +383,8 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
-let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null;
+let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, forcedSyncTimer=null;
+const FOREGROUND_SYNC_MS=30000;
 let adminApprovals=null, adminApprovalsAt=0, adminLoadPromise=null;
 let registeredUsers=null, registeredUsersAt=0, registeredUsersLoadPromise=null;
 const $=id=>document.getElementById(id), $foot=()=>$("foot");
@@ -395,7 +396,7 @@ async function api(action,data={},options={}){
   if(!SCRIPT_URL||SCRIPT_URL.startsWith("BURAYA")) throw new Error("adres");
   const timeout=Math.max(5000,Number(options.timeout)||20000),ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),timeout);
   try{
-    const r=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action,...data}),signal:ctrl.signal});
+    const r=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action,...data}),signal:ctrl.signal,cache:"no-store"});
     let j; try{j=await r.json()}catch(e){throw new Error("sunucu")}
     return j;
   }catch(e){
@@ -419,45 +420,66 @@ function updateUserUI(){
   $("adminPanel").hidden=currentUser?.role!=="admin";
 }
 function loadLocal(){
-  days={};pending=new Set();if(!currentUser)return;
+  days={};pending=new Set();serverRevision=null;if(!currentUser)return;
   try{const v=localStorage.getItem(userKey("days"));if(v)days=JSON.parse(v)||{}}catch(e){}
   try{pending=new Set(JSON.parse(localStorage.getItem(userKey("pending"))||"[]"))}catch(e){}
+  try{const r=localStorage.getItem(userKey("revision"));if(r!==null&&r!==""){const n=Number(r);serverRevision=Number.isFinite(n)?Math.floor(n):null}}catch(e){}
 }
-function saveLocal(){if(!currentUser)return;try{localStorage.setItem(userKey("days"),JSON.stringify(days));localStorage.setItem(userKey("pending"),JSON.stringify([...pending]))}catch(e){}}
-function clearUserLocal(){if(!currentUser)return;try{localStorage.removeItem(userKey("days"));localStorage.removeItem(userKey("pending"))}catch(e){}}
+function saveRevision(r){if(!currentUser||r===null||r===undefined)return;const n=Number(r);if(!Number.isFinite(n))return;serverRevision=Math.floor(n);try{localStorage.setItem(userKey("revision"),String(serverRevision))}catch(e){}}
+function invalidateRevision(){serverRevision=null;if(!currentUser)return;try{localStorage.removeItem(userKey("revision"))}catch(e){}}
+function saveLocal(){if(!currentUser)return;try{localStorage.setItem(userKey("days"),JSON.stringify(days));localStorage.setItem(userKey("pending"),JSON.stringify([...pending]));if(serverRevision!==null)localStorage.setItem(userKey("revision"),String(serverRevision))}catch(e){}}
+function clearUserLocal(){if(!currentUser)return;try{localStorage.removeItem(userKey("days"));localStorage.removeItem(userKey("pending"));localStorage.removeItem(userKey("revision"))}catch(e){}serverRevision=null}
 function persist(k){if(!currentUser)return;pending.add(k);saveLocal();clearTimeout(timers[k]);timers[k]=setTimeout(()=>push(k),700)}
+function scheduleForcedSync(){
+  clearTimeout(forcedSyncTimer);
+  forcedSyncTimer=setTimeout(()=>{
+    if(!currentUser||!getToken()||!navigator.onLine)return;
+    if(connectPromise){scheduleForcedSync();return}
+    connect({silent:true,force:true});
+  },900);
+}
 async function push(k){
   const token=getToken();if(!token||!currentUser)return false;
   try{
-    const j=await api("saveDay",{token,date:k,items:days[k]||[]});
+    const sentRevision=serverRevision;
+    const j=await api("saveDay",{token,date:k,items:days[k]||[],knownRevision:sentRevision});
     if(!j.ok){if(j.error==="oturum"){expireSession();return false}throw new Error(j.error||"hata")}
-    pending.delete(k);saveLocal();$foot().textContent=pending.size?`${pending.size} gün gönderilmeyi bekliyor.`:"Tüm kayıtlar hesabınıza kaydedildi.";return true;
+    if(j.needsSync)invalidateRevision();else if(j.revision!==undefined)saveRevision(j.revision);
+    pending.delete(k);saveLocal();
+    if(j.needsSync)scheduleForcedSync();
+    $foot().textContent=pending.size?`${pending.size} gün gönderilmeyi bekliyor.`:"Tüm kayıtlar hesabınıza kaydedildi.";return true;
   }catch(e){
     if(e.message==="adres")$foot().textContent="Sunucu adresi ayarlanmamış.";
     else $foot().textContent="Sunucuya ulaşılamadı; değişiklik bu cihazda bekliyor.";return false;
   }
 }
-async function connect(){
+async function connect(options={}){
   if(connectPromise)return connectPromise;
-  connectPromise=connectNow().finally(()=>{connectPromise=null});
+  connectPromise=connectNow(options).finally(()=>{connectPromise=null});
   return connectPromise;
 }
-async function connectNow(){
+async function connectNow({silent=false,force=false}={}){
   const token=getToken();if(!token||!currentUser)return;
-  $foot().textContent="Kayıtlar yükleniyor…";
+  if(!silent)$foot().textContent="Kayıtlar yükleniyor…";
   try{
-    const j=await api("sync",{token});
+    const j=await api("sync",{token,knownRevision:force?null:serverRevision});
     if(!j.ok){if(j.error==="oturum"){expireSession();return}throw new Error(j.error||"hata")}
     currentUser=j.user||currentUser;setSession(token,currentUser);applyUserTheme(true);updateUserUI();await syncThemePreference();
     if(currentUser?.role==="admin"&&j.adminApprovals)cacheAdminApprovals(j.adminApprovals);
     if(currentUser?.role==="admin"&&j.adminUsers)cacheRegisteredUsers(j.adminUsers);
-    const fresh=j.days||{};pending.forEach(k=>{if(days[k]&&days[k].length)fresh[k]=days[k];else delete fresh[k]});
-    days=fresh;saveLocal();render();
+    if(j.revision!==undefined)saveRevision(j.revision);
+    if(!j.unchanged){
+      const fresh=j.days||{};pending.forEach(k=>{if(days[k]&&days[k].length)fresh[k]=days[k];else delete fresh[k]});
+      days=fresh;saveLocal();render();
+    }
+    lastSyncAt=Date.now();
     const waiting=[...pending];if(waiting.length)await Promise.all(waiting.map(k=>push(k)));
-    if(!pending.size)$foot().textContent="Tüm kayıtlar hesabınıza kaydedildi.";
-  }catch(e){$foot().textContent="Sunucuya ulaşılamadı; bu cihazdaki son kopya gösteriliyor."}
+    if(!pending.size&&!silent)$foot().textContent="Tüm kayıtlar hesabınıza kaydedildi.";
+  }catch(e){
+    if(!silent)$foot().textContent="Sunucuya ulaşılamadı; bu cihazdaki son kopya gösteriliyor.";
+  }
 }
-function expireSession(){setSession("",null);days={};pending=new Set();adminApprovals=null;registeredUsers=null;render();showGate(true);setAuthStatus("Oturum süresi doldu. Yeniden giriş yapın.",true)}
+function expireSession(){setSession("",null);days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();showGate(true);setAuthStatus("Oturum süresi doldu. Yeniden giriş yapın.",true)}
 
 function addTask(t){t=t.trim();if(!t||!currentUser)return;(days[current]=days[current]||[]).push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,8),t:t.slice(0,1000),done:false});persist(current);render()}
 function toggle(id){const it=(days[current]||[]).find(x=>x.id===id);if(!it)return;it.done=!it.done;lastPop=it.done?id:null;persist(current);render()}
@@ -619,12 +641,20 @@ $("addForm").addEventListener("submit",e=>{e.preventDefault();const i=$("newTask
 $("tomorrowNotice").onclick=()=>go(addDays(todayKey(),1));
 $("todayNotice").onclick=()=>go(todayKey());
 $("prev").onclick=()=>go(addDays(current,-1));$("next").onclick=()=>go(addDays(current,1));$("mPrev").onclick=()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);renderCal()};$("mNext").onclick=()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);renderCal()};
-$("refresh").onclick=()=>connect();$("settings").onclick=()=>{updateUserUI();refreshThemeButtons();$("accountDialog").showModal();if(currentUser?.role==="admin"){if(adminApprovals)renderAdminPending(adminApprovals);else renderAdminPending(null,{loading:true});if(registeredUsers)renderRegisteredUsers(registeredUsers);else renderRegisteredUsers(null,{loading:true});if(!adminApprovals||Date.now()-adminApprovalsAt>60000)loadAdminPending();if(!registeredUsers||Date.now()-registeredUsersAt>60000)loadRegisteredUsers()}};$("refreshAdmin").onclick=()=>loadAdminPending({force:true});$("refreshRegistered").onclick=()=>loadRegisteredUsers({force:true});
+$("refresh").onclick=()=>connect({force:true});$("settings").onclick=()=>{updateUserUI();refreshThemeButtons();$("accountDialog").showModal();if(currentUser?.role==="admin"){if(adminApprovals)renderAdminPending(adminApprovals);else renderAdminPending(null,{loading:true});if(registeredUsers)renderRegisteredUsers(registeredUsers);else renderRegisteredUsers(null,{loading:true});if(!adminApprovals||Date.now()-adminApprovalsAt>60000)loadAdminPending();if(!registeredUsers||Date.now()-registeredUsersAt>60000)loadRegisteredUsers()}};$("refreshAdmin").onclick=()=>loadAdminPending({force:true});$("refreshRegistered").onclick=()=>loadRegisteredUsers({force:true});
 async function saveAndCloseAccount(){const b=$("closeAccount"),old=b.textContent;b.disabled=true;b.textContent="Kaydediliyor…";try{await syncThemePreference()}finally{b.disabled=false;b.textContent=old;$("accountDialog").close()}}
 $("closeAccount").onclick=()=>saveAndCloseAccount();$("accountDialog").addEventListener("cancel",e=>{e.preventDefault();saveAndCloseAccount()});
-$("logoutBtn").onclick=async()=>{const token=getToken();try{if(token)await api("logout",{token})}catch(e){}$("accountDialog").close();setSession("",null);applyTheme("lacivert");days={};pending=new Set();adminApprovals=null;registeredUsers=null;render();showGate(true);showPane("loginPane")};
+$("logoutBtn").onclick=async()=>{const token=getToken();try{if(token)await api("logout",{token})}catch(e){}$("accountDialog").close();setSession("",null);applyTheme("lacivert");days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();showGate(true);showPane("loginPane")};
 const brandEl=$("brand");brandEl.onclick=()=>{go(todayKey());window.scrollTo({top:0,behavior:"smooth"})};brandEl.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();brandEl.onclick()}};
-window.addEventListener("online",async()=>{await connect()});
+function foregroundSync(){
+  if(document.visibilityState!=="visible"||!navigator.onLine||!currentUser||!getToken())return;
+  connect({silent:true});
+}
+window.addEventListener("online",foregroundSync);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")foregroundSync()});
+window.addEventListener("pageshow",foregroundSync);
+window.addEventListener("focus",()=>{if(Date.now()-lastSyncAt>5000)foregroundSync()});
+setInterval(()=>{if(Date.now()-lastSyncAt>=FOREGROUND_SYNC_MS)foregroundSync()},FOREGROUND_SYNC_MS);
 
 const THEMES=["lacivert","mor"];
 const THEME_COLORS={
