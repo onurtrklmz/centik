@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // index.html'i güncellediğinde SURUM değerini artır.
-const SURUM = "centik-v16-auto-light-dark";
+const SURUM = "centik-v17-monthly-counter";
 const KABUK = [
   "./",
   "./index.html",
