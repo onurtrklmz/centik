@@ -166,6 +166,9 @@ dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px sol
 .auth-brand{display:flex;align-items:center;gap:14px;margin-bottom:22px}.auth-brand img{width:52px;height:52px;border-radius:14px}.auth-brand h1{font-size:2rem}.auth-brand p{margin:2px 0 0;color:var(--muted)}
 .auth-tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:18px}.auth-tabs button{border:0;background:transparent;padding:9px;border-radius:9px;color:var(--muted);font-weight:600}.auth-tabs button.active{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
 .auth-pane label{display:block;margin:13px 0;font-size:.88rem;font-weight:600}.auth-pane input{display:block;width:100%;margin-top:6px;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}.auth-pane small{display:block;color:var(--muted);margin:-6px 0 12px}.auth-primary{width:100%;border:0;border-radius:11px;background:linear-gradient(135deg,#2E5BFF,#6C4BFF);color:#fff;font-weight:700;padding:12px 14px;margin-top:7px}.auth-link{display:block;margin:12px auto 0;border:0;background:transparent;color:var(--marka);font-size:.88rem}.auth-status{min-height:1.4em;color:var(--muted);font-size:.86rem;margin:14px 0 0}.auth-status.error{color:#b42318}.account-box{padding:4px}.account-box .row{margin-top:20px}
+.admin-panel{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.admin-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.admin-head h3{margin:0;font-size:1rem}.admin-badge{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:color-mix(in srgb,var(--focus) 16%,transparent);color:var(--focus);font-size:.76rem;font-weight:700}
+.admin-list{display:grid;gap:10px;max-height:320px;overflow:auto}.admin-user{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg)}.admin-user strong,.admin-user small{display:block}.admin-user small{margin-top:3px;color:var(--muted);overflow-wrap:anywhere}.admin-actions{display:flex;gap:8px;margin-top:10px}.admin-actions button{flex:1;border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--paper);color:var(--ink);font-weight:600}.admin-actions .approve{background:linear-gradient(135deg,#2E5BFF,#6C4BFF);border-color:transparent;color:#fff}.admin-actions .reject{color:#b42318;border-color:rgba(180,35,24,.25)}.admin-empty{color:var(--muted);font-size:.88rem;padding:8px 0}.admin-meta{color:var(--muted);font-size:.78rem;margin:8px 0 0}.admin-refresh{margin-top:10px;border:0;background:transparent;color:var(--marka);padding:4px 0;font-weight:600}
 @media(max-width:560px){.user-chip{display:none!important}.auth-card{padding:20px;border-radius:18px}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -219,6 +222,12 @@ dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px sol
     <div class="account-box">
       <h2>Hesap</h2>
       <p class="sub" id="accountText"></p>
+      <section class="admin-panel" id="adminPanel" hidden>
+        <div class="admin-head"><h3>Kullanıcı onayları</h3><span class="admin-badge" id="pendingBadge">0</span></div>
+        <div class="admin-list" id="adminList"><p class="admin-empty">Bekleyen başvurular yükleniyor…</p></div>
+        <p class="admin-meta" id="adminMeta"></p>
+        <button class="admin-refresh" type="button" id="refreshAdmin">Listeyi yenile</button>
+      </section>
       <div class="row"><button type="button" id="closeAccount">Kapat</button><button type="button" class="danger" id="logoutBtn">Çıkış yap</button></div>
     </div>
   </dialog>
@@ -244,8 +253,8 @@ dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px sol
       <label>Adınız<input id="registerName" type="text" autocomplete="name" required minlength="2" maxlength="60"></label>
       <label>E-posta<input id="registerEmail" type="email" autocomplete="email" required></label>
       <label>Parola<input id="registerPassword" type="password" autocomplete="new-password" required minlength="10"></label>
-      <small>En az 10 karakter kullanın.</small>
-      <button class="auth-primary" type="submit">Hesap oluştur</button>
+      <small>En az 10 karakter kullanın. Yeni hesaplar yönetici onayından sonra etkinleşir.</small>
+      <button class="auth-primary" type="submit">Hesap başvurusu gönder</button>
     </form>
 
     <form class="auth-pane" id="resetPane" hidden>
@@ -290,7 +299,7 @@ async function api(action,data={}){
   return j;
 }
 function authMessage(code){
-  const map={giris:"E-posta veya parola hatalı.",kilitli:"Çok fazla hatalı deneme yapıldı. Hesap geçici olarak kilitlendi.",pasif:"Bu hesap aktif değil.",eposta:"Geçerli bir e-posta yazın.",parola:"Parola en az 10 karakter olmalı.",ad:"Adınızı yazın.",hesap_var:"Bu e-posta ile zaten bir hesap var.",oturum:"Oturum süresi doldu. Yeniden giriş yapın.",eposta_gonderilemedi:"Sıfırlama e-postası gönderilemedi.",sifirlama:"Kod geçersiz veya süresi dolmuş.",sunucu:"Sunucu hatası oluştu."};
+  const map={giris:"E-posta veya parola hatalı.",kilitli:"Çok fazla hatalı deneme yapıldı. Hesap geçici olarak kilitlendi.",pasif:"Bu hesap aktif değil.",bekliyor:"Hesabınız yönetici onayı bekliyor.",reddedildi:"Hesap başvurunuz onaylanmadı.",eposta:"Geçerli bir e-posta yazın.",parola:"Parola en az 10 karakter olmalı.",ad:"Adınızı yazın.",hesap_var:"Bu e-posta ile zaten bir hesap var.",kayit_limiti:"Yeni hesap başvurusu şu anda alınamıyor.",basvuru_limiti:"Çok sayıda bekleyen başvuru var. Yönetici onayından sonra tekrar deneyin.",admin_ayarsiz:"Süper yönetici e-posta adresi henüz yapılandırılmamış.",yetki:"Bu işlem için yönetici yetkisi gerekli.",oturum:"Oturum süresi doldu. Yeniden giriş yapın.",eposta_gonderilemedi:"Sıfırlama e-postası gönderilemedi.",sifirlama:"Kod geçersiz veya süresi dolmuş.",sunucu:"Sunucu hatası oluştu."};
   return map[code]||"İşlem tamamlanamadı.";
 }
 function setAuthStatus(text,error=false){$("authStatus").textContent=text||"";$("authStatus").classList.toggle("error",!!error)}
@@ -301,7 +310,8 @@ function setSession(token,user){
 function showGate(show){$("authGate").hidden=!show;document.body.style.overflow=show?"hidden":""}
 function updateUserUI(){
   const name=currentUser?.name||currentUser?.email||"";$("userChip").textContent=name;$("userChip").hidden=!name;
-  $("accountText").textContent=currentUser?`${currentUser.name} · ${currentUser.email}`:"";
+  $("accountText").textContent=currentUser?`${currentUser.name} · ${currentUser.email}${currentUser.role==="admin"?" · Yönetici":""}`:"";
+  $("adminPanel").hidden=currentUser?.role!=="admin";
 }
 function loadLocal(){
   days={};pending=new Set();if(!currentUser)return;
@@ -369,18 +379,49 @@ function renderCal(){
   let k=tk,s=0;if(!doneCount(k))k=addDays(k,-1);while(doneCount(k)){s++;k=addDays(k,-1)}const monthDone=Object.keys(days).filter(x=>x.startsWith(`${y}-${pad(m+1)}`)).reduce((a,x)=>a+doneCount(x),0);$("streak").textContent=`${AYLAR[m]} ayında ${monthDone} iş bitti. `+(s?`Üst üste ${s} gündür boş gün yok.`:"Bugün bir iş bitirince seri başlar.");
 }
 
+async function loadAdminPending(){
+  if(currentUser?.role!=="admin")return;
+  const list=$("adminList"),badge=$("pendingBadge"),meta=$("adminMeta");
+  list.innerHTML='<p class="admin-empty">Bekleyen başvurular yükleniyor…</p>';
+  try{
+    const j=await api("adminPending",{token:getToken()});
+    if(!j.ok){list.innerHTML=`<p class="admin-empty">${authMessage(j.error)}</p>`;return}
+    badge.textContent=String(j.count||0);meta.textContent=`Bekleyen sınırı: ${j.maxPending} · Toplam kullanıcı sınırı: ${j.maxUsers}`;
+    list.innerHTML="";
+    if(!j.users?.length){list.innerHTML='<p class="admin-empty">Bekleyen hesap başvurusu yok.</p>';return}
+    j.users.forEach(u=>{
+      const card=document.createElement("div");card.className="admin-user";
+      const name=document.createElement("strong");name.textContent=u.name||"İsimsiz";
+      const email=document.createElement("small");email.textContent=u.email||"";
+      const date=document.createElement("small");date.textContent=u.createdAt?`Başvuru: ${new Date(u.createdAt).toLocaleString("tr-TR")}`:"";
+      const actions=document.createElement("div");actions.className="admin-actions";
+      const approve=document.createElement("button");approve.className="approve";approve.type="button";approve.textContent="Onayla";approve.onclick=()=>setUserApproval(u.id,"aktif",approve);
+      const reject=document.createElement("button");reject.className="reject";reject.type="button";reject.textContent="Reddet";reject.onclick=()=>setUserApproval(u.id,"reddedildi",reject);
+      actions.append(approve,reject);card.append(name,email,date,actions);list.append(card);
+    });
+  }catch(e){list.innerHTML='<p class="admin-empty">Sunucuya ulaşılamadı.</p>'}
+}
+async function setUserApproval(userId,status,button){
+  const card=button.closest(".admin-user");card?.querySelectorAll("button").forEach(b=>b.disabled=true);
+  try{
+    const j=await api("adminSetStatus",{token:getToken(),userId,status});
+    if(!j.ok)throw new Error(j.error||"hata");
+    await loadAdminPending();
+  }catch(e){if(card)card.querySelectorAll("button").forEach(b=>b.disabled=false);alert(authMessage(e.message))}
+}
+
 function showPane(id){["loginPane","registerPane","resetPane"].forEach(x=>$(x).hidden=x!==id);$("authTabs").hidden=id==="resetPane";document.querySelectorAll("#authTabs button").forEach(b=>b.classList.toggle("active",b.dataset.pane===id));setAuthStatus("")}
 document.querySelectorAll("#authTabs button").forEach(b=>b.onclick=()=>showPane(b.dataset.pane));
 $("forgotBtn").onclick=()=>{resetStage=1;$("resetCodeFields").hidden=true;$("resetSubmit").textContent="Kod gönder";$("resetEmail").value=$("loginEmail").value;showPane("resetPane")};
 $("backLoginBtn").onclick=()=>showPane("loginPane");
 $("loginPane").addEventListener("submit",async e=>{e.preventDefault();setAuthStatus("Giriş yapılıyor…");try{const j=await api("login",{email:$("loginEmail").value,password:$("loginPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}setSession(j.token,j.user);loadLocal();updateUserUI();showGate(false);render();await connect()}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
-$("registerPane").addEventListener("submit",async e=>{e.preventDefault();setAuthStatus("Hesap oluşturuluyor…");try{const j=await api("register",{name:$("registerName").value,email:$("registerEmail").value,password:$("registerPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}setSession(j.token,j.user);loadLocal();updateUserUI();showGate(false);render();await connect()}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
+$("registerPane").addEventListener("submit",async e=>{e.preventDefault();setAuthStatus("Başvuru gönderiliyor…");try{const email=$("registerEmail").value;const j=await api("register",{name:$("registerName").value,email,password:$("registerPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}if(j.pending){showPane("loginPane");$("loginEmail").value=email;$("registerPassword").value="";setAuthStatus("Başvurunuz alındı. Yönetici onayından sonra giriş yapabilirsiniz.");return}if(j.admin&&j.approved){showPane("loginPane");$("loginEmail").value=email;$("registerPassword").value="";setAuthStatus("Süper yönetici hesabınız oluşturuldu ve etkinleştirildi. Parolanızla giriş yapabilirsiniz.");return}setAuthStatus("Hesap oluşturuldu. Giriş yapabilirsiniz.")}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
 $("resetPane").addEventListener("submit",async e=>{e.preventDefault();try{if(resetStage===1){setAuthStatus("Kod gönderiliyor…");const j=await api("resetRequest",{email:$("resetEmail").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}resetStage=2;$("resetCodeFields").hidden=false;$("resetSubmit").textContent="Parolayı değiştir";setAuthStatus("Hesap varsa sıfırlama kodu e-posta adresine gönderildi.")}else{setAuthStatus("Parola değiştiriliyor…");const j=await api("resetConfirm",{email:$("resetEmail").value,code:$("resetCode").value,password:$("resetPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}showPane("loginPane");$("loginEmail").value=$("resetEmail").value;setAuthStatus("Parola değiştirildi. Yeni parolanızla giriş yapın.")}}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
 
 $("addForm").addEventListener("submit",e=>{e.preventDefault();const i=$("newTask");addTask(i.value);i.value="";i.focus()});
 $("tomorrowNotice").onclick=()=>go(addDays(todayKey(),1));
 $("prev").onclick=()=>go(addDays(current,-1));$("next").onclick=()=>go(addDays(current,1));$("mPrev").onclick=()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);renderCal()};$("mNext").onclick=()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);renderCal()};
-$("refresh").onclick=()=>connect();$("settings").onclick=()=>{updateUserUI();$("accountDialog").showModal()};$("closeAccount").onclick=()=>$("accountDialog").close();
+$("refresh").onclick=()=>connect();$("settings").onclick=()=>{updateUserUI();$("accountDialog").showModal();if(currentUser?.role==="admin")loadAdminPending()};$("refreshAdmin").onclick=()=>loadAdminPending();$("closeAccount").onclick=()=>$("accountDialog").close();
 $("logoutBtn").onclick=async()=>{const token=getToken();try{if(token)await api("logout",{token})}catch(e){}$("accountDialog").close();setSession("",null);days={};pending=new Set();render();showGate(true);showPane("loginPane")};
 const brandEl=$("brand");brandEl.onclick=()=>{go(todayKey());window.scrollTo({top:0,behavior:"smooth"})};brandEl.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();brandEl.onclick()}};
 window.addEventListener("online",()=>connect());
