@@ -1,7 +1,17 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // index.html'i güncellediğinde SURUM değerini artır.
-const SURUM = "centik-v3";
-const KABUK = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
+const SURUM = "centik-v4-pwa";
+const KABUK = [
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./favicon.ico",
+  "./favicon-32.png",
+  "./apple-touch-icon.png",
+  "./icon-192.png",
+  "./icon-512.png",
+  "./icon-maskable-512.png"
+];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(SURUM).then(c => c.addAll(KABUK)).then(() => self.skipWaiting()));
