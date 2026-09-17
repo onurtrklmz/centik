@@ -313,7 +313,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
-let pending=new Set(), timers={}, currentUser=null, resetStage=1;
+let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null;
 const $=id=>document.getElementById(id), $foot=()=>$("foot");
 const getToken=()=>{try{return localStorage.getItem(AUTH_TOKEN)||""}catch(e){return ""}};
 const getCachedUser=()=>{try{return JSON.parse(localStorage.getItem(AUTH_USER)||"null")}catch(e){return null}};
@@ -360,6 +360,11 @@ async function push(k){
   }
 }
 async function connect(){
+  if(connectPromise)return connectPromise;
+  connectPromise=connectNow().finally(()=>{connectPromise=null});
+  return connectPromise;
+}
+async function connectNow(){
   const token=getToken();if(!token||!currentUser)return;
   $foot().textContent="Kayıtlar yükleniyor…";
   try{
@@ -367,7 +372,8 @@ async function connect(){
     if(!j.ok){if(j.error==="oturum"){expireSession();return}throw new Error(j.error||"hata")}
     currentUser=j.user||currentUser;setSession(token,currentUser);applyUserTheme(true);updateUserUI();await syncThemePreference();
     const fresh=j.days||{};pending.forEach(k=>{if(days[k]&&days[k].length)fresh[k]=days[k];else delete fresh[k]});
-    days=fresh;saveLocal();render();for(const k of [...pending])await push(k);
+    days=fresh;saveLocal();render();
+    const waiting=[...pending];if(waiting.length)await Promise.all(waiting.map(k=>push(k)));
     if(!pending.size)$foot().textContent="Tüm kayıtlar hesabınıza kaydedildi.";
   }catch(e){$foot().textContent="Sunucuya ulaşılamadı; bu cihazdaki son kopya gösteriliyor."}
 }
@@ -441,7 +447,7 @@ function showPane(id){["loginPane","registerPane","resetPane"].forEach(x=>$(x).h
 document.querySelectorAll("#authTabs button").forEach(b=>b.onclick=()=>showPane(b.dataset.pane));
 $("forgotBtn").onclick=()=>{resetStage=1;$("resetCodeFields").hidden=true;$("resetSubmit").textContent="Kod gönder";$("resetEmail").value=$("loginEmail").value;showPane("resetPane")};
 $("backLoginBtn").onclick=()=>showPane("loginPane");
-$("loginPane").addEventListener("submit",async e=>{e.preventDefault();setAuthStatus("Giriş yapılıyor…");try{const j=await api("login",{email:$("loginEmail").value,password:$("loginPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}setSession(j.token,j.user);applyUserTheme(true);loadLocal();updateUserUI();showGate(false);render();await syncThemePreference();await connect()}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
+$("loginPane").addEventListener("submit",async e=>{e.preventDefault();setAuthStatus("Giriş yapılıyor…");try{const j=await api("login",{email:$("loginEmail").value,password:$("loginPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}setSession(j.token,j.user);applyUserTheme(true);loadLocal();updateUserUI();showGate(false);render();await connect()}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
 $("registerPane").addEventListener("submit",async e=>{e.preventDefault();setAuthStatus("Başvuru gönderiliyor…");try{const email=$("registerEmail").value;const j=await api("register",{name:$("registerName").value,email,password:$("registerPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}if(j.pending){showPane("loginPane");$("loginEmail").value=email;$("registerPassword").value="";setAuthStatus("Başvurunuz alındı. Yönetici onayından sonra giriş yapabilirsiniz.");return}if(j.admin&&j.approved){showPane("loginPane");$("loginEmail").value=email;$("registerPassword").value="";setAuthStatus("Süper yönetici hesabınız oluşturuldu ve etkinleştirildi. Parolanızla giriş yapabilirsiniz.");return}setAuthStatus("Hesap oluşturuldu. Giriş yapabilirsiniz.")}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
 $("resetPane").addEventListener("submit",async e=>{e.preventDefault();try{if(resetStage===1){setAuthStatus("Kod gönderiliyor…");const j=await api("resetRequest",{email:$("resetEmail").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}resetStage=2;$("resetCodeFields").hidden=false;$("resetSubmit").textContent="Parolayı değiştir";setAuthStatus("Hesap varsa sıfırlama kodu e-posta adresine gönderildi.")}else{setAuthStatus("Parola değiştiriliyor…");const j=await api("resetConfirm",{email:$("resetEmail").value,code:$("resetCode").value,password:$("resetPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}showPane("loginPane");$("loginEmail").value=$("resetEmail").value;setAuthStatus("Parola değiştirildi. Yeni parolanızla giriş yapın.")}}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
 
@@ -452,7 +458,7 @@ $("prev").onclick=()=>go(addDays(current,-1));$("next").onclick=()=>go(addDays(c
 $("refresh").onclick=()=>connect();$("settings").onclick=()=>{updateUserUI();refreshThemeButtons();$("accountDialog").showModal();if(currentUser?.role==="admin")loadAdminPending()};$("refreshAdmin").onclick=()=>loadAdminPending();$("closeAccount").onclick=()=>$("accountDialog").close();
 $("logoutBtn").onclick=async()=>{const token=getToken();try{if(token)await api("logout",{token})}catch(e){}$("accountDialog").close();setSession("",null);applyTheme("lacivert");days={};pending=new Set();render();showGate(true);showPane("loginPane")};
 const brandEl=$("brand");brandEl.onclick=()=>{go(todayKey());window.scrollTo({top:0,behavior:"smooth"})};brandEl.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();brandEl.onclick()}};
-window.addEventListener("online",async()=>{await syncThemePreference();await connect()});
+window.addEventListener("online",async()=>{await connect()});
 
 const THEMES=["lacivert","mor"],THEME_COLORS={lacivert:"#0B1226",mor:"#150D27"};
 const themeLocalKey=u=>u?.id?`centik-theme-v1-${u.id}`:"centik-theme-v1-default";
@@ -480,7 +486,10 @@ async function chooseTheme(t){
 $("themeNavy").onclick=()=>chooseTheme("lacivert");$("themePurple").onclick=()=>chooseTheme("mor");
 
 async function boot(){
-  currentUser=getCachedUser();if(currentUser){applyUserTheme(false);loadLocal();updateUserUI();render();showGate(false);const token=getToken();if(token){try{const j=await api("me",{token});if(j.ok){currentUser=j.user;setSession(token,currentUser);applyUserTheme(true);updateUserUI();await syncThemePreference();await connect();return}if(j.error==="oturum")expireSession()}catch(e){$foot().textContent="Çevrimdışı: bu cihazdaki son kayıtlar gösteriliyor.";return}}}
+  currentUser=getCachedUser();if(currentUser){applyUserTheme(false);loadLocal();updateUserUI();render();showGate(false);const token=getToken();if(token){
+    // sync zaten oturumu doğrulayıp güncel kullanıcıyı döndürür; ayrı /me turu yok.
+    await connect();return
+  }}
   applyTheme("lacivert");showGate(true);showPane("loginPane");render();
 }
 boot();
