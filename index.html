@@ -104,7 +104,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 .day-head{display:flex;align-items:center;gap:8px}
 .day-head h2{font-size:1.75rem;line-height:1.15;flex:1}
 .nav{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--paper);font-size:1.1rem}
-.sub{color:var(--muted);margin:4px 0 0;min-height:1.5em}
+.sub{color:var(--muted);margin:0;min-height:1.5em;flex:1;min-width:0}
+.sub-row{display:flex;align-items:center;gap:10px;margin:4px 0 0;min-height:2rem}
+.today-inline{
+  flex:0 0 auto;border:1px solid var(--notice-today-border);background:var(--notice-today-bg);
+  color:var(--notice-today-accent);border-radius:999px;padding:6px 10px;font-size:.82rem;font-weight:700;
+  white-space:nowrap;line-height:1;transition:background .14s,border-color .14s,transform .14s;
+}
+.today-inline:hover{background:color-mix(in srgb,var(--notice-today-accent) 14%,var(--paper));transform:translateY(-1px)}
 
 .jump-notice{
   width:100%;padding:11px 14px;border-radius:12px;color:var(--ink);
@@ -118,11 +125,6 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 }
 .tomorrow-notice::after{color:var(--notice-tomorrow-accent)}
 .tomorrow-notice:hover{background:color-mix(in srgb,var(--notice-tomorrow-accent) 14%,var(--paper))}
-.today-notice{
-  margin:10px 0 0;border:1px solid var(--notice-today-border);background:var(--notice-today-bg);
-}
-.today-notice::after{color:var(--notice-today-accent)}
-.today-notice:hover{background:color-mix(in srgb,var(--notice-today-accent) 14%,var(--paper))}
 
 .tally{margin:20px 0 12px;display:flex;align-items:baseline;gap:10px}
 .tally b{font-family:var(--serif);font-weight:600;font-size:3.2rem;line-height:1;color:var(--done)}
@@ -212,8 +214,10 @@ dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px sol
     <h2 id="dayTitle">Bugün</h2>
     <button class="nav" id="next" aria-label="Sonraki gün">›</button>
   </div>
-  <p class="sub" id="daySub"></p>
-  <button class="jump-notice today-notice" id="todayNotice" type="button" hidden>Bugüne dön</button>
+  <div class="sub-row">
+    <p class="sub" id="daySub"></p>
+    <button class="today-inline" id="todayNotice" type="button" hidden>Bugüne dön</button>
+  </div>
 
   <div class="tally"><b id="count">0</b><span id="countLabel">iş bitti</span></div>
 
