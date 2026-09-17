@@ -164,9 +164,25 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 .today-inline::after{color:var(--notice-today-accent)}
 .today-inline:hover{background:color-mix(in srgb,var(--notice-today-accent) 14%,var(--paper))}
 
-.tally{margin:20px 0 12px;display:flex;align-items:baseline;gap:10px}
-.tally b{font-family:var(--serif);font-weight:600;font-size:3.2rem;line-height:1;color:var(--done)}
+.tally{margin:20px 0 12px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:18px}
+.tally-side{display:flex;align-items:baseline;min-width:0}
+.tally-day{justify-content:flex-start;gap:9px;flex-wrap:wrap}
+.tally-month{justify-content:flex-end;gap:9px;text-align:right;white-space:nowrap}
+.tally-unit{display:inline-flex;align-items:baseline;gap:8px;white-space:nowrap}
+.tally b{font-family:var(--serif);font-weight:600;font-size:3.2rem;line-height:1;color:var(--done);font-variant-numeric:tabular-nums}
 .tally span{color:var(--muted)}
+.planned-wrap{display:inline-flex;align-items:baseline;gap:9px}
+.planned-wrap[hidden]{display:none}
+.tally .slash{font-size:1.2rem;color:var(--line-strong, var(--muted));font-weight:500}
+.tally .planned-unit b{color:var(--focus)}
+@media (max-width:430px){
+  .tally{gap:10px}
+  .tally b{font-size:2.55rem}
+  .tally-side{gap:6px}
+  .tally-unit{gap:6px}
+  .tally span{font-size:.86rem}
+  .tally-month{gap:6px}
+}
 
 .sheet{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:6px 0;box-shadow:var(--shadow)}
 .add{display:flex;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
@@ -257,7 +273,13 @@ dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px sol
     <button class="jump-notice today-inline" id="todayNotice" type="button" hidden>Bugüne dön</button>
   </div>
 
-  <div class="tally"><b id="count">0</b><span id="countLabel">iş bitti</span></div>
+  <div class="tally" aria-live="polite">
+    <div class="tally-side tally-day">
+      <span class="tally-unit"><b id="count">0</b><span>iş bitti</span></span>
+      <span class="planned-wrap" id="plannedWrap" hidden><span class="slash">/</span><span class="tally-unit planned-unit"><b id="plannedCount">0</b><span>Planlanan</span></span></span>
+    </div>
+    <div class="tally-side tally-month"><span>bu ay biten:</span><b id="monthCount">0</b></div>
+  </div>
 
   <section class="sheet">
     <form class="add" id="addForm">
@@ -459,7 +481,12 @@ function render(){
   const d=fromKey(current),tk=todayKey(),rel=current===tk?"Bugün":current===addDays(tk,-1)?"Dün":current===addDays(tk,1)?"Yarın":null;
   $("dayTitle").textContent=rel||`${d.getDate()} ${AYLAR[d.getMonth()]}`;const sub=$("daySub");sub.textContent=`${d.getDate()} ${AYLAR[d.getMonth()]} ${d.getFullYear()}, ${DAYNAMES[d.getDay()]}`;
   const todayNotice=$("todayNotice");todayNotice.hidden=current===tk;
-  const items=days[current]||[],n=doneCount(current),monthPrefix=`${d.getFullYear()}-${pad(d.getMonth()+1)}`,monthDone=Object.keys(days).filter(x=>x.startsWith(monthPrefix)).reduce((a,x)=>a+doneCount(x),0);$("count").textContent=n;$("countLabel").textContent=`iş bitti / ${monthDone} bu ay biten`;
+  const items=days[current]||[],n=doneCount(current),planned=items.filter(x=>!x.done).length,monthPrefix=`${d.getFullYear()}-${pad(d.getMonth()+1)}`,monthDone=Object.keys(days).filter(x=>x.startsWith(monthPrefix)).reduce((a,x)=>a+doneCount(x),0);
+  $("count").textContent=n;
+  $("monthCount").textContent=monthDone;
+  const plannedWrap=$("plannedWrap"),showPlanned=current>tk&&planned>0;
+  plannedWrap.hidden=!showPlanned;
+  if(showPlanned)$("plannedCount").textContent=planned;
   const ul=$("list");ul.innerHTML="";if(!items.length){const p=document.createElement("li");p.className="empty";p.textContent=current>=tk?"Henüz görev yok. Yarım saatte bitecek bir şeyle başla.":"Bu güne kayıt girilmemiş.";ul.append(p)}
   items.forEach(it=>{const li=document.createElement("li");if(it.done)li.classList.add("done");if(it.id===lastPop)li.classList.add("pop");const c=document.createElement("button");c.className="check";c.setAttribute("aria-label",it.done?"Tamamlandı işaretini kaldır":"Tamamlandı olarak işaretle");c.setAttribute("aria-pressed",it.done);c.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3L13 4.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';c.onclick=()=>toggle(it.id);const span=document.createElement("span");span.className="txt";span.textContent=it.t;const actions=document.createElement("div");actions.className="task-actions";const edit=document.createElement("button");edit.className="edit";edit.type="button";edit.innerHTML='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M12.146.854a.5.5 0 0 1 .708 0l2.292 2.292a.5.5 0 0 1 0 .708l-9.5 9.5a.5.5 0 0 1-.168.11l-4 1.5a.5.5 0 0 1-.642-.642l1.5-4a.5.5 0 0 1 .11-.168zM11.207 2.5 3.342 10.365l-.823 2.195 2.195-.823L12.58 3.872z"/></svg>';edit.setAttribute("aria-label","Görevi düzenle");edit.title="Düzenle";edit.onclick=()=>editTask(it.id,li);const x=document.createElement("button");x.className="del";x.type="button";x.textContent="×";x.setAttribute("aria-label","Sil");x.title="Sil";x.onclick=()=>remove(it.id);actions.append(edit,x);li.append(c,span,actions);ul.append(li)});
   lastPop=null;$("plateMeta").textContent=`Bugün ${doneCount(todayKey())} iş`;renderTomorrowNotice();renderCal();
