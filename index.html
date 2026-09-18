@@ -170,6 +170,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 .tally-day{justify-content:flex-start;gap:9px;flex-wrap:wrap}
 .tally-month{justify-content:flex-end;gap:9px;text-align:right;white-space:nowrap}
 .tally-unit{display:inline-flex;align-items:baseline;gap:8px;white-space:nowrap}
+.tally-progress{gap:0}
+.tally-progress .count-sep{margin:0 .08em;color:var(--done);font-family:var(--serif);font-size:3.2rem;line-height:1;font-weight:600}
+.tally-progress .tally-label{margin-left:8px}
 .tally b{font-family:var(--serif);font-weight:600;font-size:3.2rem;line-height:1;color:var(--done);font-variant-numeric:tabular-nums}
 .tally span{color:var(--muted)}
 .planned-wrap{display:inline-flex;align-items:baseline;gap:9px}
@@ -179,6 +182,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 @media (max-width:430px){
   .tally{gap:10px}
   .tally b{font-size:2.55rem}
+  .tally-progress .count-sep{font-size:2.55rem}
   .tally-side{gap:6px}
   .tally-unit{gap:6px}
   .tally span{font-size:.86rem}
@@ -318,15 +322,15 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
 
   <div class="tally" aria-live="polite">
     <div class="tally-side tally-day">
-      <span class="tally-unit"><b id="count">0</b><span>iş bitti</span></span>
-      <span class="planned-wrap" id="plannedWrap" hidden><span class="slash">/</span><span class="tally-unit planned-unit"><b id="plannedCount">0</b><span>Planlanan</span></span></span>
+      <span class="tally-unit tally-progress"><b id="count">0</b><span class="count-sep">/</span><b id="totalCount">0</b><span class="tally-label">görev bitti</span></span>
+      <span class="planned-wrap" id="plannedWrap" hidden><span class="slash">/</span><span class="tally-unit planned-unit"><b id="plannedCount">0</b><span>planlanan görev</span></span></span>
     </div>
     <div class="tally-side tally-month"><span>bu ay biten:</span><b id="monthCount">0</b></div>
   </div>
 
   <section class="sheet">
     <form class="add" id="addForm">
-      <input id="newTask" autocomplete="off" placeholder="Küçük bir görev yaz, ör. tez önerisinin ilk bölümünü oku" aria-label="Yeni görev">
+      <input id="newTask" autocomplete="off" placeholder="Günlük küçük bir görev yaz..." aria-label="Yeni görev">
       <button type="submit">Ekle</button>
     </form>
     <ul id="list"></ul>
@@ -437,7 +441,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v23-transport-stability", CENTIK_EXPECTED_SERVER_BUILD="v19-auth-cache";
+const CENTIK_CLIENT_BUILD="v24-task-count-copy", CENTIK_EXPECTED_SERVER_BUILD="v19-auth-cache";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -758,6 +762,7 @@ function render(){
   const todayNotice=$("todayNotice");todayNotice.hidden=current===tk;
   const items=normalizeItems(days[current]||[]),n=doneCount(current),planned=items.filter(x=>!x.done).length,monthPrefix=`${d.getFullYear()}-${pad(d.getMonth()+1)}`,monthDone=Object.keys(days).filter(x=>x.startsWith(monthPrefix)).reduce((a,x)=>a+doneCount(x),0);
   $("count").textContent=n;
+  $("totalCount").textContent=items.length;
   $("monthCount").textContent=monthDone;
   const plannedWrap=$("plannedWrap"),showPlanned=current>tk&&planned>0;
   plannedWrap.hidden=!showPlanned;
