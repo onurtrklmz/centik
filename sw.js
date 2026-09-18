@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v25: açılır takvim çekmecesi, dokunmatik ay geçişleri ve takvim görev/biten sayacı; v23 taşıma kararlılığı korunur.
-const SURUM = "centik-v33-swipe-drawer";
+// v27: boş alanlarda yatay gün swipe/drag; v26 takvim çekmecesi ve v23 taşıma kararlılığı korunur.
+const SURUM = "centik-v34-global-day-swipe";
 const KABUK = [
   "./",
   "./index.html",

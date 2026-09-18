@@ -133,7 +133,7 @@ body::before{
   .brand-logo{width:1.4rem;height:1.4rem}
   .brand h1{font-size:1.3rem}
 }
-main{max-width:520px;min-height:calc(100vh - 64px);min-height:calc(100dvh - 64px);margin:0 auto;padding:20px 16px 116px}
+main{max-width:520px;min-height:calc(100vh - 64px);min-height:calc(100dvh - 64px);margin:0 auto;padding:20px 16px 116px;touch-action:pan-y}
 h1,h2{font-family:var(--serif);font-weight:600;letter-spacing:-.015em;margin:0}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
@@ -303,6 +303,9 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
 .settings-save-status{min-height:1.2em;margin:9px 0 0;color:#c63232;font-size:.8rem;text-align:right}
 .management-box .admin-panel{margin-top:14px;padding-top:0;border-top:0}.management-box .diagnostics-block{padding-bottom:4px}
 
+
+body.day-swipe-active{cursor:grabbing}
+body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!important}
 @media(max-width:560px){.user-chip{display:none!important}.auth-card{padding:20px;border-radius:18px}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -479,7 +482,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v26-swipe-drawer", CENTIK_EXPECTED_SERVER_BUILD="v19-auth-cache";
+const CENTIK_CLIENT_BUILD="v27-global-day-swipe", CENTIK_EXPECTED_SERVER_BUILD="v19-auth-cache";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -971,6 +974,48 @@ const dayHead=$("dayTitle").closest(".day-head");
 dayHead.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;dayGesture={id:e.pointerId,x:e.clientX,y:e.clientY};try{dayHead.setPointerCapture?.(e.pointerId)}catch(_){}});
 dayHead.addEventListener("pointerup",e=>{if(!dayGesture||dayGesture.id!==e.pointerId)return;const g=dayGesture;dayGesture=null;const dx=e.clientX-g.x,dy=e.clientY-g.y;if(Math.abs(dx)<42||Math.abs(dx)<Math.abs(dy)*1.2)return;shiftDay(dx<0?1:-1)});
 dayHead.addEventListener("pointercancel",()=>{dayGesture=null});
+
+// Sayfanın boş alanlarında yatay sürükleme: sağ = önceki gün, sol = sonraki gün.
+// Görev kartı/ekleme alanı, takvim çekmecesi, menüler ve modallar bu jestten özellikle hariçtir.
+const globalDaySwipeSurface=document.querySelector("main");
+const GLOBAL_DAY_SWIPE_EXCLUDE=[
+  ".sheet","#calendarDrawer",".day-head","dialog",".account-menu-wrap",
+  "button","input","textarea","select","a","[contenteditable='true']"
+].join(",");
+let globalDayGesture=null;
+function resetGlobalDayGesture(){
+  globalDayGesture=null;document.body.classList.remove("day-swipe-active");
+}
+function globalDaySwipeBlocked(target){
+  return !target||!!target.closest(GLOBAL_DAY_SWIPE_EXCLUDE);
+}
+globalDaySwipeSurface.addEventListener("pointerdown",e=>{
+  if(e.pointerType==="mouse"&&e.button!==0)return;
+  if(globalDaySwipeBlocked(e.target))return;
+  globalDayGesture={id:e.pointerId,x:e.clientX,y:e.clientY,axis:"",moved:false};
+  try{globalDaySwipeSurface.setPointerCapture?.(e.pointerId)}catch(_){}
+});
+globalDaySwipeSurface.addEventListener("pointermove",e=>{
+  const g=globalDayGesture;if(!g||g.id!==e.pointerId)return;
+  const dx=e.clientX-g.x,dy=e.clientY-g.y,ax=Math.abs(dx),ay=Math.abs(dy);
+  if(!g.axis&&Math.max(ax,ay)>=9){
+    if(ax>ay*1.15)g.axis="x";
+    else if(ay>ax)g.axis="y";
+  }
+  if(g.axis==="x"){
+    g.moved=true;document.body.classList.add("day-swipe-active");
+    e.preventDefault();
+  }
+});
+globalDaySwipeSurface.addEventListener("pointerup",e=>{
+  const g=globalDayGesture;if(!g||g.id!==e.pointerId)return;
+  const dx=e.clientX-g.x,dy=e.clientY-g.y;
+  resetGlobalDayGesture();
+  if(g.axis!=="x"||Math.abs(dx)<55||Math.abs(dx)<Math.abs(dy)*1.15)return;
+  shiftDay(dx<0?1:-1);
+});
+globalDaySwipeSurface.addEventListener("pointercancel",resetGlobalDayGesture);
+
 $("refresh").onclick=()=>connect({force:true,silent:false,reason:"manual"});
 
 let calendarOpen=false,calendarAnimating=false,drawerGesture=null,suppressCalendarClickUntil=0;
