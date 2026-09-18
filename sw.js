@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v31: görevler masaüstü ve dokunmatik cihazlarda sürüklenerek yeniden sıralanabilir.
-const SURUM = "centik-v38-task-reorder";
+// v32: üst bardaki logo ve Çentik başlığı sağdaki 40 px kontrollerle görsel olarak dengelendi.
+const SURUM = "centik-v39-header-balance";
 const KABUK = [
   "./",
   "./index.html",
