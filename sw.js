@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v29: gelecek gün sayaç hizası sabitlendi; v27 global gün swipe ve v26 takvim çekmecesi korunur.
-const SURUM = "centik-v36-tally-layout-fix";
+// v31: görevler masaüstü ve dokunmatik cihazlarda sürüklenerek yeniden sıralanabilir.
+const SURUM = "centik-v38-task-reorder";
 const KABUK = [
   "./",
   "./index.html",
