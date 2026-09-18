@@ -142,8 +142,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 .day-head h2{font-size:1.75rem;line-height:1.15;flex:1}
 .nav{width:40px;height:40px;border-radius:50%;border:1px solid color-mix(in srgb,var(--focus) 34%,var(--line));background:color-mix(in srgb,var(--focus) 7%,var(--paper));color:var(--focus);font-size:1.1rem;box-shadow:0 2px 8px color-mix(in srgb,var(--focus) 8%,transparent);transition:background .14s,border-color .14s,transform .14s}.nav:hover{background:color-mix(in srgb,var(--focus) 13%,var(--paper));border-color:color-mix(in srgb,var(--focus) 50%,var(--line));transform:translateY(-1px)}
 .sub{color:var(--muted);margin:0;min-height:1.5em;flex:1;min-width:0;display:flex;align-items:center}
-.sub-row{display:flex;align-items:stretch;gap:10px;margin:4px 0 0;min-height:44px}
-.sub-actions{margin-left:auto;display:flex;align-items:stretch;justify-content:flex-end;gap:8px;flex:none}
+.sub-row{display:flex;align-items:stretch;gap:10px;margin:8px 0 0;min-height:44px}
+.sub-actions{margin-left:auto;padding-right:6px;display:flex;align-items:stretch;justify-content:flex-end;gap:8px;flex:none}
 
 .jump-notice{
   width:100%;padding:11px 14px;border-radius:12px;color:var(--ink);
@@ -158,19 +158,19 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 .tomorrow-notice::after{color:var(--notice-tomorrow-accent)}
 .tomorrow-notice:hover{background:color-mix(in srgb,var(--notice-tomorrow-accent) 14%,var(--paper))}
 .today-inline{
-  flex:0 0 auto;width:auto;align-self:stretch;margin:0;padding:0 12px;min-width:116px;
+  flex:0 0 auto;width:auto;align-self:center;margin:0;padding:0 10px;min-width:104px;height:38px;
   border:1px solid var(--notice-today-border);background:var(--notice-today-bg);color:var(--ink);
-  border-radius:12px;font-size:.82rem;font-weight:700;white-space:nowrap;
+  border-radius:11px;font-size:.80rem;font-weight:700;white-space:nowrap;
   justify-content:center;
 }
 .today-inline::after{display:none}
 .today-inline svg{width:16px;height:16px;fill:none;stroke:var(--notice-today-accent);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .today-inline:hover{background:color-mix(in srgb,var(--notice-today-accent) 14%,var(--paper))}
 
-.tally{margin:20px auto 12px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:end;column-gap:34px;max-width:430px}
+.tally{margin:20px 0 12px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:end;column-gap:24px;width:100%;max-width:none}
 .tally-side{display:flex;align-items:baseline;min-width:0}
-.tally-day{justify-content:flex-end;gap:9px;flex-wrap:wrap;text-align:right}
-.tally-month{justify-content:flex-start;gap:8px;text-align:left;white-space:nowrap}
+.tally-day{justify-content:flex-start;gap:9px;flex-wrap:wrap;text-align:left}
+.tally-month{justify-content:flex-end;gap:8px;text-align:right;white-space:nowrap}
 .tally-unit{display:inline-flex;align-items:baseline;gap:8px;white-space:nowrap}
 .tally-progress{gap:0}
 .tally-progress .count-sep{margin:0 .075em;color:var(--ink);font-family:var(--serif);font-size:2.9rem;line-height:.95;font-weight:500;opacity:.92}
@@ -182,7 +182,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 .tally .slash{font-size:1.15rem;color:var(--ink);font-weight:500}
 .tally .planned-unit b{color:var(--focus)}
 @media (max-width:430px){
-  .tally{column-gap:18px;max-width:100%}
+  .tally{column-gap:14px;max-width:100%}
   .tally b{font-size:2.45rem}
   .tally-progress .count-sep{font-size:2.45rem}
   .tally-side{gap:5px}
@@ -482,7 +482,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v27-global-day-swipe", CENTIK_EXPECTED_SERVER_BUILD="v19-auth-cache";
+const CENTIK_CLIENT_BUILD="v28-tally-nav-fix", CENTIK_EXPECTED_SERVER_BUILD="v19-auth-cache";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -971,7 +971,7 @@ function shiftDay(dir,{animate=true}={}){
 }
 $("prev").onclick=()=>shiftDay(-1);$("next").onclick=()=>shiftDay(1);
 const dayHead=$("dayTitle").closest(".day-head");
-dayHead.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;dayGesture={id:e.pointerId,x:e.clientX,y:e.clientY};try{dayHead.setPointerCapture?.(e.pointerId)}catch(_){}});
+dayHead.addEventListener("pointerdown",e=>{if(e.target.closest("button"))return;if(e.pointerType==="mouse"&&e.button!==0)return;dayGesture={id:e.pointerId,x:e.clientX,y:e.clientY};try{dayHead.setPointerCapture?.(e.pointerId)}catch(_){}});
 dayHead.addEventListener("pointerup",e=>{if(!dayGesture||dayGesture.id!==e.pointerId)return;const g=dayGesture;dayGesture=null;const dx=e.clientX-g.x,dy=e.clientY-g.y;if(Math.abs(dx)<42||Math.abs(dx)<Math.abs(dy)*1.2)return;shiftDay(dx<0?1:-1)});
 dayHead.addEventListener("pointercancel",()=>{dayGesture=null});
 
