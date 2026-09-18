@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v20: single-flight senkronizasyon ve hesap/yönetim arayüzü; güncel kabuk ağdan yenilenir.
-const SURUM = "centik-v27-singleflight-ui";
+// v21: çark menüsü ve tam sayfa tema arka planı; v20 single-flight senkronizasyon korunur.
+const SURUM = "centik-v28-fullpage-theme-gear";
 const KABUK = [
   "./",
   "./index.html",
