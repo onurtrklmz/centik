@@ -229,36 +229,19 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
 .cell.today.sel{font-weight:700;box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--focus),0 4px 12px color-mix(in srgb,var(--focus) 24%,transparent)}
 .blank{visibility:hidden}
 
-.sync-status{
-  min-height:44px;padding:0 10px;border-radius:12px;border:1px solid transparent;
-  display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;
-  font-size:.72rem;font-weight:800;line-height:1.1;transition:background .15s,border-color .15s,color .15s;
-}
-.sync-status[hidden]{display:none}
-.sync-dot{width:7px;height:7px;border-radius:50%;flex:0 0 7px;background:currentColor}
-.sync-status.loading{color:#2f6fed;background:color-mix(in srgb,#2f6fed 10%,var(--paper));border-color:color-mix(in srgb,#2f6fed 28%,var(--line))}
-.sync-status.loading .sync-dot{animation:syncSlowBlink 1.35s ease-in-out infinite}
-.sync-status.success{color:#17864b;background:color-mix(in srgb,#17864b 10%,var(--paper));border-color:color-mix(in srgb,#17864b 28%,var(--line))}
-.sync-status.error{color:#c63232;background:color-mix(in srgb,#c63232 10%,var(--paper));border-color:color-mix(in srgb,#c63232 30%,var(--line))}
-.sync-status.error .sync-dot{animation:syncFastBlink .42s ease-in-out infinite alternate}
-@keyframes syncSlowBlink{0%,100%{opacity:.3}50%{opacity:1}}
-@keyframes syncFastBlink{from{opacity:.2;transform:scale(.85)}to{opacity:1;transform:scale(1.12)}}
-@media(max-width:480px){.sub-row{gap:6px}.sub-actions{gap:6px}.sync-status{min-height:40px;padding:0 7px;font-size:.66rem}.today-inline{min-width:98px;padding:0 8px;font-size:.76rem}}
-
-dialog{border:1px solid var(--line);border-radius:14px;background:var(--paper);color:var(--ink);max-width:420px;width:calc(100% - 32px)}
-dialog::backdrop{background:rgba(0,0,0,.4)}
-dialog label{display:block;margin:14px 0;font-weight:500}
-dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
-.row{display:flex;justify-content:flex-end;gap:8px}
-.row button{border:1px solid var(--line);background:none;border-radius:8px;padding:8px 14px}
-.row .primary{background:linear-gradient(135deg,var(--accent-start),var(--accent-end));color:#fff;border-color:transparent}
-
-.user-chip{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.76rem;color:var(--muted)}
-.row .danger{color:#b42318;border-color:rgba(180,35,24,.25)}
-.auth-gate{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:22px;overflow:auto}
-.auth-card{width:min(430px,100%);background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:var(--shadow)}
-.auth-brand{display:flex;align-items:center;gap:14px;margin-bottom:22px}.auth-brand img{width:52px;height:52px;border-radius:14px}.auth-brand h1{font-size:2rem}.auth-brand p{margin:2px 0 0;color:var(--muted)}
-.auth-tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:18px}.auth-tabs button{border:0;background:transparent;padding:9px;border-radius:9px;color:var(--muted);font-weight:600}.auth-tabs button.active{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
+/* Tepe bardaki yenile düğmesi aynı zamanda senkron durumunu gösterir. */
+.sync-refresh{position:relative;width:40px;height:40px;padding:0;justify-content:center;overflow:visible;color:var(--marka)}
+.sync-refresh .sync-icon{width:19px;height:19px;display:none;fill:currentColor}
+.sync-refresh .sync-icon-refresh{display:block}
+.sync-refresh.is-loading .sync-icon-refresh{animation:syncRotate .9s linear infinite}
+.sync-refresh.is-success{color:#17864b;border-color:color-mix(in srgb,#17864b 34%,var(--line));background:color-mix(in srgb,#17864b 9%,var(--paper))}
+.sync-refresh.is-success .sync-icon-refresh{display:none}
+.sync-refresh.is-success .sync-icon-cloud{display:block}
+.sync-refresh.is-error .sync-icon-refresh{display:block}
+.sync-refresh .sync-error-mark{display:none;position:absolute;right:-2px;bottom:-2px;width:16px;height:16px;border-radius:50%;background:#c63232;color:#fff;border:2px solid var(--bar);font:800 11px/12px var(--sans);align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.24)}
+.sync-refresh.is-error .sync-error-mark{display:flex}
+@keyframes syncRotate{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.sync-refresh.is-loading .sync-icon-refresh{animation:none}}
 .auth-pane label{display:block;margin:13px 0;font-size:.88rem;font-weight:600}.auth-pane input{display:block;width:100%;margin-top:6px;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}.auth-pane small{display:block;color:var(--muted);margin:-6px 0 12px}.auth-primary{width:100%;border:0;border-radius:11px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));color:#fff;font-weight:700;padding:12px 14px;margin-top:7px}.auth-link{display:block;margin:12px auto 0;border:0;background:transparent;color:var(--marka);font-size:.88rem}.auth-status{min-height:1.4em;color:var(--muted);font-size:.86rem;margin:14px 0 0}.auth-status.error{color:#b42318}.account-box{padding:4px}.account-box .row{margin-top:20px}
 .admin-panel{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
 .theme-settings{margin:18px 0 4px;padding:14px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--paper) 88%,transparent)}
@@ -280,7 +263,11 @@ dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px sol
     <h1>Çentik</h1>
     <span class="count" id="plateMeta"></span>
   </div>
-  <button class="ubtn" id="refresh" type="button" aria-label="Yenile"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/></svg></button>
+  <button class="ubtn sync-refresh is-loading" id="refresh" type="button" aria-label="Yükleniyor" title="Yükleniyor">
+    <svg class="sync-icon sync-icon-refresh" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/></svg>
+    <svg class="sync-icon sync-icon-cloud" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 15.5h7.2a4.3 4.3 0 0 0 .53-8.57A5.35 5.35 0 0 0 4.13 5.8 3.85 3.85 0 0 0 6.5 15.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="m7.35 10.55 1.72 1.72 3.7-4.05" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span class="sync-error-mark" aria-hidden="true">!</span>
+  </button>
   <span class="user-chip" id="userChip" hidden></span>
   <button class="ubtn" id="settings" type="button" aria-label="Hesap" title="Hesap"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/><path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"/></svg></button>
 </div></div>
@@ -295,7 +282,6 @@ dialog input{display:block;width:100%;margin-top:6px;padding:10px;border:1px sol
   <div class="sub-row">
     <p class="sub" id="daySub"></p>
     <div class="sub-actions">
-      <span class="sync-status loading" id="syncStatus" role="status" aria-live="polite"><span class="sync-dot" aria-hidden="true"></span><span id="syncStatusText">Yükleniyor...</span></span>
       <button class="jump-notice today-inline" id="todayNotice" type="button" hidden>Bugüne dön</button>
     </div>
   </div>
@@ -409,7 +395,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
-let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, forcedSyncTimer=null;
+let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
 let pendingDelete=null, pendingDeleteTimer=null;
 let pushQueue=[], pushQueued=new Set(), pushWorker=null;
 const DELETE_UNDO_MS=2000;
@@ -421,14 +407,22 @@ const $=id=>document.getElementById(id);
 const getToken=()=>{try{return localStorage.getItem(AUTH_TOKEN)||""}catch(e){return ""}};
 const getCachedUser=()=>{try{return JSON.parse(localStorage.getItem(AUTH_USER)||"null")}catch(e){return null}};
 const userKey=suffix=>currentUser?`${LS_PREFIX}${currentUser.id}-${suffix}`:`${LS_PREFIX}anon-${suffix}`;
+let syncSuccessTimer=null;
 function setSyncStatus(type){
-  const el=$("syncStatus"),txt=$("syncStatusText");if(!el||!txt)return;
-  const map={loading:"Yükleniyor...",success:"Kayıt Başarılı",error:"Sunucuya ulaşılamıyor"};
-  type=map[type]?type:"success";el.hidden=false;el.className=`sync-status ${type}`;txt.textContent=map[type];
+  const b=$("refresh");if(!b)return;
+  clearTimeout(syncSuccessTimer);syncSuccessTimer=null;
+  const valid=["idle","loading","success","error"];type=valid.includes(type)?type:"idle";
+  b.classList.remove("is-loading","is-success","is-error");
+  if(type!=="idle")b.classList.add(`is-${type}`);
+  const labels={idle:"Verileri yenile",loading:"Yükleniyor",success:"Senkronizasyon başarılı",error:"Sunucuya ulaşılamıyor — yeniden dene"};
+  b.setAttribute("aria-label",labels[type]);b.title=labels[type];
+  if(type==="success")syncSuccessTimer=setTimeout(()=>{
+    if(!connectPromise&&!pushWorker&&!pending.size)setSyncStatus("idle");
+  },1400);
 }
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 async function reliableApi(action,data={},options={}){
-  const retries=Math.max(0,Number(options.retries??1)),timeout=Math.max(5000,Number(options.timeout)||30000);let lastErr=null;
+  const retries=Math.max(0,Number(options.retries??0)),timeout=Math.max(4000,Number(options.timeout)||15000);let lastErr=null;
   for(let attempt=0;attempt<=retries;attempt++){
     try{
       const j=await api(action,data,{timeout});
@@ -441,7 +435,7 @@ async function reliableApi(action,data={},options={}){
 
 async function api(action,data={},options={}){
   if(!SCRIPT_URL||SCRIPT_URL.startsWith("BURAYA")) throw new Error("adres");
-  const timeout=Math.max(5000,Number(options.timeout)||20000),ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),timeout);
+  const timeout=Math.max(4000,Number(options.timeout)||15000),ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),timeout);
   try{
     const r=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action,...data}),signal:ctrl.signal,cache:"no-store"});
     let j; try{j=await r.json()}catch(e){throw new Error("sunucu")}
@@ -550,7 +544,7 @@ async function pushNow(k){
     const sentRevision=serverRevision;
     const normalized=normalizeItems(days[k]||[]);if(normalized.length)days[k]=normalized;else delete days[k];
     const opId=`${currentUser.id}|${k}|${Date.now().toString(36)}|${Math.random().toString(36).slice(2,7)}`;
-    const j=await reliableApi("saveDay",{token,date:k,items:normalized,knownRevision:sentRevision,opId},{timeout:30000,retries:1});
+    const j=await reliableApi("saveDay",{token,date:k,items:normalized,knownRevision:sentRevision,opId},{timeout:18000,retries:1});
     if(!j.ok){if(j.error==="oturum"){expireSession();return false}throw new Error(j.error||"hata")}
     if(j.needsSync)invalidateRevision();else if(j.revision!==undefined)saveRevision(j.revision);
     pending.delete(k);saveLocal();saveLastGood();
@@ -566,11 +560,13 @@ async function connect(options={}){
 }
 async function connectNow({silent=false,force=false}={}){
   const token=getToken();if(!token||!currentUser)return;
-  if(!silent)setSyncStatus("loading");
+  lastSyncAttemptAt=Date.now();
+  setSyncStatus("loading");
   try{
-    const j=await reliableApi("sync",{token,knownRevision:force?null:serverRevision},{timeout:30000,retries:1});
+    const j=await reliableApi("sync",{token,knownRevision:force?null:serverRevision},{timeout:force?16000:12000,retries:force?1:0});
     if(!j.ok){if(j.error==="oturum"){expireSession();return}throw new Error(j.error||"hata")}
-    currentUser=j.user||currentUser;setSession(token,currentUser);applyUserTheme(true);updateUserUI();await syncThemePreference();
+    currentUser=j.user||currentUser;setSession(token,currentUser);applyUserTheme(true);updateUserUI();
+    if(pendingTheme(currentUser))syncThemePreference();
     if(currentUser?.role==="admin"&&j.adminApprovals)cacheAdminApprovals(j.adminApprovals);
     if(currentUser?.role==="admin"&&j.adminUsers)cacheRegisteredUsers(j.adminUsers);
     if(!j.unchanged){
@@ -581,14 +577,16 @@ async function connectNow({silent=false,force=false}={}){
     }else if(Object.keys(days).length){saveLastGood()}
     if(j.revision!==undefined)saveRevision(j.revision);
     lastSyncAt=Date.now();
-    if(pending.size)await flushPending();
-    if(!pending.size)setSyncStatus("success");
+    if(pending.size){
+      flushPending().catch(()=>{});
+      setSyncStatus("loading");
+    }else setSyncStatus("success");
   }catch(e){
     restoreLastGoodIfEmpty();setSyncStatus("error");
   }
 }
 
-function expireSession(){clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();setSession("",null);days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();showGate(true);setAuthStatus("Oturum süresi doldu. Yeniden giriş yapın.",true)}
+function expireSession(){clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();setSession("",null);days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);setAuthStatus("Oturum süresi doldu. Yeniden giriş yapın.",true)}
 
 function addTask(t){t=t.trim();if(!t||!currentUser)return;(days[current]=normalizeItems(days[current]||[])).push({id:uniqueTaskId(),t:t.slice(0,1000),done:false});persist(current);render()}
 function toggle(id){if(pendingDelete?.id===id&&pendingDelete?.date===current)return;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id);if(!it)return;it.done=!it.done;lastPop=it.done?id:null;persist(current);render()}
@@ -756,7 +754,7 @@ function showPane(id){["loginPane","registerPane","resetPane"].forEach(x=>$(x).h
 document.querySelectorAll("#authTabs button").forEach(b=>b.onclick=()=>showPane(b.dataset.pane));
 $("forgotBtn").onclick=()=>{resetStage=1;$("resetCodeFields").hidden=true;$("resetSubmit").textContent="Kod gönder";$("resetEmail").value=$("loginEmail").value;showPane("resetPane")};
 $("backLoginBtn").onclick=()=>showPane("loginPane");
-$("loginPane").addEventListener("submit",async e=>{e.preventDefault();setAuthStatus("Giriş yapılıyor…");try{const j=await api("login",{email:$("loginEmail").value,password:$("loginPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}setSession(j.token,j.user);applyUserTheme(true);loadLocal();updateUserUI();showGate(false);render();await connect()}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
+$("loginPane").addEventListener("submit",async e=>{e.preventDefault();setAuthStatus("Giriş yapılıyor…");try{const j=await api("login",{email:$("loginEmail").value,password:$("loginPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}setSession(j.token,j.user);applyUserTheme(true);loadLocal();updateUserUI();showGate(false);render();setSyncStatus("loading");connect()}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
 $("registerPane").addEventListener("submit",async e=>{e.preventDefault();setAuthStatus("Başvuru gönderiliyor…");try{const email=$("registerEmail").value;const j=await api("register",{name:$("registerName").value,email,password:$("registerPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}if(j.pending){showPane("loginPane");$("loginEmail").value=email;$("registerPassword").value="";setAuthStatus("Başvurunuz alındı. Yönetici onayından sonra giriş yapabilirsiniz.");return}if(j.admin&&j.approved){showPane("loginPane");$("loginEmail").value=email;$("registerPassword").value="";setAuthStatus("Süper yönetici hesabınız oluşturuldu ve etkinleştirildi. Parolanızla giriş yapabilirsiniz.");return}setAuthStatus("Hesap oluşturuldu. Giriş yapabilirsiniz.")}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
 $("resetPane").addEventListener("submit",async e=>{e.preventDefault();try{if(resetStage===1){setAuthStatus("Kod gönderiliyor…");const j=await api("resetRequest",{email:$("resetEmail").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}resetStage=2;$("resetCodeFields").hidden=false;$("resetSubmit").textContent="Parolayı değiştir";setAuthStatus("Hesap varsa sıfırlama kodu e-posta adresine gönderildi.")}else{setAuthStatus("Parola değiştiriliyor…");const j=await api("resetConfirm",{email:$("resetEmail").value,code:$("resetCode").value,password:$("resetPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}showPane("loginPane");$("loginEmail").value=$("resetEmail").value;setAuthStatus("Parola değiştirildi. Yeni parolanızla giriş yapın.")}}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
 
@@ -764,13 +762,14 @@ $("addForm").addEventListener("submit",e=>{e.preventDefault();const i=$("newTask
 $("tomorrowNotice").onclick=()=>go(addDays(todayKey(),1));
 $("todayNotice").onclick=()=>go(todayKey());
 $("prev").onclick=()=>go(addDays(current,-1));$("next").onclick=()=>go(addDays(current,1));$("mPrev").onclick=()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);renderCal()};$("mNext").onclick=()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);renderCal()};
-$("refresh").onclick=()=>connect({force:true});$("settings").onclick=()=>{updateUserUI();refreshThemeButtons();$("accountDialog").showModal();if(currentUser?.role==="admin"){if(adminApprovals)renderAdminPending(adminApprovals);else renderAdminPending(null,{loading:true});if(registeredUsers)renderRegisteredUsers(registeredUsers);else renderRegisteredUsers(null,{loading:true});if(!adminApprovals||Date.now()-adminApprovalsAt>60000)loadAdminPending();if(!registeredUsers||Date.now()-registeredUsersAt>60000)loadRegisteredUsers()}};$("refreshAdmin").onclick=()=>loadAdminPending({force:true});$("refreshRegistered").onclick=()=>loadRegisteredUsers({force:true});
+$("refresh").onclick=async()=>{if(connectPromise){try{await connectPromise}catch(e){}}setSyncStatus("loading");connect({force:true})};$("settings").onclick=()=>{updateUserUI();refreshThemeButtons();$("accountDialog").showModal();if(currentUser?.role==="admin"){if(adminApprovals)renderAdminPending(adminApprovals);else renderAdminPending(null,{loading:true});if(registeredUsers)renderRegisteredUsers(registeredUsers);else renderRegisteredUsers(null,{loading:true});if(!adminApprovals||Date.now()-adminApprovalsAt>60000)loadAdminPending();if(!registeredUsers||Date.now()-registeredUsersAt>60000)loadRegisteredUsers()}};$("refreshAdmin").onclick=()=>loadAdminPending({force:true});$("refreshRegistered").onclick=()=>loadRegisteredUsers({force:true});
 async function saveAndCloseAccount(){const b=$("closeAccount"),old=b.textContent;b.disabled=true;b.textContent="Kaydediliyor…";try{await syncThemePreference()}finally{b.disabled=false;b.textContent=old;$("accountDialog").close()}}
 $("closeAccount").onclick=()=>saveAndCloseAccount();$("accountDialog").addEventListener("cancel",e=>{e.preventDefault();saveAndCloseAccount()});
-$("logoutBtn").onclick=async()=>{const token=getToken();try{if(token)await api("logout",{token})}catch(e){}clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();$("accountDialog").close();setSession("",null);applyTheme("lacivert");days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();showGate(true);showPane("loginPane")};
+$("logoutBtn").onclick=async()=>{const token=getToken();try{if(token)await api("logout",{token})}catch(e){}clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();$("accountDialog").close();setSession("",null);applyTheme("lacivert");days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);showPane("loginPane")};
 const brandEl=$("brand");brandEl.onclick=()=>{go(todayKey());window.scrollTo({top:0,behavior:"smooth"})};brandEl.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();brandEl.onclick()}};
 function foregroundSync(){
   if(document.visibilityState!=="visible"||!navigator.onLine||!currentUser||!getToken())return;
+  if(connectPromise||Date.now()-lastSyncAttemptAt<8000)return;
   connect({silent:true});
 }
 window.addEventListener("online",foregroundSync);
@@ -828,10 +827,10 @@ $("themeNavy").onclick=()=>chooseTheme("lacivert");$("themePurple").onclick=()=>
 
 async function boot(){
   currentUser=getCachedUser();if(currentUser){applyUserTheme(false);loadLocal();updateUserUI();render();showGate(false);const token=getToken();if(token){
-    // sync zaten oturumu doğrulayıp güncel kullanıcıyı döndürür; ayrı /me turu yok.
-    await connect();return
+    // Yerel kopya zaten çizildi; ağ senkronu arayüzü bloke etmeden arka planda çalışır.
+    setSyncStatus("loading");connect();return
   }}
-  applyTheme("lacivert");showGate(true);showPane("loginPane");render();
+  applyTheme("lacivert");setSyncStatus("idle");showGate(true);showPane("loginPane");render();
 }
 boot();
 if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
