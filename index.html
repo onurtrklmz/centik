@@ -477,7 +477,8 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
     <form class="auth-pane" id="resetPane" hidden>
       <h2>Parolayı sıfırla</h2>
       <p class="sub">E-postanıza 6 haneli bir kod göndereceğiz.</p>
-      <label>E-posta<input id="resetEmail" type="email" autocomplete="email" required></label>
+      <label>E-posta<input id="resetEmail" name="centik-reset-email" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" required></label>
+      <small>Sıfırlama kodu bu e-posta adresine gönderilecektir.</small>
       <div id="resetCodeFields" hidden>
         <label>Kod<input id="resetCode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code"></label>
         <label>Yeni parola<input id="resetPassword" type="password" autocomplete="new-password" minlength="10"></label>
@@ -501,7 +502,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v34-smooth-reorder", CENTIK_EXPECTED_SERVER_BUILD="v19-auth-cache";
+const CENTIK_CLIENT_BUILD="v37-login-recovery", CENTIK_EXPECTED_SERVER_BUILD="v19-auth-cache";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -992,9 +993,39 @@ if(toggleLoginPassword)toggleLoginPassword.onclick=()=>{
   input.focus({preventScroll:true});
 };
 document.querySelectorAll("#authTabs button").forEach(b=>b.onclick=()=>showPane(b.dataset.pane));
-$("forgotBtn").onclick=()=>{resetStage=1;$("resetCodeFields").hidden=true;$("resetSubmit").textContent="Kod gönder";$("resetEmail").value=$("loginEmail").value;showPane("resetPane")};
+$("forgotBtn").onclick=()=>{resetStage=1;$("resetCodeFields").hidden=true;$("resetSubmit").textContent="Kod gönder";$("resetEmail").value="";$("resetCode").value="";$("resetPassword").value="";showPane("resetPane");requestAnimationFrame(()=>{$("resetEmail").value="";$("resetEmail").focus()})};
 $("backLoginBtn").onclick=()=>showPane("loginPane");
-$("loginPane").addEventListener("submit",async e=>{e.preventDefault();setAuthStatus("Giriş yapılıyor…");try{const j=await api("login",{email:$("loginEmail").value,password:$("loginPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}setSession(j.token,j.user);applyUserTheme(true);loadLocal();updateUserUI();showGate(false);render();setSyncStatus("loading");connect({reason:"login"})}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
+function enterAppAfterLogin(j){
+  // Sunucu login'i başarılıysa oturumu ÖNCE kalıcılaştır. Bundan sonraki bir UI hatası
+  // hiçbir zaman "sunucu hatası" gibi gösterilmemeli ve kullanıcıyı login ekranında bırakmamalı.
+  setSession(j.token,j.user);
+  let initError="";
+  try{applyUserTheme(true)}catch(err){initError=String(err?.message||err);try{applyTheme(cleanTheme(j.user?.theme))}catch(e){}}
+  try{loadLocal()}catch(err){initError=initError||String(err?.message||err);days={};pending=new Set();serverRevision=null}
+  try{updateUserUI()}catch(err){initError=initError||String(err?.message||err)}
+  showGate(false);
+  setAuthStatus("");
+  try{render()}catch(err){initError=initError||String(err?.message||err)}
+  if(initError)recordDiag({ts:new Date().toISOString(),action:"login-ui-init",ok:false,error:initError,clientMs:0,server:null});
+  setSyncStatus("loading");
+  // İlk senkron login sonucundan bağımsızdır; başarısız olursa mevcut connect() sadece
+  // senkron ikonunu hata durumuna alır, başarılı login'i geri çevirmez.
+  Promise.resolve(connect({reason:"login"})).catch(()=>{});
+}
+$("loginPane").addEventListener("submit",async e=>{
+  e.preventDefault();
+  setAuthStatus("Giriş yapılıyor…");
+  let j;
+  try{
+    j=await api("login",{email:$("loginEmail").value,password:$("loginPassword").value},{timeout:30000});
+  }catch(err){
+    const msg=String(err?.message||"");
+    setAuthStatus(msg==="zaman_asimi"?"Sunucu yanıtı gecikti. Yeniden deneyin.":"Sunucu yanıtı alınamadı. Bağlantınızı kontrol edip yeniden deneyin.",true);
+    return;
+  }
+  if(!j?.ok){setAuthStatus(authMessage(j?.error||"sunucu"),true);return}
+  enterAppAfterLogin(j);
+});
 $("registerPane").addEventListener("submit",async e=>{e.preventDefault();setAuthStatus("Başvuru gönderiliyor…");try{const email=$("registerEmail").value;const j=await api("register",{name:$("registerName").value,email,password:$("registerPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}if(j.pending){showPane("loginPane");$("loginEmail").value=email;$("registerPassword").value="";setAuthStatus("Başvurunuz alındı. Yönetici onayından sonra giriş yapabilirsiniz.");return}if(j.admin&&j.approved){showPane("loginPane");$("loginEmail").value=email;$("registerPassword").value="";setAuthStatus("Süper yönetici hesabınız oluşturuldu ve etkinleştirildi. Parolanızla giriş yapabilirsiniz.");return}setAuthStatus("Hesap oluşturuldu. Giriş yapabilirsiniz.")}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
 $("resetPane").addEventListener("submit",async e=>{e.preventDefault();try{if(resetStage===1){setAuthStatus("Kod gönderiliyor…");const j=await api("resetRequest",{email:$("resetEmail").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}resetStage=2;$("resetCodeFields").hidden=false;$("resetSubmit").textContent="Parolayı değiştir";setAuthStatus("Hesap varsa sıfırlama kodu e-posta adresine gönderildi.")}else{setAuthStatus("Parola değiştiriliyor…");const j=await api("resetConfirm",{email:$("resetEmail").value,code:$("resetCode").value,password:$("resetPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}showPane("loginPane");$("loginEmail").value=$("resetEmail").value;setAuthStatus("Parola değiştirildi. Yeni parolanızla giriş yapın.")}}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
 

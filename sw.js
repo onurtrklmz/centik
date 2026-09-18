@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v35: login parola alanına erişilebilir göster/gizle düğmesi eklendi.
-const SURUM = "centik-v42-login-password-toggle";
+// v37: başarılı login ile frontend başlangıcı ayrıldı; UI hatası artık sunucu hatası gibi gösterilmiyor.
+const SURUM = "centik-v44-login-recovery";
 const KABUK = [
   "./",
   "./index.html",
