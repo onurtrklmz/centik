@@ -212,7 +212,8 @@ li.done .txt{color:var(--muted)}
 #list li.task-row .txt{cursor:grab;-webkit-touch-callout:none}
 #list li.task-row.dragging{z-index:6;background:var(--paper);box-shadow:0 12px 28px rgba(0,0,0,.16);transform:scale(1.012);opacity:.97}
 #list li.task-row.dragging .txt{cursor:grabbing}
-#list.reordering li.task-row:not(.dragging){transition:transform .12s ease,box-shadow .12s ease}
+#list.reordering li.task-row:not(.dragging){transition:box-shadow .14s ease;will-change:transform}
+#list li.task-row.dragging{will-change:transform}
 body.task-reordering{user-select:none;-webkit-user-select:none;cursor:grabbing}
 body.task-reordering #list li.task-row{cursor:grabbing}
 .task-actions{display:flex;align-items:center;gap:2px;flex:none}
@@ -282,6 +283,13 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
 .sync-refresh.is-error .sync-error-mark{display:flex}
 @keyframes syncRotate{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.sync-refresh.is-loading .sync-icon-refresh{animation:none}}
+/* ——— Kimlik doğrulama kapısı: fail-closed ——— */
+.auth-gate{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:22px;overflow:auto;background:var(--body-base,var(--bg));background-color:var(--bg)}
+.auth-gate::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(52% 42% at 12% -6%,var(--glow-a),transparent 62%),radial-gradient(46% 38% at 88% -2%,var(--glow-b),transparent 60%),radial-gradient(40% 34% at 62% 8%,var(--glow-c),transparent 65%)}
+.auth-card{position:relative;z-index:1;width:min(92vw,420px);padding:24px;border:1px solid var(--line);border-radius:20px;background:color-mix(in srgb,var(--paper) 96%,transparent);box-shadow:0 24px 70px rgba(0,0,0,.26);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.auth-brand{display:flex;align-items:center;gap:13px;margin-bottom:18px}.auth-brand img{width:46px;height:46px;object-fit:contain}.auth-brand h1{font-size:1.75rem;line-height:1}.auth-brand p{margin:5px 0 0;color:var(--muted);font-size:.86rem}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:5px;border:1px solid var(--line);border-radius:12px;background:var(--bg);margin-bottom:16px}.auth-tabs button{min-height:42px;border:0;border-radius:9px;background:transparent;color:var(--muted);font-weight:700}.auth-tabs button.active{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
+body.auth-locked{overflow:hidden!important}body.auth-locked .ust-cubuk,body.auth-locked main{visibility:hidden!important;pointer-events:none!important;user-select:none!important;-webkit-user-select:none!important}
 .auth-pane label{display:block;margin:13px 0;font-size:.88rem;font-weight:600}.auth-pane input{display:block;width:100%;margin-top:6px;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}.auth-pane small{display:block;color:var(--muted);margin:-6px 0 12px}.auth-primary{width:100%;border:0;border-radius:11px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));color:#fff;font-weight:700;padding:12px 14px;margin-top:7px}.auth-link{display:block;margin:12px auto 0;border:0;background:transparent;color:var(--marka);font-size:.88rem}.auth-status{min-height:1.4em;color:var(--muted);font-size:.86rem;margin:14px 0 0}.auth-status.error{color:#b42318}.account-box{padding:4px}.account-box .row{margin-top:20px}
 .admin-panel{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
 .theme-settings{margin:18px 0 4px;padding:14px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--paper) 88%,transparent)}
@@ -321,7 +329,7 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
-<body>
+<body class="auth-locked">
 
 <div class="ust-cubuk"><div class="wrap">
   <div class="brand" id="brand" role="button" tabindex="0" aria-label="Bugüne dön">
@@ -442,7 +450,7 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
   </dialog>
 </main>
 
-<div class="auth-gate" id="authGate" hidden>
+<div class="auth-gate" id="authGate">
   <div class="auth-card">
     <div class="auth-brand"><img src="icon-192.png" alt=""><div><h1>Çentik</h1><p>Kendi gününü işaretle.</p></div></div>
 
@@ -493,7 +501,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v30-calendar-click-fix", CENTIK_EXPECTED_SERVER_BUILD="v19-auth-cache";
+const CENTIK_CLIENT_BUILD="v34-smooth-reorder", CENTIK_EXPECTED_SERVER_BUILD="v19-auth-cache";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -510,6 +518,13 @@ const DIAG_LOG_LIMIT=30;
 const $=id=>document.getElementById(id);
 const getToken=()=>{try{return localStorage.getItem(AUTH_TOKEN)||""}catch(e){return ""}};
 const getCachedUser=()=>{try{return JSON.parse(localStorage.getItem(AUTH_USER)||"null")}catch(e){return null}};
+function hasLocalSession(){return !!(currentUser?.id&&getToken())}
+function requireLocalSession(){
+  if(hasLocalSession())return true;
+  currentUser=null;setSession("",null);days={};pending=new Set();serverRevision=null;
+  showGate(true);showPane("loginPane");setSyncStatus("idle");
+  return false;
+}
 const userKey=suffix=>currentUser?`${LS_PREFIX}${currentUser.id}-${suffix}`:`${LS_PREFIX}anon-${suffix}`;
 const escapeHtml=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
 function diagStorageKey(){return userKey("diagnostics-v1")}
@@ -619,7 +634,13 @@ function setSession(token,user){
   currentUser=user||null;
   try{if(token)localStorage.setItem(AUTH_TOKEN,token); else localStorage.removeItem(AUTH_TOKEN); if(user)localStorage.setItem(AUTH_USER,JSON.stringify(user)); else localStorage.removeItem(AUTH_USER)}catch(e){}
 }
-function showGate(show){$("authGate").hidden=!show;document.body.style.overflow=show?"hidden":""}
+function showGate(show){
+  const gate=$("authGate");if(gate)gate.hidden=!show;
+  document.body.classList.toggle("auth-locked",!!show);
+  const main=document.querySelector("main"),bar=document.querySelector(".ust-cubuk");
+  [main,bar].forEach(el=>{if(!el)return;try{el.inert=!!show}catch(e){}if(show)el.setAttribute("aria-hidden","true");else el.removeAttribute("aria-hidden")});
+  if(show)document.body.style.overflow="hidden";else document.body.style.overflow="";
+}
 function updateUserUI(){
   const name=currentUser?.name||currentUser?.email||"";$("userChip").textContent=name;$("userChip").hidden=!name;
   $("accountText").textContent=currentUser?`${currentUser.name} · ${currentUser.email}${currentUser.role==="admin"?" · Yönetici":""}`:"";
@@ -674,7 +695,7 @@ function invalidateRevision(){serverRevision=null;if(!currentUser)return;try{loc
 function saveLocal(){if(!currentUser)return;const norm=normalizeDays(days);days=norm.days;try{localStorage.setItem(userKey("days"),JSON.stringify(days));localStorage.setItem(userKey("pending"),JSON.stringify([...pending]));if(serverRevision!==null)localStorage.setItem(userKey("revision"),String(serverRevision))}catch(e){}}
 function clearUserLocal(){if(!currentUser)return;try{localStorage.removeItem(userKey("days"));localStorage.removeItem(userKey("pending"));localStorage.removeItem(userKey("revision"));localStorage.removeItem(userKey(LAST_GOOD_SUFFIX))}catch(e){}serverRevision=null}
 function persist(k){
-  if(!currentUser)return;pending.add(k);saveLocal();clearTimeout(timers[k]);
+  if(!requireLocalSession())return;pending.add(k);saveLocal();clearTimeout(timers[k]);
   timers[k]=setTimeout(()=>enqueuePush(k),700);
 }
 function scheduleForcedSync(){
@@ -776,10 +797,10 @@ async function connectNow({silent=false,force=false,reason=""}={}){
 
 function expireSession(){clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();setSession("",null);days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);setAuthStatus("Oturum süresi doldu. Yeniden giriş yapın.",true)}
 
-function addTask(t){t=t.trim();if(!t||!currentUser)return;(days[current]=normalizeItems(days[current]||[])).push({id:uniqueTaskId(),t:t.slice(0,1000),done:false});persist(current);render()}
-function toggle(id){if(pendingDelete?.id===id&&pendingDelete?.date===current)return;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id);if(!it)return;it.done=!it.done;lastPop=it.done?id:null;persist(current);render()}
-function updateTask(id,text){if(pendingDelete?.id===id&&pendingDelete?.date===current)return false;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id),t=String(text||'').trim();if(!it||!t)return false;it.t=t.slice(0,1000);persist(current);render();return true}
-function editTask(id,li){const it=normalizeItems(days[current]||[]).find(x=>x.id===id);if(!it||li.classList.contains("editing")||(pendingDelete?.id===id&&pendingDelete?.date===current))return;li.classList.add("editing");const span=li.querySelector(".txt"),btn=li.querySelector(".edit");const input=document.createElement("input");input.className="edit-input";input.type="text";input.maxLength=1000;input.value=it.t;input.setAttribute("aria-label","Görevi düzenle");span.replaceWith(input);const save=()=>{if(!updateTask(id,input.value)){input.focus();input.select()}};btn.innerHTML='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.485 1.929a.75.75 0 0 1 .086 1.056l-7.5 8.75a.75.75 0 0 1-1.08.037L1.93 8.71a.75.75 0 0 1 1.06-1.06l2.49 2.49 6.95-8.11a.75.75 0 0 1 1.056-.101Z"/></svg>';btn.setAttribute("aria-label","Düzenlemeyi kaydet");btn.title="Kaydet";btn.onclick=save;input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();save()}else if(e.key==="Escape"){e.preventDefault();render()}});requestAnimationFrame(()=>{input.focus();input.setSelectionRange(input.value.length,input.value.length)})}
+function addTask(t){t=t.trim();if(!t||!requireLocalSession())return;(days[current]=normalizeItems(days[current]||[])).push({id:uniqueTaskId(),t:t.slice(0,1000),done:false});persist(current);render()}
+function toggle(id){if(!requireLocalSession())return;if(pendingDelete?.id===id&&pendingDelete?.date===current)return;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id);if(!it)return;it.done=!it.done;lastPop=it.done?id:null;persist(current);render()}
+function updateTask(id,text){if(!requireLocalSession())return false;if(pendingDelete?.id===id&&pendingDelete?.date===current)return false;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id),t=String(text||'').trim();if(!it||!t)return false;it.t=t.slice(0,1000);persist(current);render();return true}
+function editTask(id,li){if(!requireLocalSession())return;const it=normalizeItems(days[current]||[]).find(x=>x.id===id);if(!it||li.classList.contains("editing")||(pendingDelete?.id===id&&pendingDelete?.date===current))return;li.classList.add("editing");const span=li.querySelector(".txt"),btn=li.querySelector(".edit");const input=document.createElement("input");input.className="edit-input";input.type="text";input.maxLength=1000;input.value=it.t;input.setAttribute("aria-label","Görevi düzenle");span.replaceWith(input);const save=()=>{if(!updateTask(id,input.value)){input.focus();input.select()}};btn.innerHTML='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.485 1.929a.75.75 0 0 1 .086 1.056l-7.5 8.75a.75.75 0 0 1-1.08.037L1.93 8.71a.75.75 0 0 1 1.06-1.06l2.49 2.49 6.95-8.11a.75.75 0 0 1 1.056-.101Z"/></svg>';btn.setAttribute("aria-label","Düzenlemeyi kaydet");btn.title="Kaydet";btn.onclick=save;input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();save()}else if(e.key==="Escape"){e.preventDefault();render()}});requestAnimationFrame(()=>{input.focus();input.setSelectionRange(input.value.length,input.value.length)})}
 function hideUndoToast(){}
 function finalizeDelete(){
   if(!pendingDelete)return;clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;
@@ -790,6 +811,7 @@ function finalizeDelete(){
 }
 function undoDelete(){if(!pendingDelete)return;clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();render();setSyncStatus(pending.size?"loading":"success")}
 function remove(id){
+  if(!requireLocalSession())return;
   const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id);if(!it)return;
   if(pendingDelete)finalizeDelete();
   pendingDelete={date:current,id,item:{...it}};
@@ -1031,26 +1053,52 @@ globalDaySwipeSurface.addEventListener("pointercancel",resetGlobalDayGesture);
 // Checkbox, düzenleme, silme ve input kontrolleri sıralamayı başlatmaz.
 const taskList=$("list");
 const TASK_REORDER_HOLD_MS=280;
-let taskReorder=null,taskReorderHoldTimer=null;
+const TASK_REORDER_FLIP_MS=190;
+let taskReorder=null,taskReorderHoldTimer=null,lastTaskFlipAt=0;
+const taskFlipAnimations=new WeakMap();
 function clearTaskReorderHold(){if(taskReorderHoldTimer){clearTimeout(taskReorderHoldTimer);taskReorderHoldTimer=null}}
 function taskReorderRow(target){return target?.closest?.("#list li.task-row[data-task-id]")||null}
 function taskReorderBlocked(target){return !target||!!target.closest("button,input,textarea,select,a,[contenteditable='true'],.editing,.deleting")}
 function beginTaskReorder(row,clientY){
+  if(!requireLocalSession())return;
   if(!taskReorder||taskReorder.active||!row||current!==taskReorder.date)return;
-  taskReorder.active=true;taskReorder.lastY=clientY;
+  taskReorder.active=true;taskReorder.lastY=clientY;lastTaskFlipAt=0;
   row.classList.add("dragging");row.setAttribute("aria-grabbed","true");
   taskList.classList.add("reordering");document.body.classList.add("task-reordering");
+}
+function animateTaskReorder(mutator){
+  const rows=[...taskList.querySelectorAll("li.task-row[data-task-id]")];
+  const first=new Map(rows.map(el=>[el,el.getBoundingClientRect()]));
+  mutator();
+  const last=new Map(rows.map(el=>[el,el.getBoundingClientRect()]));
+  rows.forEach(el=>{
+    const a=taskFlipAnimations.get(el);if(a){try{a.cancel()}catch(_){ }taskFlipAnimations.delete(el)}
+    const f=first.get(el),l=last.get(el);if(!f||!l)return;
+    const dx=f.left-l.left,dy=f.top-l.top;if(Math.abs(dx)<.5&&Math.abs(dy)<.5)return;
+    const dragging=el===taskReorder?.row;
+    const from=`translate(${dx}px, ${dy}px)${dragging?" scale(1.012)":""}`;
+    const to=dragging?"translate(0, 0) scale(1.012)":"translate(0, 0)";
+    const anim=el.animate([{transform:from},{transform:to}],{duration:TASK_REORDER_FLIP_MS,easing:"cubic-bezier(.22,.61,.36,1)",fill:"none"});
+    taskFlipAnimations.set(el,anim);
+    const clear=()=>{if(taskFlipAnimations.get(el)===anim)taskFlipAnimations.delete(el)};anim.onfinish=clear;anim.oncancel=clear;
+  });
 }
 function moveTaskReorder(clientY){
   const d=taskReorder;if(!d?.active||current!==d.date)return;d.lastY=clientY;
   const row=d.row,others=[...taskList.querySelectorAll("li.task-row[data-task-id]")].filter(x=>x!==row);
   let before=null;
   for(const el of others){const r=el.getBoundingClientRect();if(clientY<r.top+r.height/2){before=el;break}}
-  if(before){if(row.nextElementSibling!==before)taskList.insertBefore(row,before)}else if(taskList.lastElementChild!==row)taskList.appendChild(row);
-  const edge=72;if(clientY<edge)window.scrollBy(0,-10);else if(clientY>window.innerHeight-edge)window.scrollBy(0,10);
+  const shouldMove=before ? row.nextElementSibling!==before : taskList.lastElementChild!==row;
+  if(shouldMove&&Date.now()-lastTaskFlipAt>70){
+    lastTaskFlipAt=Date.now();
+    animateTaskReorder(()=>{if(before)taskList.insertBefore(row,before);else taskList.appendChild(row)});
+  }
+  const edge=72;if(clientY<edge)window.scrollBy({top:-10,behavior:"auto"});else if(clientY>window.innerHeight-edge)window.scrollBy({top:10,behavior:"auto"});
 }
 function finishTaskReorder(commit=true){
-  clearTaskReorderHold();const d=taskReorder;taskReorder=null;if(!d)return;
+  clearTaskReorderHold();const d=taskReorder;if(!d)return;
+  [...taskList.querySelectorAll("li.task-row[data-task-id]")].forEach(el=>{const a=taskFlipAnimations.get(el);if(a){try{a.finish()}catch(_){ }taskFlipAnimations.delete(el)}});
+  taskReorder=null;
   d.row?.classList.remove("dragging");d.row?.removeAttribute("aria-grabbed");taskList.classList.remove("reordering");document.body.classList.remove("task-reordering");
   if(!commit||!d.active||current!==d.date)return;
   const existing=normalizeItems(days[d.date]||[]),byId=new Map(existing.map(it=>[it.id,it]));
@@ -1271,11 +1319,17 @@ applySystemAppearance();
 $("themeNavy").onclick=()=>chooseTheme("lacivert");$("themePurple").onclick=()=>chooseTheme("mor");
 
 async function boot(){
-  currentUser=getCachedUser();if(currentUser){applyUserTheme(false);loadLocal();updateUserUI();render();showGate(false);const token=getToken();if(token){
-    // Yerel kopya zaten çizildi; ağ senkronu arayüzü bloke etmeden arka planda çalışır.
-    setSyncStatus("loading");connect({reason:"boot"});return
-  }}
-  applyTheme("lacivert");setSyncStatus("idle");showGate(true);showPane("loginPane");render();
+  const cachedUser=getCachedUser(),token=getToken();
+  // Fail-closed: kullanıcı ve token birlikte yoksa uygulama kabuğu hiç açılmaz.
+  if(cachedUser?.id&&token){
+    currentUser=cachedUser;applyUserTheme(false);loadLocal();updateUserUI();render();showGate(false);
+    // 60 günlük session sunucuda arka planda doğrulanır; geçersizse connect() expireSession() çağırıp kapıyı yeniden kilitler.
+    setSyncStatus("loading");connect({reason:"boot"});return;
+  }
+  // Yarım kalmış/eski local kimlik bilgisini temizle.
+  if(cachedUser||token)setSession("",null);
+  currentUser=null;days={};pending=new Set();serverRevision=null;
+  applyTheme("lacivert");setSyncStatus("idle");showGate(true);showPane("loginPane");
 }
 boot();
 if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>r.update().catch(()=>{})).catch(()=>{}));

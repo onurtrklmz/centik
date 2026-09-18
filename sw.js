@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v32: üst bardaki logo ve Çentik başlığı sağdaki 40 px kontrollerle görsel olarak dengelendi.
-const SURUM = "centik-v39-header-balance";
+// v34: görev sıralama FLIP animasyonuyla akıcı hale getirildi; oturum guard yalnız yerel kontroldür.
+const SURUM = "centik-v41-smooth-reorder";
 const KABUK = [
   "./",
   "./index.html",
