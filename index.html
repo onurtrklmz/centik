@@ -167,28 +167,32 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 .today-inline svg{width:16px;height:16px;fill:none;stroke:var(--notice-today-accent);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .today-inline:hover{background:color-mix(in srgb,var(--notice-today-accent) 14%,var(--paper))}
 
-.tally{margin:20px 0 12px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:end;column-gap:24px;width:100%;max-width:none}
-.tally-side{display:flex;align-items:baseline;min-width:0}
-.tally-day{justify-content:flex-start;gap:9px;flex-wrap:wrap;text-align:left}
-.tally-month{justify-content:flex-end;gap:8px;text-align:right;white-space:nowrap}
+.tally{margin:20px 0 12px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;column-gap:24px;width:100%;max-width:none;min-height:78px}
+.tally-side{min-width:0}
+.tally-day{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;text-align:left;min-height:78px}
+.tally-month{display:flex;align-items:baseline;justify-content:flex-end;gap:8px;text-align:right;white-space:nowrap;align-self:center}
 .tally-unit{display:inline-flex;align-items:baseline;gap:8px;white-space:nowrap}
 .tally-progress{gap:0}
 .tally-progress .count-sep{margin:0 .075em;color:var(--ink);font-family:var(--serif);font-size:2.9rem;line-height:.95;font-weight:500;opacity:.92}
 .tally-progress .tally-label{margin-left:9px;font-size:.98rem}
 .tally b{font-family:var(--serif);font-weight:600;font-size:2.9rem;line-height:.95;color:var(--done);font-variant-numeric:tabular-nums;letter-spacing:-.03em}
 .tally span{color:var(--muted)}
-.planned-wrap{display:inline-flex;align-items:baseline;gap:9px}
+.planned-wrap{display:flex;align-items:baseline;gap:6px;min-height:20px;padding-left:2px;line-height:1.15}
 .planned-wrap[hidden]{display:none}
-.tally .slash{font-size:1.15rem;color:var(--ink);font-weight:500}
-.tally .planned-unit b{color:var(--focus)}
+.tally .slash{font-size:.95rem;color:var(--ink);font-weight:500;opacity:.8}
+.tally .planned-unit{gap:5px}
+.tally .planned-unit b{color:var(--focus);font-size:1.42rem;line-height:1}
+.tally .planned-unit span{font-size:.88rem}
 @media (max-width:430px){
-  .tally{column-gap:14px;max-width:100%}
+  .tally{column-gap:14px;max-width:100%;min-height:70px}
+  .tally-day{min-height:70px}
   .tally b{font-size:2.45rem}
   .tally-progress .count-sep{font-size:2.45rem}
-  .tally-side{gap:5px}
   .tally-unit{gap:5px}
   .tally span{font-size:.82rem}
   .tally-progress .tally-label{margin-left:7px}
+  .tally .planned-unit b{font-size:1.28rem}
+  .tally .planned-unit span{font-size:.78rem}
 }
 
 .sheet{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:6px 0;box-shadow:var(--shadow)}
@@ -482,7 +486,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v28-tally-nav-fix", CENTIK_EXPECTED_SERVER_BUILD="v19-auth-cache";
+const CENTIK_CLIENT_BUILD="v29-tally-layout-fix", CENTIK_EXPECTED_SERVER_BUILD="v19-auth-cache";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
