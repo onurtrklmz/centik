@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v34: görev sıralama FLIP animasyonuyla akıcı hale getirildi; oturum guard yalnız yerel kontroldür.
-const SURUM = "centik-v41-smooth-reorder";
+// v35: login parola alanına erişilebilir göster/gizle düğmesi eklendi.
+const SURUM = "centik-v42-login-password-toggle";
 const KABUK = [
   "./",
   "./index.html",
