@@ -138,9 +138,9 @@ h1,h2{font-family:var(--serif);font-weight:600;letter-spacing:-.015em;margin:0}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 
-.day-head{display:flex;align-items:center;gap:8px}
+.day-head{display:flex;align-items:center;gap:8px;touch-action:pan-y;user-select:none;-webkit-user-select:none}
 .day-head h2{font-size:1.75rem;line-height:1.15;flex:1}
-.nav{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--paper);font-size:1.1rem}
+.nav{width:40px;height:40px;border-radius:50%;border:1px solid color-mix(in srgb,var(--focus) 34%,var(--line));background:color-mix(in srgb,var(--focus) 7%,var(--paper));color:var(--focus);font-size:1.1rem;box-shadow:0 2px 8px color-mix(in srgb,var(--focus) 8%,transparent);transition:background .14s,border-color .14s,transform .14s}.nav:hover{background:color-mix(in srgb,var(--focus) 13%,var(--paper));border-color:color-mix(in srgb,var(--focus) 50%,var(--line));transform:translateY(-1px)}
 .sub{color:var(--muted);margin:0;min-height:1.5em;flex:1;min-width:0;display:flex;align-items:center}
 .sub-row{display:flex;align-items:stretch;gap:10px;margin:4px 0 0;min-height:44px}
 .sub-actions{margin-left:auto;display:flex;align-items:stretch;justify-content:flex-end;gap:8px;flex:none}
@@ -167,28 +167,28 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 .today-inline svg{width:16px;height:16px;fill:none;stroke:var(--notice-today-accent);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .today-inline:hover{background:color-mix(in srgb,var(--notice-today-accent) 14%,var(--paper))}
 
-.tally{margin:20px 0 12px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:18px}
+.tally{margin:20px auto 12px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:end;column-gap:34px;max-width:430px}
 .tally-side{display:flex;align-items:baseline;min-width:0}
-.tally-day{justify-content:flex-start;gap:9px;flex-wrap:wrap}
-.tally-month{justify-content:flex-end;gap:9px;text-align:right;white-space:nowrap}
+.tally-day{justify-content:flex-end;gap:9px;flex-wrap:wrap;text-align:right}
+.tally-month{justify-content:flex-start;gap:8px;text-align:left;white-space:nowrap}
 .tally-unit{display:inline-flex;align-items:baseline;gap:8px;white-space:nowrap}
 .tally-progress{gap:0}
-.tally-progress .count-sep{margin:0 .06em;color:var(--done);font-family:var(--serif);font-size:3.65rem;line-height:.95;font-weight:600}
-.tally-progress .tally-label{margin-left:10px;font-size:1rem}
-.tally b{font-family:var(--serif);font-weight:600;font-size:3.65rem;line-height:.95;color:var(--done);font-variant-numeric:tabular-nums;letter-spacing:-.035em}
+.tally-progress .count-sep{margin:0 .075em;color:var(--ink);font-family:var(--serif);font-size:2.9rem;line-height:.95;font-weight:500;opacity:.92}
+.tally-progress .tally-label{margin-left:9px;font-size:.98rem}
+.tally b{font-family:var(--serif);font-weight:600;font-size:2.9rem;line-height:.95;color:var(--done);font-variant-numeric:tabular-nums;letter-spacing:-.03em}
 .tally span{color:var(--muted)}
 .planned-wrap{display:inline-flex;align-items:baseline;gap:9px}
 .planned-wrap[hidden]{display:none}
-.tally .slash{font-size:1.2rem;color:var(--line-strong, var(--muted));font-weight:500}
+.tally .slash{font-size:1.15rem;color:var(--ink);font-weight:500}
 .tally .planned-unit b{color:var(--focus)}
 @media (max-width:430px){
-  .tally{gap:10px}
-  .tally b{font-size:3rem}
-  .tally-progress .count-sep{font-size:3rem}
-  .tally-side{gap:6px}
-  .tally-unit{gap:6px}
-  .tally span{font-size:.86rem}
-  .tally-month{gap:6px}
+  .tally{column-gap:18px;max-width:100%}
+  .tally b{font-size:2.45rem}
+  .tally-progress .count-sep{font-size:2.45rem}
+  .tally-side{gap:5px}
+  .tally-unit{gap:5px}
+  .tally span{font-size:.82rem}
+  .tally-progress .tally-label{margin-left:7px}
 }
 
 .sheet{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:6px 0;box-shadow:var(--shadow)}
@@ -222,12 +222,11 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
 .undo-toast button{border:0;background:transparent;color:var(--focus);font-weight:800;padding:5px 2px;white-space:nowrap}
 
 .cal{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));z-index:38;width:min(520px,calc(100% - 24px));transform:translateX(-50%);border:1px solid var(--line);border-radius:17px;background:color-mix(in srgb,var(--paper) 94%,transparent);box-shadow:0 14px 40px rgba(0,0,0,.16);overflow:hidden;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-.cal-head{display:grid;grid-template-columns:48px minmax(0,1fr) 48px;align-items:center;gap:8px;min-height:58px;padding:8px 10px;margin:0;touch-action:none;user-select:none}
-.cal-head .nav{width:40px;height:40px;justify-self:center}
-.month-toggle{min-width:0;border:0;background:transparent;padding:8px 12px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--ink);font-family:var(--serif);font-size:1.25rem;font-weight:600;letter-spacing:-.015em}
+.cal-head{display:grid;grid-template-columns:48px minmax(0,1fr) 48px;align-items:center;gap:8px;min-height:58px;padding:8px 10px;margin:0;touch-action:none;user-select:none;-webkit-user-select:none}
+.cal-head .nav{width:40px;height:40px;justify-self:center;display:grid;place-items:center}
+.cal-head .nav svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.month-toggle{min-width:0;border:0;background:transparent;padding:8px 12px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--ink);font-family:var(--serif);font-size:1.25rem;font-weight:600;letter-spacing:-.015em}
 .month-toggle:hover,.month-toggle:focus-visible{background:color-mix(in srgb,var(--focus) 7%,transparent)}
-.month-caret{font-family:var(--sans);font-size:.82rem;color:var(--muted);transition:transform .26s ease}
-.cal.open .month-caret{transform:rotate(180deg)}
 .cal-body-wrap{display:grid;grid-template-rows:0fr;opacity:0;transform:translateY(22px);transition:grid-template-rows .32s cubic-bezier(.22,.8,.24,1),opacity .24s ease,transform .32s cubic-bezier(.22,.8,.24,1)}
 .cal.open .cal-body-wrap{grid-template-rows:1fr;opacity:1;transform:translateY(0)}
 .cal-body-clip{overflow:auto;min-height:0;max-height:min(62dvh,560px);overscroll-behavior:contain}
@@ -256,7 +255,7 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
   .cell small{font-size:.64rem}
 }
 @media (prefers-reduced-motion:reduce){
-  .cal-body-wrap,.month-caret{transition:none}
+  .cal-body-wrap{transition:none}
 }
 
 /* Tepe bardaki yenile düğmesi aynı zamanda senkron durumunu gösterir. */
@@ -367,11 +366,11 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
 
   <section class="cal" id="calendarDrawer" aria-label="Takvim">
     <div class="cal-head" id="calendarHandle">
-      <button class="nav" id="mPrev" type="button" aria-label="Önceki ay">‹</button>
+      <button class="nav" id="mPrev" type="button" aria-label="Takvimi aç"></button>
       <button class="month-toggle" id="monthToggle" type="button" aria-expanded="false" aria-controls="calendarBodyWrap">
-        <span id="monthTitle"></span><span class="month-caret" aria-hidden="true">⌃</span>
+        <span id="monthTitle"></span>
       </button>
-      <button class="nav" id="mNext" type="button" aria-label="Sonraki ay">›</button>
+      <button class="nav" id="mNext" type="button" aria-label="Takvimi aç"></button>
     </div>
     <div class="cal-body-wrap" id="calendarBodyWrap">
       <div class="cal-body-clip">
@@ -480,7 +479,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v25-calendar-drawer", CENTIK_EXPECTED_SERVER_BUILD="v19-auth-cache";
+const CENTIK_CLIENT_BUILD="v26-swipe-drawer", CENTIK_EXPECTED_SERVER_BUILD="v19-auth-cache";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -955,16 +954,43 @@ $("resetPane").addEventListener("submit",async e=>{e.preventDefault();try{if(res
 $("addForm").addEventListener("submit",e=>{e.preventDefault();const i=$("newTask");addTask(i.value);i.value="";i.focus()});
 $("tomorrowNotice").onclick=()=>go(addDays(todayKey(),1));
 $("todayNotice").onclick=()=>go(todayKey());
-$("prev").onclick=()=>go(addDays(current,-1));$("next").onclick=()=>go(addDays(current,1));
+let dayAnimating=false,dayGesture=null;
+function shiftDay(dir,{animate=true}={}){
+  if(dayAnimating||!dir)return;
+  const targets=[$("dayTitle"),document.querySelector(".sub-row"),document.querySelector(".tally"),document.querySelector(".sheet")].filter(Boolean);
+  const commit=()=>go(addDays(current,dir));
+  if(!animate||prefersReducedMotion()){commit();return}
+  dayAnimating=true;const outX=dir>0?-30:30,inX=-outX;
+  Promise.all(targets.map(el=>el.animate([{transform:"translateX(0)",opacity:1},{transform:`translateX(${outX}px)`,opacity:.28}],{duration:100,easing:"ease-in",fill:"forwards"}).finished.catch(()=>{}))).then(()=>{
+    commit();targets.forEach(el=>el.getAnimations().forEach(a=>a.cancel()));
+    return Promise.all(targets.map(el=>el.animate([{transform:`translateX(${inX}px)`,opacity:.28},{transform:"translateX(0)",opacity:1}],{duration:150,easing:"cubic-bezier(.22,.8,.24,1)"}).finished.catch(()=>{})));
+  }).finally(()=>{dayAnimating=false});
+}
+$("prev").onclick=()=>shiftDay(-1);$("next").onclick=()=>shiftDay(1);
+const dayHead=$("dayTitle").closest(".day-head");
+dayHead.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;dayGesture={id:e.pointerId,x:e.clientX,y:e.clientY};try{dayHead.setPointerCapture?.(e.pointerId)}catch(_){}});
+dayHead.addEventListener("pointerup",e=>{if(!dayGesture||dayGesture.id!==e.pointerId)return;const g=dayGesture;dayGesture=null;const dx=e.clientX-g.x,dy=e.clientY-g.y;if(Math.abs(dx)<42||Math.abs(dx)<Math.abs(dy)*1.2)return;shiftDay(dx<0?1:-1)});
+dayHead.addEventListener("pointercancel",()=>{dayGesture=null});
 $("refresh").onclick=()=>connect({force:true,silent:false,reason:"manual"});
 
 let calendarOpen=false,calendarAnimating=false,drawerGesture=null,suppressCalendarClickUntil=0;
 const prefersReducedMotion=()=>window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const calendarSvg='<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3.2" y="4.8" width="13.6" height="11.8" rx="2.2"></rect><path d="M6.3 2.9v3.4M13.7 2.9v3.4M3.2 8.1h13.6"></path></svg>';
+const upSvg='<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 12.5 4.5-4.5 4.5 4.5"></path></svg>';
+function refreshCalendarHead(){
+  const left=$("mPrev"),right=$("mNext");
+  if(calendarOpen){
+    left.innerHTML="‹";right.innerHTML="›";left.setAttribute("aria-label","Önceki ay");right.setAttribute("aria-label","Sonraki ay");
+  }else{
+    left.innerHTML=calendarSvg;right.innerHTML=upSvg;left.setAttribute("aria-label","Takvimi aç");right.setAttribute("aria-label","Takvimi aç");
+  }
+}
 function setCalendarOpen(open){
   calendarOpen=!!open;
   const drawer=$("calendarDrawer"),toggle=$("monthToggle");
   drawer.classList.toggle("open",calendarOpen);
   toggle.setAttribute("aria-expanded",String(calendarOpen));
+  refreshCalendarHead();
 }
 function toggleCalendar(){if(Date.now()<suppressCalendarClickUntil)return;setCalendarOpen(!calendarOpen)}
 function shiftMonth(dir,{animate=true}={}){
@@ -973,22 +999,17 @@ function shiftMonth(dir,{animate=true}={}){
   const commit=()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+dir,1);renderCal()};
   if(!animate||prefersReducedMotion()){commit();return}
   calendarAnimating=true;
-  const outX=dir>0?-34:34,inX=-outX;
-  Promise.all([
-    body.animate([{transform:"translateX(0)",opacity:1},{transform:`translateX(${outX}px)`,opacity:.2}],{duration:115,easing:"ease-in",fill:"forwards"}).finished.catch(()=>{}),
-    title.animate([{transform:"translateX(0)",opacity:1},{transform:`translateX(${outX/2}px)`,opacity:.35}],{duration:115,easing:"ease-in",fill:"forwards"}).finished.catch(()=>{})
-  ]).then(()=>{
+  const outX=dir>0?-42:42,inX=-outX;
+  const moving=[title];if(calendarOpen)moving.push(body);
+  Promise.all(moving.map(el=>el.animate([{transform:"translateX(0)",opacity:1},{transform:`translateX(${outX}px)`,opacity:.18}],{duration:120,easing:"ease-in",fill:"forwards"}).finished.catch(()=>{}))).then(()=>{
     commit();
-    body.getAnimations().forEach(a=>a.cancel());title.getAnimations().forEach(a=>a.cancel());
-    return Promise.all([
-      body.animate([{transform:`translateX(${inX}px)`,opacity:.2},{transform:"translateX(0)",opacity:1}],{duration:155,easing:"cubic-bezier(.22,.8,.24,1)"}).finished.catch(()=>{}),
-      title.animate([{transform:`translateX(${inX/2}px)`,opacity:.35},{transform:"translateX(0)",opacity:1}],{duration:155,easing:"cubic-bezier(.22,.8,.24,1)"}).finished.catch(()=>{})
-    ]);
+    moving.forEach(el=>el.getAnimations().forEach(a=>a.cancel()));
+    return Promise.all(moving.map(el=>el.animate([{transform:`translateX(${inX}px)`,opacity:.18},{transform:"translateX(0)",opacity:1}],{duration:165,easing:"cubic-bezier(.22,.8,.24,1)"}).finished.catch(()=>{})));
   }).finally(()=>{calendarAnimating=false});
 }
 $("monthToggle").onclick=toggleCalendar;
-$("mPrev").onclick=e=>{e.stopPropagation();shiftMonth(-1)};
-$("mNext").onclick=e=>{e.stopPropagation();shiftMonth(1)};
+$("mPrev").onclick=e=>{e.stopPropagation();calendarOpen?shiftMonth(-1):setCalendarOpen(true)};
+$("mNext").onclick=e=>{e.stopPropagation();calendarOpen?shiftMonth(1):setCalendarOpen(true)};
 
 function beginDrawerGesture(e,zone){
   if(e.pointerType==="mouse"&&e.button!==0)return;
