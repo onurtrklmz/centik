@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// index.html'i güncellediğinde SURUM değerini artır.
-const SURUM = "centik-v23-fast-sync-topbar-status";
+// v18: güncel kabuk dosyalarını kurulumda HTTP cache yerine doğrudan ağdan yeniler.
+const SURUM = "centik-v25-diagnostics";
 const KABUK = [
   "./",
   "./index.html",
@@ -14,7 +14,16 @@ const KABUK = [
 ];
 
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(SURUM).then(c => c.addAll(KABUK)).then(() => self.skipWaiting()));
+  e.waitUntil((async()=>{
+    const cache=await caches.open(SURUM);
+    for(const url of KABUK){
+      try{
+        const r=await fetch(url,{cache:"reload"});
+        if(r&&(r.ok||r.type==="opaque"))await cache.put(url,r.clone());
+      }catch(err){}
+    }
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener("activate", e => {
@@ -30,24 +39,24 @@ self.addEventListener("fetch", e => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
 
-  // E-tablo betiği: asla önbelleğe alma, doğrudan ağa git
+  // Apps Script / Google API yanıtları hiçbir koşulda SW cache'ine girmez.
   if (url.hostname.endsWith("google.com") || url.hostname.endsWith("googleusercontent.com")) return;
 
-  // Sayfanın kendisi: önce ağ (güncel sürüm gelsin), yoksa önbellek
+  // Uygulama navigasyonu: güncel HTML önce ağdan, ağ yoksa son sağlam cache.
   if (req.mode === "navigate") {
     e.respondWith(
-      fetch(req)
+      fetch(req,{cache:"no-store"})
         .then(r => { const k = r.clone(); caches.open(SURUM).then(c => c.put("./index.html", k)); return r; })
         .catch(() => caches.match("./index.html").then(r => r || caches.match("./")))
     );
     return;
   }
 
-  // Yazı tipleri ve diğer dosyalar: önbellekten ver, arkada yenile
+  // Statik kabuk: cache'ten hızlı aç, arkada ağdan tazele.
   if (url.origin === location.origin || url.hostname.endsWith("fonts.googleapis.com") || url.hostname.endsWith("fonts.gstatic.com")) {
     e.respondWith(
       caches.match(req).then(hit => {
-        const ag = fetch(req).then(r => {
+        const ag = fetch(req,{cache:"no-store"}).then(r => {
           if (r && (r.ok || r.type === "opaque")) { const k = r.clone(); caches.open(SURUM).then(c => c.put(req, k)); }
           return r;
         }).catch(() => hit);

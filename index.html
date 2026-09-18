@@ -251,6 +251,7 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
 .admin-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.admin-head h3{margin:0;font-size:1rem}.admin-badge{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:color-mix(in srgb,var(--focus) 16%,transparent);color:var(--focus);font-size:.76rem;font-weight:700}
 .admin-list{display:grid;gap:10px;max-height:320px;overflow:auto}.admin-user{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg)}.admin-user strong,.admin-user small{display:block}.admin-user small{margin-top:3px;color:var(--muted);overflow-wrap:anywhere}.admin-actions{display:flex;gap:8px;margin-top:10px}.admin-actions button{flex:1;border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--paper);color:var(--ink);font-weight:600}.admin-actions .approve{background:linear-gradient(135deg,var(--accent-start),var(--accent-end));border-color:transparent;color:#fff}.admin-actions .reject{color:#b42318;border-color:rgba(180,35,24,.25)}.admin-empty{color:var(--muted);font-size:.88rem;padding:8px 0}.admin-meta{color:var(--muted);font-size:.78rem;margin:8px 0 0}.admin-refresh{margin-top:10px;border:0;background:transparent;color:var(--marka);padding:4px 0;font-weight:600}
 .registered-users-block{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}.registered-role{display:inline-flex;align-items:center;width:max-content;margin-top:7px;padding:3px 8px;border-radius:999px;background:color-mix(in srgb,var(--focus) 12%,transparent);color:var(--focus);font-size:.72rem;font-weight:700}.registered-role.admin{background:color-mix(in srgb,var(--accent-end) 16%,transparent);color:var(--accent-end)}
+.diagnostics-block{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}.diag-summary{display:grid;gap:8px;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg);font-size:.82rem}.diag-summary strong{color:var(--ink)}.diag-summary small{color:var(--muted);overflow-wrap:anywhere}.diag-ok{color:#17864b}.diag-bad{color:#c63232}.diag-steps{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:500 .74rem/1.45 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;color:var(--muted);max-height:170px;overflow:auto}.diag-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}.diag-actions button{border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--paper);color:var(--ink);font-weight:650}.diag-actions button:first-child{color:var(--focus);border-color:color-mix(in srgb,var(--focus) 35%,var(--line))}
 @media(max-width:560px){.user-chip{display:none!important}.auth-card{padding:20px;border-radius:18px}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -336,6 +337,11 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
           <p class="admin-meta" id="registeredMeta"></p>
           <button class="admin-refresh" type="button" id="refreshRegistered">Kullanıcı listesini yenile</button>
         </section>
+        <section class="diagnostics-block" aria-labelledby="diagnosticsTitle">
+          <div class="admin-head"><h3 id="diagnosticsTitle">Sistem tanılama</h3><span class="admin-badge" id="diagBuild">v18</span></div>
+          <div class="diag-summary" id="diagSummary"><small>Henüz tanılama verisi yok.</small></div>
+          <div class="diag-actions"><button type="button" id="runDiagnostics">Sunucu testini çalıştır</button><button type="button" id="copyDiagnostics">Raporu kopyala</button></div>
+        </section>
       </section>
       <div class="row"><button type="button" class="primary" id="closeAccount">Kaydet / Kapat</button><button type="button" class="danger" id="logoutBtn">Çıkış yap</button></div>
     </div>
@@ -393,58 +399,114 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
+const CENTIK_CLIENT_BUILD="v18-diagnostics", CENTIK_EXPECTED_SERVER_BUILD="v18-diagnostics";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
-let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
+let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, activeSyncController=null, connectSerial=0, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
 let pendingDelete=null, pendingDeleteTimer=null;
 let pushQueue=[], pushQueued=new Set(), pushWorker=null;
 const DELETE_UNDO_MS=2000;
-const FOREGROUND_SYNC_MS=30000;
+// Sürekli kısa aralıklı polling kullanılmaz; focus/visibility olayları esas alınır.
 const LAST_GOOD_SUFFIX="last-good-days";
 let adminApprovals=null, adminApprovalsAt=0, adminLoadPromise=null;
 let registeredUsers=null, registeredUsersAt=0, registeredUsersLoadPromise=null;
+let diagnosticsResult=null;
+const DIAG_LOG_LIMIT=30;
 const $=id=>document.getElementById(id);
 const getToken=()=>{try{return localStorage.getItem(AUTH_TOKEN)||""}catch(e){return ""}};
 const getCachedUser=()=>{try{return JSON.parse(localStorage.getItem(AUTH_USER)||"null")}catch(e){return null}};
 const userKey=suffix=>currentUser?`${LS_PREFIX}${currentUser.id}-${suffix}`:`${LS_PREFIX}anon-${suffix}`;
-let syncSuccessTimer=null;
+const escapeHtml=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+function diagStorageKey(){return userKey("diagnostics-v1")}
+function readDiagLog(){try{const v=JSON.parse(localStorage.getItem(diagStorageKey())||"[]");return Array.isArray(v)?v:[]}catch(e){return []}}
+function recordDiag(entry){
+  try{
+    const log=readDiagLog();log.push(entry);while(log.length>DIAG_LOG_LIMIT)log.shift();localStorage.setItem(diagStorageKey(),JSON.stringify(log));
+    if(currentUser?.role==="admin"&&$("accountDialog")?.open)renderDiagnostics();
+  }catch(e){}
+}
+function lastDiag(action){const log=readDiagLog();for(let i=log.length-1;i>=0;i--)if(!action||log[i].action===action)return log[i];return null}
+function diagStepsText(entry){
+  const d=entry?.server;if(!d)return "Sunucu aşama ölçümü yok.";
+  const rows=(d.steps||[]).map(x=>`${x.name}: +${x.deltaMs} ms (${x.totalMs} ms)`);
+  return rows.length?rows.join("\n"):"Sunucu aşaması kaydedilmedi.";
+}
+function renderDiagnostics(message=""){
+  const box=$("diagSummary");if(!box||currentUser?.role!=="admin")return;
+  const last=lastDiag("sync"),server=last?.server||null,mismatch=server?.build&&server.build!==CENTIK_EXPECTED_SERVER_BUILD;
+  const health=diagnosticsResult?.report||null;
+  const status=last?(last.ok?"Başarılı":"Hata"):"Henüz sync yok";
+  const cls=last?(last.ok?"diag-ok":"diag-bad"):"";
+  const pieces=[`<div><strong>Son sync:</strong> <span class="${cls}">${status}</span>${last?` · istemci ${Math.round(last.clientMs)} ms`:""}${server?` · sunucu ${server.totalMs} ms`:""}</div>`];
+  if(last?.error)pieces.push(`<small>Hata: ${escapeHtml(last.error)}</small>`);
+  if(server)pieces.push(`<small>İstemci: ${escapeHtml(CENTIK_CLIENT_BUILD)} · Sunucu: ${escapeHtml(server.build||"bilinmiyor")}${mismatch?' · <span class="diag-bad">SÜRÜM UYUMSUZ</span>':''}</small>`);
+  if(health){const c=health.counts||{};pieces.push(`<small>Sunucu testi: <span class="${diagnosticsResult.healthOk?'diag-ok':'diag-bad'}">${diagnosticsResult.healthOk?'PASS':'KONTROL GEREKİYOR'}</span> · kayıt ${c.records??'?'} · kullanıcı ${c.users??'?'} · oturum ${c.sessions??'?'} · mükerrer ${c.duplicates??'?'}</small>`)}
+  if(message)pieces.push(`<small>${escapeHtml(message)}</small>`);
+  pieces.push(`<pre class="diag-steps">${escapeHtml(diagStepsText(last))}</pre>`);box.innerHTML=pieces.join("");
+  if($("diagBuild"))$("diagBuild").textContent=CENTIK_CLIENT_BUILD.replace("-diagnostics","");
+}
+async function runDiagnostics(){
+  const b=$("runDiagnostics");if(!b||currentUser?.role!=="admin")return;const old=b.textContent;b.disabled=true;b.textContent="Test çalışıyor…";renderDiagnostics("Sunucu testi başlatıldı…");
+  try{const j=await api("diagnostics",{token:getToken()},{timeout:15000});if(!j.ok)throw new Error(j.error||"hata");diagnosticsResult=j;renderDiagnostics(j.healthOk?"Regresyon kontrolleri geçti.":"En az bir regresyon kontrolü başarısız.")}
+  catch(e){renderDiagnostics(`Tanılama testi başarısız: ${e.message||e}`)}finally{b.disabled=false;b.textContent=old}
+}
+async function copyDiagnostics(){
+  const report={clientBuild:CENTIK_CLIENT_BUILD,expectedServerBuild:CENTIK_EXPECTED_SERVER_BUILD,generatedAt:new Date().toISOString(),health:diagnosticsResult,recent:readDiagLog().slice(-10)};
+  const text=JSON.stringify(report,null,2);try{await navigator.clipboard.writeText(text);renderDiagnostics("Tanılama raporu panoya kopyalandı.")}catch(e){renderDiagnostics("Rapor kopyalanamadı; tarayıcı pano izni vermedi.")}
+}
 function setSyncStatus(type){
   const b=$("refresh");if(!b)return;
-  clearTimeout(syncSuccessTimer);syncSuccessTimer=null;
   const valid=["idle","loading","success","error"];type=valid.includes(type)?type:"idle";
   b.classList.remove("is-loading","is-success","is-error");
   if(type!=="idle")b.classList.add(`is-${type}`);
-  const labels={idle:"Verileri yenile",loading:"Yükleniyor",success:"Senkronizasyon başarılı",error:"Sunucuya ulaşılamıyor — yeniden dene"};
+  const labels={idle:"Verileri yenile",loading:"Yükleniyor",success:"Senkronizasyon başarılı — yenilemek için tıklayın",error:"Sunucuya ulaşılamıyor — yeniden dene"};
   b.setAttribute("aria-label",labels[type]);b.title=labels[type];
-  if(type==="success")syncSuccessTimer=setTimeout(()=>{
-    if(!connectPromise&&!pushWorker&&!pending.size)setSyncStatus("idle");
-  },1400);
 }
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 async function reliableApi(action,data={},options={}){
   const retries=Math.max(0,Number(options.retries??0)),timeout=Math.max(4000,Number(options.timeout)||15000);let lastErr=null;
   for(let attempt=0;attempt<=retries;attempt++){
     try{
-      const j=await api(action,data,{timeout});
-      if(j&&j.ok===false&&j.error==="mesgul"&&attempt<retries){await wait(700*(attempt+1));continue}
+      const j=await api(action,data,{timeout,signal:options.signal});
+      if(j&&j.ok===false&&j.error==="mesgul"&&attempt<retries){await wait(500*(attempt+1));continue}
       return j;
-    }catch(e){lastErr=e;if(attempt>=retries)throw e;await wait(650*(attempt+1))}
+    }catch(e){
+      lastErr=e;
+      if(options.signal?.aborted||attempt>=retries)throw e;
+      await wait(500*(attempt+1));
+    }
   }
   throw lastErr||new Error("sunucu");
 }
 
 async function api(action,data={},options={}){
   if(!SCRIPT_URL||SCRIPT_URL.startsWith("BURAYA")) throw new Error("adres");
-  const timeout=Math.max(4000,Number(options.timeout)||15000),ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),timeout);
+  const timeout=Math.max(4000,Number(options.timeout)||15000),ctrl=new AbortController();
+  const traceId=`${Date.now().toString(36)}-${Math.random().toString(36).slice(2,9)}`;
+  const started=performance.now();
+  let externalAbort=null;
+  if(options.signal){
+    if(options.signal.aborted)ctrl.abort();
+    else{externalAbort=()=>ctrl.abort();options.signal.addEventListener("abort",externalAbort,{once:true})}
+  }
+  const timer=setTimeout(()=>ctrl.abort(),timeout);
   try{
-    const r=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action,...data}),signal:ctrl.signal,cache:"no-store"});
-    let j; try{j=await r.json()}catch(e){throw new Error("sunucu")}
+    const payload={action,...data,clientBuild:CENTIK_CLIENT_BUILD,clientTraceId:traceId};
+    const r=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload),signal:ctrl.signal,cache:"no-store",redirect:"follow"});
+    let j;try{j=await r.json()}catch(e){throw new Error("sunucu")}
+    recordDiag({ts:new Date().toISOString(),action,traceId,ok:j?.ok!==false,error:j?.error||"",clientMs:Math.round(performance.now()-started),http:r.status,server:j?._diag||null});
     return j;
   }catch(e){
-    if(e?.name==="AbortError")throw new Error("zaman_asimi");
+    const mapped=e?.name==="AbortError"?(options.signal?.aborted?"iptal":"zaman_asimi"):(e?.message||"sunucu");
+    recordDiag({ts:new Date().toISOString(),action,traceId,ok:false,error:mapped,clientMs:Math.round(performance.now()-started),server:null});
+    if(e?.name==="AbortError")throw new Error(mapped);
     throw e;
-  }finally{clearTimeout(timer)}
+  }finally{
+    clearTimeout(timer);
+    if(options.signal&&externalAbort)options.signal.removeEventListener("abort",externalAbort);
+  }
 }
+
 function authMessage(code){
   const map={giris:"E-posta veya parola hatalı.",kilitli:"Çok fazla hatalı deneme yapıldı. Hesap geçici olarak kilitlendi.",pasif:"Bu hesap aktif değil.",bekliyor:"Hesabınız yönetici onayı bekliyor.",reddedildi:"Hesap başvurunuz onaylanmadı.",eposta:"Geçerli bir e-posta yazın.",parola:"Parola en az 10 karakter olmalı.",ad:"Adınızı yazın.",hesap_var:"Bu e-posta ile zaten bir hesap var.",kayit_limiti:"Yeni hesap başvurusu şu anda alınamıyor.",basvuru_limiti:"Çok sayıda bekleyen başvuru var. Yönetici onayından sonra tekrar deneyin.",admin_ayarsiz:"Süper yönetici e-posta adresi henüz yapılandırılmamış.",yetki:"Bu işlem için yönetici yetkisi gerekli.",oturum:"Oturum süresi doldu. Yeniden giriş yapın.",eposta_gonderilemedi:"Sıfırlama e-postası gönderilemedi.",sifirlama:"Kod geçersiz veya süresi dolmuş.",tema:"Geçersiz tema seçimi.",sunucu:"Sunucu hatası oluştu.",zaman_asimi:"Sunucu yanıtı gecikti. Yeniden deneyin."};
   return map[code]||"İşlem tamamlanamadı.";
@@ -544,7 +606,7 @@ async function pushNow(k){
     const sentRevision=serverRevision;
     const normalized=normalizeItems(days[k]||[]);if(normalized.length)days[k]=normalized;else delete days[k];
     const opId=`${currentUser.id}|${k}|${Date.now().toString(36)}|${Math.random().toString(36).slice(2,7)}`;
-    const j=await reliableApi("saveDay",{token,date:k,items:normalized,knownRevision:sentRevision,opId},{timeout:18000,retries:1});
+    const j=await reliableApi("saveDay",{token,date:k,items:normalized,knownRevision:sentRevision,opId},{timeout:15000,retries:0});
     if(!j.ok){if(j.error==="oturum"){expireSession();return false}throw new Error(j.error||"hata")}
     if(j.needsSync)invalidateRevision();else if(j.revision!==undefined)saveRevision(j.revision);
     pending.delete(k);saveLocal();saveLastGood();
@@ -555,33 +617,41 @@ async function pushNow(k){
   }
 }
 async function connect(options={}){
-  if(connectPromise)return connectPromise;
-  connectPromise=connectNow(options).finally(()=>{connectPromise=null});return connectPromise;
+  const replace=!!options.replace;
+  if(connectPromise&&!replace)return connectPromise;
+  if(replace&&activeSyncController){try{activeSyncController.abort()}catch(e){}}
+  const serial=++connectSerial,controller=new AbortController();
+  activeSyncController=controller;
+  const p=connectNow({...options,signal:controller.signal,serial}).finally(()=>{
+    if(serial===connectSerial){connectPromise=null;activeSyncController=null}
+  });
+  connectPromise=p;return p;
 }
-async function connectNow({silent=false,force=false}={}){
+async function connectNow({silent=false,force=false,signal=null,serial=0}={}){
   const token=getToken();if(!token||!currentUser)return;
   lastSyncAttemptAt=Date.now();
-  setSyncStatus("loading");
+  if(serial===connectSerial)setSyncStatus("loading");
   try{
-    const j=await reliableApi("sync",{token,knownRevision:force?null:serverRevision},{timeout:force?16000:12000,retries:force?1:0});
+    // Tek deneme: eski retry zinciri 40–60 saniyelik beklemelere yol açıyordu.
+    // Yerel kayıtlar ekranda kalırken ağ çağrısı arka planda tek deneme yapar; revision aynıysa Sheet kayıtları taranmaz.
+    const j=await reliableApi("sync",{token,knownRevision:serverRevision},{timeout:force?18000:16000,retries:0,signal});
+    if(serial!==connectSerial)return;
     if(!j.ok){if(j.error==="oturum"){expireSession();return}throw new Error(j.error||"hata")}
     currentUser=j.user||currentUser;setSession(token,currentUser);applyUserTheme(true);updateUserUI();
     if(pendingTheme(currentUser))syncThemePreference();
-    if(currentUser?.role==="admin"&&j.adminApprovals)cacheAdminApprovals(j.adminApprovals);
-    if(currentUser?.role==="admin"&&j.adminUsers)cacheRegisteredUsers(j.adminUsers);
     if(!j.unchanged){
       if(!j.days||typeof j.days!=="object"||Array.isArray(j.days))throw new Error("veri");
       const serverNorm=normalizeDays(j.days),fresh=serverNorm.days;
       pending.forEach(k=>{const local=normalizeItems(days[k]||[]);if(local.length)fresh[k]=local;else delete fresh[k]});
+      // Sunucudan doğrulanmış veri gelmeden mevcut görünüm hiçbir zaman temizlenmez.
       days=fresh;saveLocal();saveLastGood();render();
     }else if(Object.keys(days).length){saveLastGood()}
     if(j.revision!==undefined)saveRevision(j.revision);
     lastSyncAt=Date.now();
-    if(pending.size){
-      flushPending().catch(()=>{});
-      setSyncStatus("loading");
-    }else setSyncStatus("success");
+    if(pending.size){flushPending().catch(()=>{});setSyncStatus("loading")}
+    else setSyncStatus("success");
   }catch(e){
+    if(serial!==connectSerial||e?.message==="iptal")return;
     restoreLastGoodIfEmpty();setSyncStatus("error");
   }
 }
@@ -762,21 +832,24 @@ $("addForm").addEventListener("submit",e=>{e.preventDefault();const i=$("newTask
 $("tomorrowNotice").onclick=()=>go(addDays(todayKey(),1));
 $("todayNotice").onclick=()=>go(todayKey());
 $("prev").onclick=()=>go(addDays(current,-1));$("next").onclick=()=>go(addDays(current,1));$("mPrev").onclick=()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()-1,1);renderCal()};$("mNext").onclick=()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,1);renderCal()};
-$("refresh").onclick=async()=>{if(connectPromise){try{await connectPromise}catch(e){}}setSyncStatus("loading");connect({force:true})};$("settings").onclick=()=>{updateUserUI();refreshThemeButtons();$("accountDialog").showModal();if(currentUser?.role==="admin"){if(adminApprovals)renderAdminPending(adminApprovals);else renderAdminPending(null,{loading:true});if(registeredUsers)renderRegisteredUsers(registeredUsers);else renderRegisteredUsers(null,{loading:true});if(!adminApprovals||Date.now()-adminApprovalsAt>60000)loadAdminPending();if(!registeredUsers||Date.now()-registeredUsersAt>60000)loadRegisteredUsers()}};$("refreshAdmin").onclick=()=>loadAdminPending({force:true});$("refreshRegistered").onclick=()=>loadRegisteredUsers({force:true});
+$("refresh").onclick=()=>{setSyncStatus("loading");connect({force:true,replace:true})};$("settings").onclick=()=>{updateUserUI();refreshThemeButtons();$("accountDialog").showModal();if(currentUser?.role==="admin"){renderDiagnostics();if(adminApprovals)renderAdminPending(adminApprovals);else renderAdminPending(null,{loading:true});if(registeredUsers)renderRegisteredUsers(registeredUsers);else renderRegisteredUsers(null,{loading:true});if(!adminApprovals||Date.now()-adminApprovalsAt>60000)loadAdminPending();if(!registeredUsers||Date.now()-registeredUsersAt>60000)loadRegisteredUsers()}};$("refreshAdmin").onclick=()=>loadAdminPending({force:true});$("refreshRegistered").onclick=()=>loadRegisteredUsers({force:true});$("runDiagnostics").onclick=runDiagnostics;$("copyDiagnostics").onclick=copyDiagnostics;
 async function saveAndCloseAccount(){const b=$("closeAccount"),old=b.textContent;b.disabled=true;b.textContent="Kaydediliyor…";try{await syncThemePreference()}finally{b.disabled=false;b.textContent=old;$("accountDialog").close()}}
 $("closeAccount").onclick=()=>saveAndCloseAccount();$("accountDialog").addEventListener("cancel",e=>{e.preventDefault();saveAndCloseAccount()});
 $("logoutBtn").onclick=async()=>{const token=getToken();try{if(token)await api("logout",{token})}catch(e){}clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();$("accountDialog").close();setSession("",null);applyTheme("lacivert");days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);showPane("loginPane")};
 const brandEl=$("brand");brandEl.onclick=()=>{go(todayKey());window.scrollTo({top:0,behavior:"smooth"})};brandEl.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();brandEl.onclick()}};
 function foregroundSync(){
   if(document.visibilityState!=="visible"||!navigator.onLine||!currentUser||!getToken())return;
-  if(connectPromise||Date.now()-lastSyncAttemptAt<8000)return;
+  // Açılış/focus/pageshow olayları peş peşe gelebilir; tek bir çağrı yeterli.
+  if(connectPromise||Date.now()-lastSyncAttemptAt<12000)return;
   connect({silent:true});
 }
 window.addEventListener("online",foregroundSync);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")foregroundSync()});
 window.addEventListener("pageshow",foregroundSync);
-window.addEventListener("focus",()=>{if(Date.now()-lastSyncAt>5000)foregroundSync()});
-setInterval(()=>{if(Date.now()-lastSyncAt>=FOREGROUND_SYNC_MS)foregroundSync()},FOREGROUND_SYNC_MS);
+window.addEventListener("focus",()=>{if(Date.now()-lastSyncAt>12000)foregroundSync()});
+// Sürekli 30 sn polling kaldırıldı. Uygulama ekranda uzun süre açık kalırsa yalnızca 5 dk'da bir güvenlik kontrolü.
+const FALLBACK_SYNC_MS=300000;
+setInterval(()=>{if(Date.now()-lastSyncAt>=FALLBACK_SYNC_MS)foregroundSync()},FALLBACK_SYNC_MS);
 
 const THEMES=["lacivert","mor"];
 const THEME_COLORS={
@@ -833,7 +906,7 @@ async function boot(){
   applyTheme("lacivert");setSyncStatus("idle");showGate(true);showPane("loginPane");render();
 }
 boot();
-if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>r.update().catch(()=>{})).catch(()=>{}));
 </script>
 </body>
 </html>
