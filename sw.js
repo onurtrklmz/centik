@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v18: güncel kabuk dosyalarını kurulumda HTTP cache yerine doğrudan ağdan yeniler.
-const SURUM = "centik-v25-diagnostics";
+// v19: auth-cache performans yaması; güncel kabuk HTTP cache yerine doğrudan ağdan yenilenir.
+const SURUM = "centik-v26-auth-cache";
 const KABUK = [
   "./",
   "./index.html",

@@ -399,7 +399,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v18-diagnostics", CENTIK_EXPECTED_SERVER_BUILD="v18-diagnostics";
+const CENTIK_CLIENT_BUILD="v19-auth-cache", CENTIK_EXPECTED_SERVER_BUILD="v19-auth-cache";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, activeSyncController=null, connectSerial=0, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -439,11 +439,15 @@ function renderDiagnostics(message=""){
   const cls=last?(last.ok?"diag-ok":"diag-bad"):"";
   const pieces=[`<div><strong>Son sync:</strong> <span class="${cls}">${status}</span>${last?` · istemci ${Math.round(last.clientMs)} ms`:""}${server?` · sunucu ${server.totalMs} ms`:""}</div>`];
   if(last?.error)pieces.push(`<small>Hata: ${escapeHtml(last.error)}</small>`);
-  if(server)pieces.push(`<small>İstemci: ${escapeHtml(CENTIK_CLIENT_BUILD)} · Sunucu: ${escapeHtml(server.build||"bilinmiyor")}${mismatch?' · <span class="diag-bad">SÜRÜM UYUMSUZ</span>':''}</small>`);
+  if(server){
+    const stepNames=(server.steps||[]).map(x=>String(x.name||""));
+    const authCache=stepNames.includes("auth:cache-hit")?"HIT":(stepNames.includes("auth:cache-miss")?"MISS":"—");
+    pieces.push(`<small>İstemci: ${escapeHtml(CENTIK_CLIENT_BUILD)} · Sunucu: ${escapeHtml(server.build||"bilinmiyor")} · Auth cache: <span class="${authCache==='HIT'?'diag-ok':''}">${authCache}</span>${mismatch?' · <span class="diag-bad">SÜRÜM UYUMSUZ</span>':''}</small>`);
+  }
   if(health){const c=health.counts||{};pieces.push(`<small>Sunucu testi: <span class="${diagnosticsResult.healthOk?'diag-ok':'diag-bad'}">${diagnosticsResult.healthOk?'PASS':'KONTROL GEREKİYOR'}</span> · kayıt ${c.records??'?'} · kullanıcı ${c.users??'?'} · oturum ${c.sessions??'?'} · mükerrer ${c.duplicates??'?'}</small>`)}
   if(message)pieces.push(`<small>${escapeHtml(message)}</small>`);
   pieces.push(`<pre class="diag-steps">${escapeHtml(diagStepsText(last))}</pre>`);box.innerHTML=pieces.join("");
-  if($("diagBuild"))$("diagBuild").textContent=CENTIK_CLIENT_BUILD.replace("-diagnostics","");
+  if($("diagBuild"))$("diagBuild").textContent=CENTIK_CLIENT_BUILD;
 }
 async function runDiagnostics(){
   const b=$("runDiagnostics");if(!b||currentUser?.role!=="admin")return;const old=b.textContent;b.disabled=true;b.textContent="Test çalışıyor…";renderDiagnostics("Sunucu testi başlatıldı…");
