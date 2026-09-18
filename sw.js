@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v21: çark menüsü ve tam sayfa tema arka planı; v20 single-flight senkronizasyon korunur.
-const SURUM = "centik-v29-person-menu-gear-settings";
+const SURUM = "centik-v30-transport-stability";
 const KABUK = [
   "./",
   "./index.html",

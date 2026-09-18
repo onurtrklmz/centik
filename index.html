@@ -284,7 +284,6 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
   <div class="brand" id="brand" role="button" tabindex="0" aria-label="Bugüne dön">
     <img class="brand-logo" src="icon-192.png" alt="">
     <h1>Çentik</h1>
-    <span class="count" id="plateMeta"></span>
   </div>
   <button class="ubtn sync-refresh is-loading" id="refresh" type="button" aria-label="Yükleniyor" title="Yükleniyor">
     <svg class="sync-icon sync-icon-refresh" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/></svg>
@@ -438,11 +437,11 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v20-singleflight-ui", CENTIK_EXPECTED_SERVER_BUILD="v19-auth-cache";
+const CENTIK_CLIENT_BUILD="v23-transport-stability", CENTIK_EXPECTED_SERVER_BUILD="v19-auth-cache";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
-let queuedForceSync=false, queuedForceSilent=true, foregroundSyncTimer=null, settingsOriginalTheme=null;
+let queuedForceSync=false, queuedForceSilent=true, foregroundSyncTimer=null, settingsOriginalTheme=null, hiddenSince=0;
 let pendingDelete=null, pendingDeleteTimer=null;
 let pushQueue=[], pushQueued=new Set(), pushWorker=null;
 const DELETE_UNDO_MS=2000;
@@ -491,7 +490,7 @@ function renderDiagnostics(message=""){
 }
 async function runDiagnostics(){
   const b=$("runDiagnostics");if(!b||currentUser?.role!=="admin")return;const old=b.textContent;b.disabled=true;b.textContent="Test çalışıyor…";renderDiagnostics("Sunucu testi başlatıldı…");
-  try{const j=await api("diagnostics",{token:getToken()},{timeout:15000});if(!j.ok)throw new Error(j.error||"hata");diagnosticsResult=j;renderDiagnostics(j.healthOk?"Regresyon kontrolleri geçti.":"En az bir regresyon kontrolü başarısız.")}
+  try{const j=await api("diagnostics",{token:getToken()},{timeout:30000});if(!j.ok)throw new Error(j.error||"hata");diagnosticsResult=j;renderDiagnostics(j.healthOk?"Regresyon kontrolleri geçti.":"En az bir regresyon kontrolü başarısız.")}
   catch(e){renderDiagnostics(`Tanılama testi başarısız: ${e.message||e}`)}finally{b.disabled=false;b.textContent=old}
 }
 async function copyDiagnostics(){
@@ -525,7 +524,9 @@ async function reliableApi(action,data={},options={}){
 
 async function api(action,data={},options={}){
   if(!SCRIPT_URL||SCRIPT_URL.startsWith("BURAYA")) throw new Error("adres");
-  const timeout=Math.max(4000,Number(options.timeout)||15000),ctrl=new AbortController();
+  // Apps Script'in HTTP/yönlendirme katmanı zaman zaman 10-15 sn gecikebiliyor.
+  // Kısa timeout ile başarılı olacak isteği istemci tarafında kesmemek için sert sınır 30 sn.
+  const timeout=Math.max(8000,Number(options.timeout)||30000),ctrl=new AbortController();
   const traceId=`${Date.now().toString(36)}-${Math.random().toString(36).slice(2,9)}`;
   const started=performance.now();
   let externalAbort=null;
@@ -536,7 +537,9 @@ async function api(action,data={},options={}){
   const timer=setTimeout(()=>ctrl.abort(),timeout);
   try{
     const payload={action,...data,clientBuild:CENTIK_CLIENT_BUILD,clientTraceId:traceId};
-    const r=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload),signal:ctrl.signal,cache:"no-store",redirect:"follow"});
+    // POST yanıtları zaten cache'lenmez. cache:no-store/redirect ayarlarını kaldırarak
+    // Apps Script'in redirect/CORS yolunu tarayıcı varsayılanlarına bırakıyoruz.
+    const r=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload),signal:ctrl.signal});
     let j;try{j=await r.json()}catch(e){throw new Error("sunucu")}
     recordDiag({ts:new Date().toISOString(),action,traceId,ok:j?.ok!==false,error:j?.error||"",clientMs:Math.round(performance.now()-started),http:r.status,server:j?._diag||null});
     return j;
@@ -649,7 +652,7 @@ async function pushNow(k){
     const sentRevision=serverRevision;
     const normalized=normalizeItems(days[k]||[]);if(normalized.length)days[k]=normalized;else delete days[k];
     const opId=`${currentUser.id}|${k}|${Date.now().toString(36)}|${Math.random().toString(36).slice(2,7)}`;
-    const j=await reliableApi("saveDay",{token,date:k,items:normalized,knownRevision:sentRevision,opId},{timeout:15000,retries:0});
+    const j=await reliableApi("saveDay",{token,date:k,items:normalized,knownRevision:sentRevision,opId},{timeout:30000,retries:0});
     if(!j.ok){if(j.error==="oturum"){expireSession();return false}throw new Error(j.error||"hata")}
     if(j.needsSync)invalidateRevision();else if(j.revision!==undefined)saveRevision(j.revision);
     pending.delete(k);saveLocal();saveLastGood();
@@ -695,7 +698,7 @@ async function connectNow({silent=false,force=false,reason=""}={}){
   lastSyncAttemptAt=Date.now();setSyncStatus("loading");recordSyncControl("start",reason,{force});
   try{
     // Revision her zaman gönderilir. "Force" yalnız HTTP kontrolünü zorlar; Sheet'i gereksiz yere tam taratmaz.
-    const j=await reliableApi("sync",{token,knownRevision:serverRevision},{timeout:force?15000:12000,retries:0});
+    const j=await reliableApi("sync",{token,knownRevision:serverRevision},{timeout:30000,retries:0});
     if(!j.ok){if(j.error==="oturum"){expireSession();return false}throw new Error(j.error||"hata")}
     currentUser=j.user||currentUser;setSession(token,currentUser);applyUserTheme(true);updateUserUI();
     if(!j.unchanged){
@@ -761,7 +764,7 @@ function render(){
   if(showPlanned)$("plannedCount").textContent=planned;
   const ul=$("list");ul.innerHTML="";if(!items.length){const p=document.createElement("li");p.className="empty";p.textContent=current>=tk?"Henüz görev yok. Yarım saatte bitecek bir şeyle başla.":"Bu güne kayıt girilmemiş.";ul.append(p)}
   items.forEach(it=>{const li=document.createElement("li"),isDeleting=pendingDelete?.date===current&&pendingDelete?.id===it.id;if(it.done)li.classList.add("done");if(it.id===lastPop)li.classList.add("pop");if(isDeleting)li.classList.add("deleting");const c=document.createElement("button");c.className="check";c.setAttribute("aria-label",it.done?"Tamamlandı işaretini kaldır":"Tamamlandı olarak işaretle");c.setAttribute("aria-pressed",it.done);c.disabled=isDeleting;c.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3L13 4.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';c.onclick=()=>toggle(it.id);const span=document.createElement("span");span.className="txt";span.textContent=it.t;const actions=document.createElement("div");actions.className="task-actions";const edit=document.createElement("button");edit.className="edit";edit.type="button";edit.disabled=isDeleting;edit.innerHTML='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M12.146.854a.5.5 0 0 1 .708 0l2.292 2.292a.5.5 0 0 1 0 .708l-9.5 9.5a.5.5 0 0 1-.168.11l-4 1.5a.5.5 0 0 1-.642-.642l1.5-4a.5.5 0 0 1 .11-.168zM11.207 2.5 3.342 10.365l-.823 2.195 2.195-.823L12.58 3.872z"/></svg>';edit.setAttribute("aria-label","Görevi düzenle");edit.title="Düzenle";edit.onclick=()=>editTask(it.id,li);const x=document.createElement("button");x.type="button";if(isDeleting){x.className="undo-inline";x.textContent="Geri al";x.setAttribute("aria-label","Silmeyi geri al");x.title="Geri al";x.onclick=()=>undoDelete()}else{x.className="del";x.textContent="×";x.setAttribute("aria-label","Sil");x.title="Sil";x.onclick=()=>remove(it.id)}actions.append(edit,x);li.append(c,span,actions);ul.append(li)});
-  lastPop=null;$("plateMeta").textContent=`Bugün ${doneCount(todayKey())} iş`;renderTomorrowNotice();renderCal();
+  lastPop=null;renderTomorrowNotice();renderCal();
 }
 function renderCal(){
   const y=viewMonth.getFullYear(),m=viewMonth.getMonth(),tk=todayKey();$("monthTitle").textContent=`${AYLAR[m]} ${y}`;const g=$("grid");g.innerHTML="";WD.forEach(w=>{const e=document.createElement("div");e.className="wd";e.textContent=w;g.append(e)});const lead=(new Date(y,m,1).getDay()+6)%7;for(let i=0;i<lead;i++){const e=document.createElement("div");e.className="cell blank";g.append(e)}const last=new Date(y,m+1,0).getDate();
@@ -811,7 +814,7 @@ async function loadAdminPending({force=false}={}){
   else renderAdminPending(null,{loading:true});
   adminLoadPromise=(async()=>{
     try{
-      const j=await api("adminPending",{token:getToken()},{timeout:18000});
+      const j=await api("adminPending",{token:getToken()},{timeout:30000});
       if(!j.ok){
         const msg=authMessage(j.error);
         if(adminApprovals)renderAdminPending(adminApprovals,{message:msg});
@@ -856,7 +859,7 @@ async function loadRegisteredUsers({force=false}={}){
   if(registeredUsers)renderRegisteredUsers(registeredUsers,{message:"Liste güncelleniyor…"});else renderRegisteredUsers(null,{loading:true});
   registeredUsersLoadPromise=(async()=>{
     try{
-      const j=await api("adminUsers",{token:getToken()},{timeout:18000});
+      const j=await api("adminUsers",{token:getToken()},{timeout:30000});
       if(!j.ok){const msg=authMessage(j.error);if(registeredUsers)renderRegisteredUsers(registeredUsers,{message:msg});else renderRegisteredUsers(null,{message:msg});return false}
       cacheRegisteredUsers(j);return true;
     }catch(e){const msg=e.message==="zaman_asimi"?"Sunucu gecikti. Son kullanıcı listesi korunuyor.":"Sunucuya ulaşılamadı. Kullanıcı listesini yeniden deneyin.";if(registeredUsers)renderRegisteredUsers(registeredUsers,{message:msg});else renderRegisteredUsers(null,{message:msg});return false}
@@ -868,7 +871,7 @@ async function loadRegisteredUsers({force=false}={}){
 async function setUserApproval(userId,status,button){
   const card=button.closest(".admin-user");card?.querySelectorAll("button").forEach(b=>b.disabled=true);
   try{
-    const j=await api("adminSetStatus",{token:getToken(),userId,status},{timeout:20000});
+    const j=await api("adminSetStatus",{token:getToken(),userId,status},{timeout:30000});
     if(!j.ok)throw new Error(j.error||"hata");
     if(adminApprovals){
       adminApprovals.users=adminApprovals.users.filter(u=>u.id!==userId);
@@ -906,7 +909,9 @@ async function openManagementDialog(){
   closeAccountMenu();if(currentUser?.role!=="admin")return;$("managementDialog").showModal();renderDiagnostics();
   if(adminApprovals)renderAdminPending(adminApprovals);else renderAdminPending(null,{loading:true});
   if(registeredUsers)renderRegisteredUsers(registeredUsers);else renderRegisteredUsers(null,{loading:true});
-  // Yönetim ekranı iki ayrı Apps Script isteğini aynı anda başlatmaz; daha kararlı olması için sırayla yükler.
+  // Boot/foreground sync sürerken ikinci bir Apps Script okuması başlatmayız.
+  // Böylece yönetim paneli sync ile taşıma katmanında yarışmaz.
+  if(connectPromise){recordSyncControl("admin-wait","management",{});try{await connectPromise}catch(e){}}
   if(!adminApprovals||Date.now()-adminApprovalsAt>60000)await loadAdminPending();
   if(!registeredUsers||Date.now()-registeredUsersAt>60000)await loadRegisteredUsers();
 }
@@ -931,23 +936,31 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("accountDialog")
 $("logoutBtn").onclick=async()=>{closeAccountMenu();const token=getToken();try{if(token)await api("logout",{token})}catch(e){}clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();if($("accountDialog").open)$("accountDialog").close();if($("managementDialog").open)$("managementDialog").close();setSession("",null);applyTheme("lacivert");days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);showPane("loginPane")};
 const brandEl=$("brand");brandEl.onclick=()=>{go(todayKey());window.scrollTo({top:0,behavior:"smooth"})};brandEl.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();brandEl.onclick()}};
 
-function requestForegroundSync(reason){
+function requestForegroundSync(reason,{minAge=15000}={}){
   if(document.visibilityState!=="visible"||!navigator.onLine||!currentUser||!getToken())return;
-  if(Date.now()-lastSyncAt<10000){recordSyncControl("cooldown",reason,{sinceSuccessMs:Date.now()-lastSyncAt});return}
+  if(Date.now()-lastSyncAt<minAge){recordSyncControl("cooldown",reason,{sinceSuccessMs:Date.now()-lastSyncAt});return}
   clearTimeout(foregroundSyncTimer);
   foregroundSyncTimer=setTimeout(()=>{
     if(document.visibilityState!=="visible"||!navigator.onLine||!currentUser||!getToken())return;
-    if(Date.now()-lastSyncAt<10000){recordSyncControl("cooldown",reason,{sinceSuccessMs:Date.now()-lastSyncAt});return}
+    if(Date.now()-lastSyncAt<minAge){recordSyncControl("cooldown",reason,{sinceSuccessMs:Date.now()-lastSyncAt});return}
     connect({silent:true,reason});
-  },220);
+  },300);
 }
-window.addEventListener("online",()=>requestForegroundSync("online"));
-document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")requestForegroundSync("visibility")});
-window.addEventListener("pageshow",()=>requestForegroundSync("pageshow"));
-window.addEventListener("focus",()=>requestForegroundSync("focus"));
-// Uygulama uzun süre açık kalırsa 5 dakikada bir tek bir güvenlik kontrolü.
-const FALLBACK_SYNC_MS=300000;
-setInterval(()=>{if(Date.now()-lastSyncAt>=FALLBACK_SYNC_MS)requestForegroundSync("fallback")},FALLBACK_SYNC_MS);
+// Ağ gerçekten geri geldiyse kontrol et.
+window.addEventListener("online",()=>requestForegroundSync("online",{minAge:5000}));
+// Yalnız uygulama anlamlı süre arka planda kaldıysa geri dönüşte sync yap.
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="hidden"){hiddenSince=Date.now();return}
+  const away=hiddenSince?Date.now()-hiddenSince:0;hiddenSince=0;
+  if(away>=15000)requestForegroundSync("visibility-return",{minAge:15000});
+  else recordSyncControl("lifecycle-skip","visibility-return",{awayMs:away});
+});
+// BFCache'den geri yüklenme gerçek bir sayfaya dönüş olayıdır; ilk açılışta boot zaten sync yapar.
+window.addEventListener("pageshow",e=>{if(e.persisted)requestForegroundSync("pageshow-bfcache",{minAge:15000})});
+// focus olayı kaldırıldı: masaüstünde sekme/pencere odağı sık değiştiği için gereksiz sync üretiyordu.
+// Uygulama çok uzun süre açık kalırsa 10 dakikada bir tek bir güvenlik kontrolü.
+const FALLBACK_SYNC_MS=600000;
+setInterval(()=>{if(Date.now()-lastSyncAt>=FALLBACK_SYNC_MS)requestForegroundSync("fallback",{minAge:FALLBACK_SYNC_MS})},FALLBACK_SYNC_MS);
 
 const THEMES=["lacivert","mor"];
 const THEME_COLORS={
