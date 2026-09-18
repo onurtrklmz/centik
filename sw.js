@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v24: görev sayacı ve metin sadeleştirmesi; v23 taşıma kararlılığı korunur.
-const SURUM = "centik-v31-task-count-copy";
+// v25: açılır takvim çekmecesi, dokunmatik ay geçişleri ve takvim görev/biten sayacı; v23 taşıma kararlılığı korunur.
+const SURUM = "centik-v32-calendar-drawer";
 const KABUK = [
   "./",
   "./index.html",
