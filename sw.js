@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v41: sürükleme sırasında dört yönlü taşıma simgesi gösterilir; görev hiyerarşisi davranışı değişmedi.
-const SURUM = "centik-v48-fourway-drag-icon";
+// v42: takvim çekmecesi açıkken arka plan karartması %25 yapıldı.
+const SURUM = "centik-v50-calendar-backdrop-blur";
 const KABUK = [
   "./",
   "./index.html",

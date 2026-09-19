@@ -250,7 +250,7 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
 .undo-toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:90;width:min(430px,calc(100% - 28px));display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px solid var(--line);border-radius:13px;background:var(--paper);color:var(--ink);box-shadow:0 12px 36px rgba(0,0,0,.22);font-size:.9rem}
 .undo-toast button{border:0;background:transparent;color:var(--focus);font-weight:800;padding:5px 2px;white-space:nowrap}
 
-.calendar-backdrop{position:fixed;inset:0;z-index:45;background:rgba(4,8,16,.16);opacity:0;pointer-events:none;transition:opacity .22s ease}
+.calendar-backdrop{position:fixed;inset:0;z-index:45;background:rgba(4,8,16,.25);opacity:0;pointer-events:none;transition:opacity .22s ease;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
 .calendar-backdrop.open{opacity:1;pointer-events:auto}
 .cal{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));z-index:46;width:min(520px,calc(100% - 24px));transform:translate(-50%,var(--drawer-drag-y,0px));transition:transform .17s cubic-bezier(.22,.8,.24,1);border:1px solid var(--line);border-radius:17px;background:color-mix(in srgb,var(--paper) 94%,transparent);box-shadow:0 14px 40px rgba(0,0,0,.16);overflow:hidden;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .cal.drawer-dragging{transition:none;cursor:grabbing}
@@ -531,7 +531,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v41-fourway-drag-icon", CENTIK_EXPECTED_SERVER_BUILD="v20-task-hierarchy";
+const CENTIK_CLIENT_BUILD="v43-calendar-backdrop-blur", CENTIK_EXPECTED_SERVER_BUILD="v20-task-hierarchy";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
