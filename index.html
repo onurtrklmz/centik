@@ -250,7 +250,7 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
 .undo-toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:90;width:min(430px,calc(100% - 28px));display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px solid var(--line);border-radius:13px;background:var(--paper);color:var(--ink);box-shadow:0 12px 36px rgba(0,0,0,.22);font-size:.9rem}
 .undo-toast button{border:0;background:transparent;color:var(--focus);font-weight:800;padding:5px 2px;white-space:nowrap}
 
-.calendar-backdrop{position:fixed;inset:0;z-index:45;background:rgba(4,8,16,.25);opacity:0;pointer-events:none;transition:opacity .22s ease;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.calendar-backdrop{position:fixed;inset:0;z-index:45;background:rgba(4,8,16,.25);opacity:0;pointer-events:none;transition:opacity .22s ease;backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px)}
 .calendar-backdrop.open{opacity:1;pointer-events:auto}
 .cal{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));z-index:46;width:min(520px,calc(100% - 24px));transform:translate(-50%,var(--drawer-drag-y,0px));transition:transform .17s cubic-bezier(.22,.8,.24,1);border:1px solid var(--line);border-radius:17px;background:color-mix(in srgb,var(--paper) 94%,transparent);box-shadow:0 14px 40px rgba(0,0,0,.16);overflow:hidden;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .cal.drawer-dragging{transition:none;cursor:grabbing}
@@ -276,8 +276,6 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
 .cell.sel small,.cell.sel.all-done small{color:rgba(255,255,255,.92)}
 .cell.today.sel{font-weight:700;box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--focus),0 4px 12px color-mix(in srgb,var(--focus) 24%,transparent)}
 .blank{visibility:hidden}
-.cal-legend{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:9px;color:var(--muted);font-size:.7rem}
-.cal-legend b{color:var(--ink);font-variant-numeric:tabular-nums}
 @media (max-width:430px){
   .cal{width:calc(100% - 16px);bottom:max(8px,env(safe-area-inset-bottom))}
   .cal-head{grid-template-columns:44px minmax(0,1fr) 44px;padding-inline:6px}
@@ -428,7 +426,6 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
         <div class="cal-body" id="calendarBody">
           <div class="drawer-hint" aria-hidden="true"></div>
           <div class="grid" id="grid"></div>
-          <div class="cal-legend"><b>biten / toplam</b><span>· görev yok</span></div>
         </div>
       </div>
     </div>
@@ -531,7 +528,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v43-calendar-backdrop-blur", CENTIK_EXPECTED_SERVER_BUILD="v20-task-hierarchy";
+const CENTIK_CLIENT_BUILD="v44-calendar-clean-1px-blur", CENTIK_EXPECTED_SERVER_BUILD="v20-task-hierarchy";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;

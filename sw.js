@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v42: takvim çekmecesi açıkken arka plan karartması %25 yapıldı.
-const SURUM = "centik-v50-calendar-backdrop-blur";
+const SURUM = "centik-v51-calendar-clean-1px-blur";
 const KABUK = [
   "./",
   "./index.html",
