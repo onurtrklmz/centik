@@ -159,6 +159,19 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 }
 .tomorrow-notice::after{color:var(--notice-tomorrow-accent)}
 .tomorrow-notice:hover{background:color-mix(in srgb,var(--notice-tomorrow-accent) 14%,var(--paper))}
+.upcoming-notice{min-width:0;overflow:hidden}
+.upcoming-notice.simple{cursor:pointer}
+.upcoming-notice.simple .upcoming-chips{display:none}
+.upcoming-notice.multi{align-items:center;padding-right:10px}
+.upcoming-notice.multi::after{display:none}
+.upcoming-notice-main{flex:0 0 auto}
+.upcoming-notice.multi .upcoming-notice-main{font-weight:700}
+.upcoming-chips{display:flex;align-items:center;gap:7px;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:1px 2px 1px 0;touch-action:pan-x}
+.upcoming-chips::-webkit-scrollbar{display:none}
+.upcoming-chip{flex:0 0 auto;border:1px solid color-mix(in srgb,var(--notice-tomorrow-accent) 38%,var(--notice-tomorrow-border));background:color-mix(in srgb,var(--notice-tomorrow-accent) 8%,var(--paper));color:var(--ink);border-radius:999px;padding:6px 9px;font-size:.79rem;font-weight:750;line-height:1;white-space:nowrap;box-shadow:none;transition:background .14s,border-color .14s,transform .14s}
+.upcoming-chip:hover{background:color-mix(in srgb,var(--notice-tomorrow-accent) 16%,var(--paper));border-color:color-mix(in srgb,var(--notice-tomorrow-accent) 58%,var(--notice-tomorrow-border));transform:translateY(-1px)}
+.upcoming-chip strong{font-variant-numeric:tabular-nums}
+@media(max-width:520px){.upcoming-notice.multi{gap:8px}.upcoming-notice.multi .jump-notice-main{gap:7px}.upcoming-notice.multi #tomorrowNoticeText{font-size:.86rem}.upcoming-chip{font-size:.76rem;padding:6px 8px}}
 .today-inline{
   flex:0 0 auto;width:auto;align-self:center;margin:0;padding:0 10px;min-width:104px;height:38px;
   border:1px solid var(--notice-today-border);background:var(--notice-today-bg);color:var(--ink);
@@ -375,12 +388,13 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
 </div></div>
 
 <main>
-  <button class="jump-notice tomorrow-notice" id="tomorrowNotice" type="button" hidden>
-    <span class="jump-notice-main">
+  <div class="jump-notice tomorrow-notice upcoming-notice" id="tomorrowNotice" hidden>
+    <div class="jump-notice-main upcoming-notice-main">
       <svg class="notice-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="11" r="5.8"></circle><path d="M10 7.7v3.65l2.35 1.4M7.6 2.8h4.8M10 2.8v2.1"></path></svg>
       <span id="tomorrowNoticeText"></span>
-    </span>
-  </button>
+    </div>
+    <div class="upcoming-chips" id="upcomingChips" aria-label="Yaklaşan görev günleri"></div>
+  </div>
   <div class="day-head">
     <button class="nav" id="prev" aria-label="Önceki gün">‹</button>
     <h2 id="dayTitle">Bugün</h2>
@@ -528,7 +542,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v44-calendar-clean-1px-blur", CENTIK_EXPECTED_SERVER_BUILD="v20-task-hierarchy";
+const CENTIK_CLIENT_BUILD="v45-upcoming-task-strip", CENTIK_EXPECTED_SERVER_BUILD="v20-task-hierarchy";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -863,14 +877,50 @@ function remove(id){
 function go(k){current=k;const d=fromKey(k);viewMonth=new Date(d.getFullYear(),d.getMonth(),1);render()}
 const doneCount=k=>(days[k]||[]).filter(x=>x.done).length;
 function renderTomorrowNotice(){
-  const tomorrow=addDays(todayKey(),1),pendingCount=(days[tomorrow]||[]).filter(x=>!x.done).length,notice=$("tomorrowNotice"),text=$("tomorrowNoticeText");
-  if(pendingCount>0){
-    notice.hidden=false;
-    if(text)text.textContent=`Yarın: Bekleyen ${pendingCount} görev`;
-    notice.setAttribute("aria-label",`Yarına git. Bekleyen ${pendingCount} görev var.`);
-  }else{
+  const notice=$("tomorrowNotice"),text=$("tomorrowNoticeText"),chips=$("upcomingChips"),today=todayKey();
+  const upcoming=[];
+  for(let i=1;i<=7;i++){
+    const key=addDays(today,i),count=(days[key]||[]).filter(x=>!x.done).length;
+    if(count>0)upcoming.push({key,count,offset:i});
+  }
+  notice.classList.remove("simple","multi");
+  notice.onclick=null;
+  if(chips)chips.innerHTML="";
+  if(!upcoming.length){
     notice.hidden=true;
     if(text)text.textContent="";
+    notice.removeAttribute("aria-label");
+    return;
+  }
+  notice.hidden=false;
+  if(upcoming.length===1&&upcoming[0].offset===1){
+    const item=upcoming[0];
+    notice.classList.add("simple");
+    if(text)text.textContent=`Yarın: Bekleyen ${item.count} görev`;
+    notice.setAttribute("role","button");
+    notice.setAttribute("tabindex","0");
+    notice.setAttribute("aria-label",`Yarına git. Bekleyen ${item.count} görev var.`);
+    const activate=()=>goDayAnimated(item.key);
+    notice.onclick=activate;
+    notice.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();activate()}};
+    return;
+  }
+  notice.classList.add("multi");
+  notice.removeAttribute("role");
+  notice.removeAttribute("tabindex");
+  notice.removeAttribute("aria-label");
+  notice.onkeydown=null;
+  if(text)text.textContent="Yaklaşan";
+  const shortDays=["Paz","Pzt","Sal","Çar","Per","Cum","Cmt"];
+  if(chips){
+    upcoming.forEach(item=>{
+      const d=fromKey(item.key),label=item.offset===1?"Yarın":shortDays[d.getDay()];
+      const b=document.createElement("button");
+      b.type="button";b.className="upcoming-chip";b.dataset.date=item.key;
+      b.innerHTML=`<span>${label}</span> <strong>${item.count}</strong>`;
+      b.setAttribute("aria-label",`${label}: ${item.count} bekleyen görev. Bu güne git.`);
+      chips.appendChild(b);
+    });
   }
 }
 function render(){
@@ -1102,7 +1152,13 @@ function shiftDay(dir,{animate=true}={}){
   if(!dir)return;
   goDayAnimated(addDays(current,dir),{animate});
 }
-$("tomorrowNotice").onclick=()=>goDayAnimated(addDays(todayKey(),1));
+$("upcomingChips").addEventListener("click",e=>{
+  const chip=e.target.closest(".upcoming-chip");
+  if(!chip)return;
+  e.stopPropagation();
+  const target=chip.dataset.date;
+  if(target)goDayAnimated(target);
+});
 $("todayNotice").onclick=()=>goDayAnimated(todayKey());
 $("prev").onclick=()=>shiftDay(-1);$("next").onclick=()=>shiftDay(1);
 const dayHead=$("dayTitle").closest(".day-head");
@@ -1114,7 +1170,7 @@ dayHead.addEventListener("pointercancel",()=>{dayGesture=null});
 // Görev kartı/ekleme alanı, takvim çekmecesi, menüler ve modallar bu jestten özellikle hariçtir.
 const globalDaySwipeSurface=document.querySelector("main");
 const GLOBAL_DAY_SWIPE_EXCLUDE=[
-  ".sheet","#calendarDrawer","#calendarBackdrop",".day-head","dialog",".account-menu-wrap",
+  ".sheet","#calendarDrawer","#calendarBackdrop",".day-head",".upcoming-notice","dialog",".account-menu-wrap",
   "button","input","textarea","select","a","[contenteditable='true']"
 ].join(",");
 let globalDayGesture=null;

@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v42: takvim çekmecesi açıkken arka plan karartması %25 yapıldı.
-const SURUM = "centik-v51-calendar-clean-1px-blur";
+// v45: yaklaşan 7 gündeki bekleyen görevler için dinamik görev şeridi eklendi.
+const SURUM = "centik-v52-upcoming-task-strip";
 const KABUK = [
   "./",
   "./index.html",
