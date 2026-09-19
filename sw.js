@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v45: yaklaşan 7 gündeki bekleyen görevler için dinamik görev şeridi eklendi.
-const SURUM = "centik-v52-upcoming-task-strip";
+// v46: kullanıcı simgesi daha dolgun glyph biçiminde güncellendi.
+const SURUM = "centik-v53-solid-account-icon";
 const KABUK = [
   "./",
   "./index.html",
