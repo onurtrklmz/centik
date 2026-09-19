@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v37: başarılı login ile frontend başlangıcı ayrıldı; UI hatası artık sunucu hatası gibi gösterilmiyor.
-const SURUM = "centik-v44-login-recovery";
+// v41: sürükleme sırasında dört yönlü taşıma simgesi gösterilir; görev hiyerarşisi davranışı değişmedi.
+const SURUM = "centik-v48-fourway-drag-icon";
 const KABUK = [
   "./",
   "./index.html",
