@@ -658,7 +658,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v65-cascade-delete", CENTIK_EXPECTED_SERVER_BUILD="v30-stable-share-rebase";
+const CENTIK_CLIENT_BUILD="v66-received-subtask-atomic", CENTIK_EXPECTED_SERVER_BUILD="v31-received-subtask-atomic";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, serverTaskMetaVersion=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -1328,9 +1328,38 @@ function createTaskRow(it,{received=false}={}){
   }
   li.append(slot,span,hint,actions);return li;
 }
-function addReceivedSubtask(sourceSuggestionId,rootId){
-  if(!requireLocalSession())return;const text=window.prompt("Alt görev");const t=String(text||"").trim();if(!t)return;
-  const list=normalizeItems(days[current]||[]);list.push({id:uniqueTaskId(),t:t.slice(0,1000),done:false,parentId:rootId||"",sourceSuggestionId:"",sourceSuggestionItemId:""});days[current]=normalizeItems(list);persist(current);render();
+async function addReceivedSubtask(sourceSuggestionId,rootId){
+  if(!requireLocalSession())return;
+  const text=window.prompt("Alt görev"),t=String(text||"").trim();
+  if(!t)return;
+  const sid=String(sourceSuggestionId||""),pid=String(rootId||"");
+  if(!sid||!pid)return;
+  setSyncStatus("loading");
+  try{
+    const j=await api("addReceivedSubtask",{token:getToken(),suggestionId:sid,parentTaskId:pid,text:t.slice(0,1000)},{timeout:30000});
+    if(!j?.ok){
+      if(j?.error==="oturum"){expireSession();return}
+      throw new Error(j?.error||"hata");
+    }
+    const item=j.item||{};
+    const list=normalizeItems(days[current]||[]);
+    if(item.id&&!list.some(x=>x.id===item.id)){
+      list.push({
+        id:String(item.id),
+        t:String(item.t||t).slice(0,1000),
+        done:!!item.done,
+        parentId:String(item.parentId||pid),
+        sourceSuggestionId:String(item.sourceSuggestionId||sid),
+        sourceSuggestionItemId:String(item.sourceSuggestionItemId||"")
+      });
+      days[current]=normalizeItems(list);
+    }
+    if(j.recipientRevision!==undefined)saveRevision(j.recipientRevision);
+    saveLocal();saveLastGood();render();setSyncStatus("success");
+  }catch(e){
+    setSyncStatus("error");
+    alert("Alt görev karşı tarafa eklenemedi. Yeniden deneyin.");
+  }
 }
 function renderReceivedTasks(items){
   const host=$("receivedTasks");host.innerHTML="";

@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v65: ana görev silinince bağlı alt görevler de birlikte silinir.
-const SURUM = "centik-v73-cascade-delete";
+// v66: alınan göreve eklenen alt görev iki tarafa atomik olarak yazılır.
+const SURUM = "centik-v74-received-subtask-atomic";
 const KABUK = [
   "./",
   "./index.html",
