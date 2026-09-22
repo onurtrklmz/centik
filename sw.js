@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v47: görev taşıma göstergesi ayrık dört yönlü yuvarlatılmış üçgenlerle güncellendi.
-const SURUM = "centik-v54-spaced-move-cue";
+// v46 yaması: hiyerarşik silme ve ayrık dört yönlü taşıma simgesi.
+const SURUM = "centik-v54-cascade-delete-arrow-gap";
 const KABUK = [
   "./",
   "./index.html",

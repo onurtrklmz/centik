@@ -228,7 +228,7 @@ li.done .txt{color:var(--muted)}
 .check-slot{position:relative;flex:none;width:28px;height:28px;display:grid;place-items:center}
 .check-slot .check{position:absolute;inset:0}
 .drag-cue{position:absolute;inset:0;display:grid;place-items:center;color:var(--focus);opacity:0;transform:scale(.84);transition:opacity .12s ease,transform .16s ease;pointer-events:none}
-.drag-cue svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.drag-cue svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 #list li.task-row.dragging{z-index:6;background:var(--paper);box-shadow:0 12px 28px rgba(0,0,0,.16);transform:translateX(var(--drag-x,0px)) scale(1.012);opacity:.98}
 #list li.task-row.dragging .txt{cursor:grabbing}
 #list li.task-row.dragging .check{opacity:0;pointer-events:none}
@@ -542,7 +542,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v47-spaced-move-cue", CENTIK_EXPECTED_SERVER_BUILD="v20-task-hierarchy";
+const CENTIK_CLIENT_BUILD="v45-upcoming-task-strip", CENTIK_EXPECTED_SERVER_BUILD="v20-task-hierarchy";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -855,15 +855,26 @@ async function connectNow({silent=false,force=false,reason=""}={}){
 function expireSession(){clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();setSession("",null);days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);setAuthStatus("Oturum süresi doldu. Yeniden giriş yapın.",true)}
 
 function addTask(t){t=t.trim();if(!t||!requireLocalSession())return;(days[current]=normalizeItems(days[current]||[])).push({id:uniqueTaskId(),t:t.slice(0,1000),done:false,parentId:""});persist(current);render()}
-function toggle(id){if(!requireLocalSession())return;if(pendingDelete?.id===id&&pendingDelete?.date===current)return;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id);if(!it)return;it.done=!it.done;lastPop=it.done?id:null;persist(current);render()}
-function updateTask(id,text){if(!requireLocalSession())return false;if(pendingDelete?.id===id&&pendingDelete?.date===current)return false;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id),t=String(text||'').trim();if(!it||!t)return false;it.t=t.slice(0,1000);persist(current);render();return true}
-function editTask(id,li){if(!requireLocalSession())return;const it=normalizeItems(days[current]||[]).find(x=>x.id===id);if(!it||li.classList.contains("editing")||(pendingDelete?.id===id&&pendingDelete?.date===current))return;li.classList.add("editing");const span=li.querySelector(".txt"),btn=li.querySelector(".edit");const input=document.createElement("input");input.className="edit-input";input.type="text";input.maxLength=1000;input.value=it.t;input.setAttribute("aria-label","Görevi düzenle");span.replaceWith(input);const save=()=>{if(!updateTask(id,input.value)){input.focus();input.select()}};btn.innerHTML='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.485 1.929a.75.75 0 0 1 .086 1.056l-7.5 8.75a.75.75 0 0 1-1.08.037L1.93 8.71a.75.75 0 0 1 1.06-1.06l2.49 2.49 6.95-8.11a.75.75 0 0 1 1.056-.101Z"/></svg>';btn.setAttribute("aria-label","Düzenlemeyi kaydet");btn.title="Kaydet";btn.onclick=save;input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();save()}else if(e.key==="Escape"){e.preventDefault();render()}});requestAnimationFrame(()=>{input.focus();input.setSelectionRange(input.value.length,input.value.length)})}
+function pendingDeleteHas(date,id){
+  if(!pendingDelete||pendingDelete.date!==date)return false;
+  const ids=Array.isArray(pendingDelete.ids)&&pendingDelete.ids.length?pendingDelete.ids:[pendingDelete.id];
+  return ids.includes(id);
+}
+function collectDeleteIds(list,rootId){
+  const ids=new Set([rootId]);let added=true;
+  while(added){added=false;list.forEach(it=>{if(it.parentId&&ids.has(it.parentId)&&!ids.has(it.id)){ids.add(it.id);added=true}})}
+  return [...ids];
+}
+function toggle(id){if(!requireLocalSession())return;if(pendingDeleteHas(current,id))return;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id);if(!it)return;it.done=!it.done;lastPop=it.done?id:null;persist(current);render()}
+function updateTask(id,text){if(!requireLocalSession())return false;if(pendingDeleteHas(current,id))return false;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id),t=String(text||'').trim();if(!it||!t)return false;it.t=t.slice(0,1000);persist(current);render();return true}
+function editTask(id,li){if(!requireLocalSession())return;const it=normalizeItems(days[current]||[]).find(x=>x.id===id);if(!it||li.classList.contains("editing")||pendingDeleteHas(current,id))return;li.classList.add("editing");const span=li.querySelector(".txt"),btn=li.querySelector(".edit");const input=document.createElement("input");input.className="edit-input";input.type="text";input.maxLength=1000;input.value=it.t;input.setAttribute("aria-label","Görevi düzenle");span.replaceWith(input);const save=()=>{if(!updateTask(id,input.value)){input.focus();input.select()}};btn.innerHTML='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.485 1.929a.75.75 0 0 1 .086 1.056l-7.5 8.75a.75.75 0 0 1-1.08.037L1.93 8.71a.75.75 0 0 1 1.06-1.06l2.49 2.49 6.95-8.11a.75.75 0 0 1 1.056-.101Z"/></svg>';btn.setAttribute("aria-label","Düzenlemeyi kaydet");btn.title="Kaydet";btn.onclick=save;input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();save()}else if(e.key==="Escape"){e.preventDefault();render()}});requestAnimationFrame(()=>{input.focus();input.setSelectionRange(input.value.length,input.value.length)})}
 function hideUndoToast(){}
 function finalizeDelete(){
   if(!pendingDelete)return;clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;
-  const d=pendingDelete.date,id=pendingDelete.id,list=normalizeItems(days[d]||[]),idx=list.findIndex(x=>x.id===id);
-  if(idx>=0)list.splice(idx,1);
-  if(list.length)days[d]=list;else delete days[d];
+  const d=pendingDelete.date,list=normalizeItems(days[d]||[]);
+  const ids=new Set([...(Array.isArray(pendingDelete.ids)?pendingDelete.ids:[]),...collectDeleteIds(list,pendingDelete.id)]);
+  const kept=list.filter(it=>!ids.has(it.id));
+  if(kept.length)days[d]=kept;else delete days[d];
   pendingDelete=null;hideUndoToast();persist(d);render();
 }
 function undoDelete(){if(!pendingDelete)return;clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();render();setSyncStatus(pending.size?"loading":"success")}
@@ -871,7 +882,7 @@ function remove(id){
   if(!requireLocalSession())return;
   const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id);if(!it)return;
   if(pendingDelete)finalizeDelete();
-  pendingDelete={date:current,id,item:{...it}};
+  pendingDelete={date:current,id,item:{...it},ids:collectDeleteIds(list,id)};
   pendingDeleteTimer=setTimeout(finalizeDelete,DELETE_UNDO_MS);render();
 }
 function go(k){current=k;const d=fromKey(k);viewMonth=new Date(d.getFullYear(),d.getMonth(),1);render()}
@@ -936,17 +947,17 @@ function render(){
   if(showPlanned)$("plannedCount").textContent=planned;
   const ul=$("list");ul.innerHTML="";if(!items.length){const p=document.createElement("li");p.className="empty";p.textContent=current>=tk?"Aklında ne var?":"Bu güne kayıt girilmemiş.";ul.append(p)}
   items.forEach(it=>{
-    const li=document.createElement("li"),isDeleting=pendingDelete?.date===current&&pendingDelete?.id===it.id;
+    const li=document.createElement("li"),isDeleting=pendingDeleteHas(current,it.id),isDeleteRoot=pendingDelete?.date===current&&pendingDelete?.id===it.id;
     li.classList.add("task-row");li.dataset.taskId=it.id;li.dataset.parentId=it.parentId||"";
     if(it.parentId)li.classList.add("subtask");if(it.done)li.classList.add("done");if(it.id===lastPop)li.classList.add("pop");if(isDeleting)li.classList.add("deleting");
     const slot=document.createElement("span");slot.className="check-slot";
     const c=document.createElement("button");c.className="check";c.setAttribute("aria-label",it.done?"Tamamlandı işaretini kaldır":"Tamamlandı olarak işaretle");c.setAttribute("aria-pressed",it.done);c.disabled=isDeleting;c.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3L13 4.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';c.onclick=()=>toggle(it.id);
-    const cue=document.createElement("span");cue.className="drag-cue";cue.setAttribute("aria-hidden","true");cue.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.25 7.9 12 3.65l2.75 4.25Z"/><path d="M7.9 9.25 3.65 12l4.25 2.75Z"/><path d="m16.1 9.25 4.25 2.75-4.25 2.75Z"/><path d="m9.25 16.1 2.75 4.25 2.75-4.25Z"/></svg>';slot.append(c,cue);
+    const cue=document.createElement("span");cue.className="drag-cue";cue.setAttribute("aria-hidden","true");cue.innerHTML='<svg viewBox="0 0 20 20"><path d="M10 2.4 7.2 5.2M10 2.4l2.8 2.8M10 2.4v4.1M10 17.6l-2.8-2.8M10 17.6l2.8-2.8M10 17.6v-4.1M2.4 10l2.8-2.8M2.4 10l2.8 2.8M2.4 10h4.1M17.6 10l-2.8-2.8M17.6 10l-2.8 2.8M17.6 10h-4.1"/></svg>';slot.append(c,cue);
     const span=document.createElement("span");span.className="txt";span.textContent=it.t;
     const hint=document.createElement("span");hint.className="hierarchy-hint";hint.textContent="Alt görev";
     const actions=document.createElement("div");actions.className="task-actions";
     const edit=document.createElement("button");edit.className="edit";edit.type="button";edit.disabled=isDeleting;edit.innerHTML='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M12.146.854a.5.5 0 0 1 .708 0l2.292 2.292a.5.5 0 0 1 0 .708l-9.5 9.5a.5.5 0 0 1-.168.11l-4 1.5a.5.5 0 0 1-.642-.642l1.5-4a.5.5 0 0 1 .11-.168zM11.207 2.5 3.342 10.365l-.823 2.195 2.195-.823L12.58 3.872z"/></svg>';edit.setAttribute("aria-label","Görevi düzenle");edit.title="Düzenle";edit.onclick=()=>editTask(it.id,li);
-    const x=document.createElement("button");x.type="button";if(isDeleting){x.className="undo-inline";x.textContent="Geri al";x.setAttribute("aria-label","Silmeyi geri al");x.title="Geri al";x.onclick=()=>undoDelete()}else{x.className="del";x.textContent="×";x.setAttribute("aria-label","Sil");x.title="Sil";x.onclick=()=>remove(it.id)}
+    const x=document.createElement("button");x.type="button";if(isDeleteRoot){x.className="undo-inline";x.textContent="Geri al";x.setAttribute("aria-label","Silmeyi geri al");x.title="Geri al";x.onclick=()=>undoDelete()}else{x.className="del";x.textContent="×";x.setAttribute("aria-label",isDeleting?"Ana görevle birlikte silinecek":"Sil");x.title=isDeleting?"Ana görevle birlikte silinecek":"Sil";x.disabled=isDeleting;if(!isDeleting)x.onclick=()=>remove(it.id)}
     actions.append(edit,x);li.append(slot,span,hint,actions);ul.append(li)
   });
   lastPop=null;renderTomorrowNotice();renderCal();
@@ -1239,7 +1250,7 @@ function clearHierarchyPreview(){
 }
 function previousTopLevelRow(row){
   let p=row?.previousElementSibling;
-  while(p){if(p.matches?.("li.task-row[data-task-id]")&&!rowParentId(p))return p;p=p.previousElementSibling}
+  while(p){if(p.matches?.("li.task-row[data-task-id]")&&!rowParentId(p)&&!p.classList.contains("deleting"))return p;p=p.previousElementSibling}
   return null;
 }
 function beginTaskReorder(row,clientX,clientY){
