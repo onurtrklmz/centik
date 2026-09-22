@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v56: görev önerileri frontend entegrasyonu.
-const SURUM = "centik-v64-task-suggestions-ui";
+// v46: kullanıcı simgesi daha dolgun glyph biçiminde güncellendi.
+const SURUM = "centik-v53-solid-account-icon";
 const KABUK = [
   "./",
   "./index.html",
