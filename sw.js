@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v69: manuel yenileme sunucuyu zorla okur; cihazlar ve paylaşımlar arasında stale veri kaybı engellenir.
-const SURUM = "centik-v77-authoritative-sync";
+// v70: paylaşım mirror doğrulaması ikinci Sheet taraması olmadan ilk mirror sonucundan yapılır.
+const SURUM = "centik-v78-mirror-result-verify";
 const KABUK = [
   "./",
   "./index.html",
