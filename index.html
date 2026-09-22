@@ -224,7 +224,7 @@ li.done .check svg{opacity:1}
 li.done .txt{color:var(--muted)}
 .txt{flex:1;overflow-wrap:anywhere}
 #list li.task-row{position:relative;transition:box-shadow .16s ease,background-color .16s ease,transform .16s ease,padding-left .18s ease;user-select:none;-webkit-user-select:none}
-#list li.task-row .txt{cursor:grab;-webkit-touch-callout:none}
+#list li.task-row .txt{cursor:text;-webkit-touch-callout:none}
 .check-slot{position:relative;flex:none;width:28px;height:28px;display:grid;place-items:center}
 .check-slot .check{position:absolute;inset:0}
 .drag-cue{position:absolute;inset:0;display:grid;place-items:center;color:var(--focus);opacity:0;transform:scale(.84);transition:opacity .12s ease,transform .16s ease;pointer-events:none}
@@ -576,7 +576,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v50-keyboard-safe-edit", CENTIK_EXPECTED_SERVER_BUILD="v21-task-move";
+const CENTIK_CLIENT_BUILD="v51-tap-edit-longpress-drag", CENTIK_EXPECTED_SERVER_BUILD="v21-task-move";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -1401,11 +1401,11 @@ globalDaySwipeSurface.addEventListener("pointercancel",resetGlobalDayGesture);
 // Görev sıralama + tek seviyeli alt görev: dikey hareket sıralar, belirgin yatay hareket hiyerarşiyi değiştirir.
 // Checkbox, düzenleme, silme ve input kontrolleri sıralamayı başlatmaz.
 const taskList=$("list");
-const TASK_REORDER_HOLD_MS=280;
+const TASK_REORDER_HOLD_MS=320;
 const TASK_REORDER_FLIP_MS=190;
 const TASK_NEST_THRESHOLD=42;
 const TASK_NEST_RELEASE=24;
-let taskReorder=null,taskReorderHoldTimer=null,lastTaskFlipAt=0;
+let taskReorder=null,taskReorderHoldTimer=null,lastTaskFlipAt=0,suppressTaskEditUntil=0;
 const taskFlipAnimations=new WeakMap();
 function clearTaskReorderHold(){if(taskReorderHoldTimer){clearTimeout(taskReorderHoldTimer);taskReorderHoldTimer=null}}
 function taskReorderRow(target){return target?.closest?.("#list li.task-row[data-task-id]")||null}
@@ -1518,7 +1518,7 @@ function commitHierarchyIntent(d,byId){
 function finishTaskReorder(commit=true){
   clearTaskReorderHold();const d=taskReorder;if(!d)return;
   taskRows().forEach(el=>{const a=taskFlipAnimations.get(el);if(a){try{a.finish()}catch(_){ }taskFlipAnimations.delete(el)}});
-  const wasActive=d.active;taskReorder=null;
+  const wasActive=d.active;if(wasActive)suppressTaskEditUntil=Date.now()+420;taskReorder=null;
   clearHierarchyPreview();
   d.row?.classList.remove("dragging","nest-preview","outdent-preview");d.row?.removeAttribute("aria-grabbed");d.row?.style.removeProperty("--drag-x");taskRows().forEach(x=>x.classList.remove("dragging-companion","nest-parent-candidate"));taskList.classList.remove("reordering");document.body.classList.remove("task-reordering");
   if(!commit||!wasActive||current!==d.date)return;
@@ -1536,19 +1536,19 @@ function finishTaskReorder(commit=true){
   days[d.date]=normalized;persist(d.date);
 }
 
-// Masaüstü: görev metni/boş alanı üzerinde basıp sürükle. Dikey eksen sıralar, belirgin yatay hareket alt görev niyeti oluşturur.
+// Masaüstü: kısa tık görev metnini düzenler; basıp anlamlı miktarda sürükleme taşıma/hiyerarşi modunu başlatır.
 taskList.addEventListener("mousedown",e=>{
   if(e.button!==0||taskReorderBlocked(e.target))return;const row=taskReorderRow(e.target);if(!row)return;
   taskReorder={mode:"mouse",active:false,row,date:current,startX:e.clientX,startY:e.clientY,lastX:e.clientX,lastY:e.clientY};
 });
 window.addEventListener("mousemove",e=>{
   const d=taskReorder;if(!d||d.mode!=="mouse")return;
-  if(!d.active){const dx=e.clientX-d.startX,dy=e.clientY-d.startY;if(Math.hypot(dx,dy)<5)return;beginTaskReorder(d.row,e.clientX,e.clientY)}
+  if(!d.active){const dx=e.clientX-d.startX,dy=e.clientY-d.startY;if(Math.hypot(dx,dy)<8)return;beginTaskReorder(d.row,e.clientX,e.clientY)}
   if(taskReorder?.active){e.preventDefault();moveTaskReorder(e.clientX,e.clientY)}
 });
 window.addEventListener("mouseup",()=>{if(taskReorder?.mode==="mouse")finishTaskReorder(true)});
 
-// Dokunmatik: normal sayfa kaydırmasını bozmamak için önce kısa basılı tut; ardından aynı dikey/yatay jestler çalışır.
+// Dokunmatik: kısa dokunma görev metnini düzenler; uzun basılı tut + sürükle taşıma/hiyerarşi modunu başlatır.
 taskList.addEventListener("touchstart",e=>{
   if(e.touches.length!==1||taskReorderBlocked(e.target))return;const row=taskReorderRow(e.target);if(!row)return;
   const t=e.touches[0];clearTaskReorderHold();taskReorder={mode:"touch",active:false,row,date:current,startX:t.clientX,startY:t.clientY,lastX:t.clientX,lastY:t.clientY};
@@ -1562,6 +1562,14 @@ taskList.addEventListener("touchmove",e=>{
 taskList.addEventListener("touchend",()=>{if(taskReorder?.mode==="touch")finishTaskReorder(true)});
 taskList.addEventListener("touchcancel",()=>{if(taskReorder?.mode==="touch")finishTaskReorder(false)});
 taskList.addEventListener("contextmenu",e=>{if(taskReorder?.active&&taskReorderRow(e.target))e.preventDefault()});
+
+// Görev metnine kısa dokun/tık = düzenle. Uzun basma/sürükleme bittikten sonra oluşabilecek sentetik click bastırılır.
+taskList.addEventListener("click",e=>{
+  const text=e.target.closest?.(".txt");if(!text)return;
+  if(Date.now()<suppressTaskEditUntil)return;
+  const row=taskReorderRow(text);if(!row||row.classList.contains("dragging")||row.classList.contains("deleting"))return;
+  editTask(row.dataset.taskId,row);
+});
 
 document.addEventListener("click",e=>{if(!e.target.closest?.(".task-actions"))closeTaskMenus()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&openTaskMenu){closeTaskMenus();return}if(e.key==="Escape"&&$("moveTaskDialog")?.open)$("moveTaskDialog").close()});

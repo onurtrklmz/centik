@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v50: mobil görev düzenleme alanı için klavye yüksekliği kadar kaydırma alanı ve güvenli görünürlük düzeltmesi.
-const SURUM = "centik-v57-keyboard-safe-edit";
+// v51: görev metnine tek dokun/tık ile düzenleme; uzun basma/sürükleme ile taşıma-hiyerarşi ayrımı.
+const SURUM = "centik-v58-tap-edit-longpress-drag";
 const KABUK = [
   "./",
   "./index.html",
