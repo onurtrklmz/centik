@@ -247,14 +247,14 @@ li.done .txt{color:var(--muted)}
 #list li.task-row.nest-preview .hierarchy-hint,#list li.task-row.outdent-preview .hierarchy-hint{opacity:1}
 body.task-reordering{user-select:none;-webkit-user-select:none;cursor:grabbing}
 body.task-reordering #list li.task-row{cursor:grabbing}
- .task-actions{display:flex;align-items:center;gap:2px;flex:none;position:relative}
-.task-actions.inline-actions{gap:2px;padding-left:6px;border-left:1px solid var(--line)}
-.task-action-btn{width:38px;height:40px;flex:0 0 38px;border:0;border-radius:10px;background:transparent;color:var(--muted);padding:0;display:grid;place-items:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-.task-action-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+ .task-actions{display:flex;align-items:center;gap:0;flex:none;position:relative}
+.task-actions.inline-actions{gap:0;padding-left:4px;border-left:1px solid var(--line)}
+.task-action-btn{width:34px;height:40px;flex:0 0 34px;border:0;border-radius:9px;background:transparent;color:var(--muted);padding:0;display:grid;place-items:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.task-action-btn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
 .task-action-btn:hover,.task-action-btn:focus-visible{background:color-mix(in srgb,var(--focus) 7%,transparent);color:var(--focus);outline:none}
 .task-action-btn[disabled]{opacity:1;color:var(--muted);cursor:default}.task-action-btn[disabled]:hover{background:transparent;color:var(--muted)}
-@media(max-width:430px){.task-actions.inline-actions{gap:2px;padding-left:4px}.task-action-btn{width:40px;height:42px;flex-basis:40px}.task-action-btn svg{width:19px;height:19px}}
-@media(max-width:360px){.task-actions.inline-actions{gap:1px;padding-left:3px}.task-action-btn{width:38px;height:40px;flex-basis:38px}}
+@media(max-width:430px){.task-actions.inline-actions{gap:0;padding-left:3px}.task-action-btn{width:33px;height:40px;flex-basis:33px}.task-action-btn svg{width:22px;height:22px}}
+@media(max-width:360px){.task-actions.inline-actions{gap:0;padding-left:2px}.task-action-btn{width:31px;height:38px;flex-basis:31px}.task-action-btn svg{width:21px;height:21px}}
 .task-menu-btn{border:0;background:none;color:var(--muted);width:34px;height:34px;border-radius:8px;display:grid;place-items:center;padding:0;font-size:1.45rem;line-height:1;font-weight:800;letter-spacing:1px}
 .task-menu-btn:hover,.task-menu-btn:focus-visible,.task-row.menu-open .task-menu-btn{color:var(--focus);background:var(--bg);outline:none}
 .task-menu-pop{position:absolute;right:0;top:36px;z-index:35;min-width:184px;padding:6px;border:1px solid var(--line);border-radius:12px;background:var(--paper);box-shadow:0 14px 34px rgba(0,0,0,.2);display:grid;gap:2px}
@@ -584,7 +584,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v54-inline-actions-touch-targets", CENTIK_EXPECTED_SERVER_BUILD="v21-task-move";
+const CENTIK_CLIENT_BUILD="v55-inline-actions-balanced", CENTIK_EXPECTED_SERVER_BUILD="v21-task-move";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
