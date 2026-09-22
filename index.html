@@ -155,6 +155,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 .jump-notice::after{content:"›";font-size:1.25rem;line-height:1;flex:none}
 .jump-notice:hover{transform:translateY(-1px)}
 
+
+.shared-task-mark{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-left:6px;vertical-align:-3px;color:var(--muted);opacity:.82;flex:none}
+.shared-task-mark svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}
+
 .incoming-task-notice{
   width:100%;margin:0 0 10px;border:1px solid rgba(217,45,32,.28);
   background:rgba(217,45,32,.11);color:var(--ink);cursor:pointer;
@@ -401,8 +405,8 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
 .username-settings{margin:18px 0 4px;padding:14px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--paper) 88%,transparent)}
 .username-settings h3{margin:0 0 4px;font-size:.96rem}.username-settings p{margin:0 0 11px;color:var(--muted);font-size:.82rem}.username-field{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:10px;background:var(--bg);overflow:hidden}.username-field span{padding:0 0 0 11px;color:var(--muted);font-weight:800}.username-field input{min-width:0;width:100%;border:0;background:transparent;color:var(--ink);padding:10px 11px 10px 2px;font:inherit;outline:none}.username-field:focus-within{border-color:var(--focus);box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 14%,transparent)}
 .username-help{margin:7px 0 0!important;font-size:.75rem!important}
-#sendTaskDialog,#sentTasksDialog{width:min(92vw,500px);max-height:min(90vh,780px);padding:0;border:0;background:transparent;color:var(--ink);overflow:visible}
-#sendTaskDialog::backdrop,#sentTasksDialog::backdrop{background:rgba(5,9,20,.46);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+#sendTaskDialog{width:min(92vw,500px);max-height:min(90vh,780px);padding:0;border:0;background:transparent;color:var(--ink);overflow:visible}
+#sendTaskDialog::backdrop{background:rgba(5,9,20,.46);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
 .suggestion-box{padding:20px}.suggestion-section{margin-top:16px}.suggestion-label{display:block;margin:0 0 7px;color:var(--muted);font-size:.78rem;font-weight:800}.suggestion-search{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:11px 12px;font:inherit;outline:none}.suggestion-search:focus{border-color:var(--focus);box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 14%,transparent)}
 .directory-list{display:grid;gap:6px;margin-top:8px;max-height:190px;overflow:auto}.directory-user{width:100%;min-width:0;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:9px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left}.directory-user:hover,.directory-user:focus-visible,.directory-user.selected{border-color:var(--focus);background:color-mix(in srgb,var(--focus) 8%,var(--paper));outline:none}.directory-user strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.directory-user small{display:block;color:var(--muted);font-size:.73rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.directory-user .pick{flex:none;color:var(--focus);font-weight:800}.directory-empty{margin:8px 2px;color:var(--muted);font-size:.8rem}
 .selected-recipient{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;padding:9px 11px;border-radius:10px;background:color-mix(in srgb,var(--focus) 9%,var(--paper));border:1px solid color-mix(in srgb,var(--focus) 28%,var(--line));font-size:.84rem}.selected-recipient button{border:0;background:transparent;color:var(--muted);font-weight:800;padding:2px 4px}.task-preview{border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:11px 12px}.task-preview-root{font-weight:750;overflow-wrap:anywhere}.task-preview-sub{position:relative;margin:7px 0 0 18px;padding-left:13px;color:var(--muted);font-size:.84rem;overflow-wrap:anywhere}.task-preview-sub::before{content:"";position:absolute;left:0;top:.72em;width:7px;height:1px;background:var(--focus);opacity:.58}
@@ -413,7 +417,7 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
 .outgoing-status{flex:none;border-radius:999px;padding:4px 8px;font-size:.7rem;font-weight:800;background:var(--accent-soft);color:var(--focus)}.outgoing-status.rejected{background:color-mix(in srgb,#b42318 10%,var(--paper));color:#b42318}.outgoing-status.pending{background:color-mix(in srgb,#f59e0b 12%,var(--paper));color:#9a6700}
 .outgoing-task-line{display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-size:.86rem;overflow-wrap:anywhere}.outgoing-task-line.sub{margin-left:20px;color:var(--muted)}.outgoing-task-line .state{flex:none;width:16px;text-align:center;color:var(--focus);font-weight:900}.outgoing-task-line.done .text{text-decoration:line-through;color:var(--muted)}
 .received-add-subtask{margin:8px 0 0 40px;border:0;background:transparent;color:var(--focus);font:750 .78rem var(--sans);padding:5px 2px;cursor:pointer}.received-add-subtask:hover{text-decoration:underline}
-@media(max-width:420px){#sendTaskDialog,#sentTasksDialog{width:calc(100vw - 20px)}.suggestion-box{padding:16px}.suggestion-card{padding:11px}.suggestion-footer{flex-wrap:wrap}.suggestion-footer button{min-height:40px}}
+@media(max-width:420px){#sendTaskDialog{width:calc(100vw - 20px)}.suggestion-box{padding:16px}.suggestion-card{padding:11px}.suggestion-footer{flex-wrap:wrap}.suggestion-footer button{min-height:40px}}
 
 </style>
 </head>
@@ -435,7 +439,6 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
     <div class="account-menu" id="accountMenu" role="menu" hidden>
       <div class="account-menu-user" id="accountMenuUser" title=""></div>
       <div class="account-menu-sep" aria-hidden="true"></div>
-      <button class="account-menu-item" id="menuSentTasks" type="button" role="menuitem"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3.2 10h10.6"></path><path d="m10.4 6.6 3.4 3.4-3.4 3.4"></path><path d="M15.8 4.2h1v11.6h-1"></path></svg><span>Gönderdiklerim</span></button>
       <button class="account-menu-item" id="menuSettings" type="button" role="menuitem"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="2.45"/><path d="M7.4 3.55 6.85 5.1a5.6 5.6 0 0 0-1.75 1.75l-1.55.55v5.2l1.55.55a5.6 5.6 0 0 0 1.75 1.75l.55 1.55h5.2l.55-1.55a5.6 5.6 0 0 0 1.75-1.75l1.55-.55V7.4l-1.55-.55a5.6 5.6 0 0 0-1.75-1.75l-.55-1.55h-5.2Z"/></svg><span>Ayarlar</span></button>
       <button class="account-menu-item" id="menuAdmin" type="button" role="menuitem" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.8 16 5v4.3c0 3.8-2.35 6.45-6 7.9-3.65-1.45-6-4.1-6-7.9V5l6-2.2Z"/><path d="M7.2 9.8 9 11.6l3.8-4"/></svg><span>Yönetim</span></button>
       <div class="account-menu-sep" aria-hidden="true"></div>
@@ -601,15 +604,6 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
       <div class="suggestion-footer"><button type="button" id="cancelSendTask">Vazgeç</button><button type="button" class="primary" id="confirmSendTask">Gönder</button></div>
     </div>
   </dialog>
-
-  <dialog id="sentTasksDialog">
-    <div class="modal-box suggestion-box">
-      <button type="button" class="modal-close" id="closeSentTasksX" aria-label="Gönderdiklerimi kapat" title="Kapat">×</button>
-      <div class="modal-head"><h2>Gönderdiklerim</h2></div>
-      <div class="incoming-toolbar"><button type="button" id="refreshSentTasks">Yenile</button></div>
-      <div class="incoming-list" id="sentTasksList"><p class="incoming-empty">Gönderilen görevler yükleniyor…</p></div>
-    </div>
-  </dialog>
 </main>
 
 <div class="auth-gate" id="authGate">
@@ -664,7 +658,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v60-auto-received-notice", CENTIK_EXPECTED_SERVER_BUILD="v26-auto-received-notice";
+const CENTIK_CLIENT_BUILD="v61-bidirectional-task-share", CENTIK_EXPECTED_SERVER_BUILD="v27-bidirectional-task-share";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, serverTaskMetaVersion=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -677,7 +671,7 @@ const LAST_GOOD_SUFFIX="last-good-days";
 let adminApprovals=null, adminApprovalsAt=0, adminLoadPromise=null;
 let registeredUsers=null, registeredUsersAt=0, registeredUsersLoadPromise=null;
 let diagnosticsResult=null;
-let incomingNotification=null, suggestionDirectory=null, suggestionDirectoryAt=0, selectedSuggestionRecipient=null, sendTaskContext=null, outgoingSuggestionsCache=null;
+let incomingNotification=null, suggestionDirectory=null, suggestionDirectoryAt=0, selectedSuggestionRecipient=null, sendTaskContext=null;
 const DIAG_LOG_LIMIT=30;
 const $=id=>document.getElementById(id);
 const getToken=()=>{try{return localStorage.getItem(AUTH_TOKEN)||""}catch(e){return ""}};
@@ -834,7 +828,7 @@ function normalizeItems(list){
     if(!id||!t)return;
     let parentId=String(raw&&raw.parentId||"").trim().slice(0,80);
     if(parentId===id)parentId="";
-    const item={id,t,done:!!(raw&&raw.done),parentId,sourceSuggestionId:String(raw&&raw.sourceSuggestionId||"").trim().slice(0,80),sourceSuggestionItemId:String(raw&&raw.sourceSuggestionItemId||"").trim().slice(0,80),sourceSender:raw&&raw.sourceSender&&typeof raw.sourceSender==="object"?{id:String(raw.sourceSender.id||""),name:String(raw.sourceSender.name||""),username:String(raw.sourceSender.username||"")}:null};
+    const item={id,t,done:!!(raw&&raw.done),parentId,sourceSuggestionId:String(raw&&raw.sourceSuggestionId||"").trim().slice(0,80),sourceSuggestionItemId:String(raw&&raw.sourceSuggestionItemId||"").trim().slice(0,80),sourceSender:raw&&raw.sourceSender&&typeof raw.sourceSender==="object"?{id:String(raw.sourceSender.id||""),name:String(raw.sourceSender.name||""),username:String(raw.sourceSender.username||"")}:null,sharedTask:!!(raw&&raw.sharedTask),sharedSuggestionId:String(raw&&raw.sharedSuggestionId||"").trim().slice(0,80),sharedRecipient:raw&&raw.sharedRecipient&&typeof raw.sharedRecipient==="object"?{id:String(raw.sharedRecipient.id||""),name:String(raw.sharedRecipient.name||""),username:String(raw.sharedRecipient.username||"")}:null};
     if(pos.has(id))out[pos.get(id)]=item;
     else{pos.set(id,out.length);out.push(item)}
   });
@@ -1123,7 +1117,7 @@ function incomingSenderHandle(notification){
 function renderIncomingTaskNotice(){
   const box=$("incomingTaskNotice"),text=$("incomingTaskNoticeText");
   if(!box||!text)return;
-  if(!incomingNotification||!incomingNotification.id||!/^\d{4}-\d{2}-\d{2}$/.test(String(incomingNotification.date||""))){
+  if(!incomingNotification||!incomingNotification.id||String(incomingNotification.recipientUserId||"")!==String(currentUser?.id||"")||!/^\d{4}-\d{2}-\d{2}$/.test(String(incomingNotification.date||""))){
     box.hidden=true;text.textContent="";return;
   }
   text.textContent=`Yeni görev geldi! ${incomingSenderHandle(incomingNotification)}`;
@@ -1245,30 +1239,9 @@ async function sendTaskSuggestion(){
   if(!selectedSuggestionRecipient){status.textContent="Görevin gönderileceği kullanıcıyı seçin.";status.classList.add("error");return}
   const suggestedDate=String($("sendSuggestedDate").value||"");if(!/^\d{4}-\d{2}-\d{2}$/.test(suggestedDate)){status.textContent="Geçerli bir tarih seçin.";status.classList.add("error");return}
   btn.disabled=true;btn.textContent="Gönderiliyor…";status.textContent="";
-  try{const j=await api("sendTaskSuggestion",{token:getToken(),recipientUserId:selectedSuggestionRecipient.id,suggestedDate,items:sendTaskContext.items},{timeout:30000});if(!j.ok){if(j.error==="oturum"){expireSession();return}throw new Error(j.error||"hata")}status.textContent=`${selectedSuggestionRecipient.name} kullanıcısına gönderildi.`;setTimeout(()=>{if($("sendTaskDialog").open)$("sendTaskDialog").close();sendTaskContext=null;selectedSuggestionRecipient=null},450)}catch(e){status.textContent="Görev gönderilemedi. Yeniden deneyin.";status.classList.add("error");btn.disabled=false;btn.textContent="Gönder"}
+  try{const j=await api("sendTaskSuggestion",{token:getToken(),recipientUserId:selectedSuggestionRecipient.id,suggestedDate,items:sendTaskContext.items},{timeout:30000});if(!j.ok){if(j.error==="oturum"){expireSession();return}throw new Error(j.error||"hata")}status.textContent=`${selectedSuggestionRecipient.name} kullanıcısına gönderildi.`;setTimeout(()=>{if($("sendTaskDialog").open)$("sendTaskDialog").close();sendTaskContext=null;selectedSuggestionRecipient=null;connect({force:true,silent:true,reason:"task-shared"}).catch(()=>{})},450)}catch(e){status.textContent="Görev gönderilemedi. Yeniden deneyin.";status.classList.add("error");btn.disabled=false;btn.textContent="Gönder"}
 }
 
-function outgoingStatusLabel(status){return status==="alindi"||status==="kabul"?"Alındı":"Gönderildi"}
-function renderOutgoingLiveTree(container,items){
-  container.innerHTML="";const arr=Array.isArray(items)?items:[];
-  if(!arr.length){const p=document.createElement("p");p.className="incoming-empty";p.textContent="Alıcı bu görev grubundaki tüm görevleri silmiş.";container.append(p);return}
-  const ids=new Set(arr.map(x=>x.taskId).filter(Boolean));
-  arr.forEach(it=>{const line=document.createElement("div");const isSub=!!(it.parentTaskId&&ids.has(it.parentTaskId));line.className=`outgoing-task-line${isSub?" sub":""}${it.done?" done":""}`;const state=document.createElement("span");state.className="state";state.textContent=it.done?"✓":"○";const text=document.createElement("span");text.className="text";text.textContent=it.text||"";line.append(state,text);container.append(line)});
-}
-function renderOutgoingSuggestions(list){
-  const box=$("sentTasksList");box.innerHTML="";const arr=Array.isArray(list)?list:[];
-  if(!arr.length){const p=document.createElement("p");p.className="incoming-empty";p.textContent="Henüz görev göndermedin.";box.append(p);return}
-  arr.forEach(sug=>{const card=document.createElement("article");card.className="suggestion-card";const head=document.createElement("div");head.className="suggestion-card-head";const info=document.createElement("div");const strong=document.createElement("strong");strong.textContent=`${sug.recipient?.name||"Bir kullanıcı"} kullanıcısına gönderdin`;const small=document.createElement("small");small.textContent=sug.recipient?.username?`@${sug.recipient.username}`:"";info.append(strong,small);const tag=document.createElement("span");tag.className="outgoing-status";tag.textContent=outgoingStatusLabel(sug.status);head.append(info,tag);card.append(head);
-    const preview=document.createElement("div");preview.className="task-preview";
-    if(sug.status==="alindi"||sug.status==="kabul")renderOutgoingLiveTree(preview,sug.items||[]);else renderTaskTreePreview(preview,sug.items||[]);card.append(preview);
-    if(sug.status==="alindi"||sug.status==="kabul"){const prog=document.createElement("div");prog.className="outgoing-progress";prog.innerHTML=`Ana görev tamamlanma: <b>${Number(sug.completedCount)||0}/${Number(sug.totalCount)||0}</b>`;card.append(prog)}
-    box.append(card)});
-}
-async function loadOutgoingSuggestions(){
-  if(!requireLocalSession())return false;const box=$("sentTasksList");if(box)box.innerHTML='<p class="incoming-empty">Gönderilen görevler yükleniyor…</p>';
-  try{if(connectPromise){try{await connectPromise}catch(e){}}const j=await api("listOutgoingSuggestions",{token:getToken()},{timeout:30000});if(!j.ok){if(j.error==="oturum"){expireSession();return false}throw new Error(j.error||"hata")}outgoingSuggestionsCache=Array.isArray(j.suggestions)?j.suggestions:[];renderOutgoingSuggestions(outgoingSuggestionsCache);return true}catch(e){if(box)box.innerHTML='<p class="incoming-empty">Gönderdiklerin alınamadı.</p>';return false}
-}
-async function openSentTasksDialog(){closeAccountMenu();$("sentTasksDialog").showModal();await loadOutgoingSuggestions()}
 
 function taskMenuItem(label,svg,handler,cls=""){
   const b=document.createElement("button");b.type="button";b.className=`task-menu-item ${cls}`.trim();b.innerHTML=`${svg}<span>${label}</span>`;b.onclick=e=>{e.stopPropagation();handler?.()};return b;
@@ -1314,8 +1287,8 @@ function createTaskRow(it,{received=false}={}){
   const slot=document.createElement("span");slot.className="check-slot";
   const c=document.createElement("button");c.className="check";c.setAttribute("aria-label",it.done?"Tamamlandı işaretini kaldır":"Tamamlandı olarak işaretle");c.setAttribute("aria-pressed",it.done);c.disabled=isDeleting;c.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3L13 4.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';c.onclick=()=>toggle(it.id);
   const cue=document.createElement("span");cue.className="drag-cue";cue.setAttribute("aria-hidden","true");cue.innerHTML='<svg viewBox="0 0 20 20"><path d="M7.7 6.2 10 3l2.3 3.2Z"/><path d="M7.7 13.8 10 17l2.3-3.2Z"/><path d="M6.2 7.7 3 10l3.2 2.3Z"/><path d="M13.8 7.7 17 10l-3.2 2.3Z"/></svg>';slot.append(c,cue);
-  const span=document.createElement("span");span.className="txt";span.textContent=it.t;if(received)span.onclick=e=>{e.stopPropagation();if(Date.now()>=suppressTaskEditUntil)editTask(it.id,li)};
-  const hint=document.createElement("span");hint.className="hierarchy-hint";hint.textContent="Alt görev";
+  const span=document.createElement("span");span.className="txt";span.textContent=it.t;if(it.sharedTask){const mark=document.createElement("span");mark.className="shared-task-mark";mark.title=it.sharedRecipient?.username?`@${it.sharedRecipient.username} ile paylaşıldı`:"Paylaşılan görev";mark.setAttribute("aria-label",mark.title);mark.innerHTML='<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="6" cy="10" r="2.1"></circle><circle cx="14.5" cy="5.3" r="2.1"></circle><circle cx="14.5" cy="14.7" r="2.1"></circle><path d="m7.8 9 4.8-2.7M7.8 11l4.8 2.7"></path></svg>';span.append(mark)}if(received)span.onclick=e=>{e.stopPropagation();if(Date.now()>=suppressTaskEditUntil)editTask(it.id,li)};
+  const hint=document.createElement("span");hint.className="hierarchy-hint";hint.textContent=it.parentId?"Alt görev":"";hint.hidden=!it.parentId;
   const actions=document.createElement("div");actions.className="task-actions";
   if(isDeleting){
     const undo=document.createElement("button");undo.type="button";undo.className="undo-inline";undo.textContent="Geri al";undo.setAttribute("aria-label","Silmeyi geri al");undo.onclick=()=>undoDelete();actions.append(undo);
@@ -1652,7 +1625,7 @@ function topLevelBlocks(){
 }
 function siblingRows(parentId,excludeRow){return taskRows().filter(r=>r!==excludeRow&&rowParentId(r)===parentId)}
 function clearHierarchyPreview(){
-  taskRows().forEach(r=>{r.classList.remove("nest-preview","outdent-preview","nest-parent-candidate");const h=r.querySelector(".hierarchy-hint");if(h)h.textContent="Alt görev"});
+  taskRows().forEach(r=>{r.classList.remove("nest-preview","outdent-preview","nest-parent-candidate");const h=r.querySelector(".hierarchy-hint");if(h)h.textContent=r.dataset.parentId?"Alt görev":""});
   if(taskReorder?.row)taskReorder.row.style.setProperty("--drag-x","0px");
 }
 function previousTopLevelRow(row){
@@ -1939,17 +1912,17 @@ async function saveSettings(){
 }
 $("incomingTaskNotice").onclick=openIncomingTaskNotification;
 $("settings").onclick=e=>{e.stopPropagation();toggleAccountMenu()};
-$("menuSentTasks").onclick=openSentTasksDialog;$("menuSettings").onclick=openSettingsDialog;$("menuAdmin").onclick=openManagementDialog;
+$("menuSettings").onclick=openSettingsDialog;$("menuAdmin").onclick=openManagementDialog;
 $("closeSettingsX").onclick=discardSettingsAndClose;$("saveSettings").onclick=saveSettings;
 $("closeManagementX").onclick=()=>$("managementDialog").close();
 $("closeSendTaskX").onclick=()=>$("sendTaskDialog").close();$("cancelSendTask").onclick=()=>$("sendTaskDialog").close();$("confirmSendTask").onclick=sendTaskSuggestion;
 $("recipientSearch").addEventListener("input",e=>renderRecipientResults(e.target.value));
-$("closeSentTasksX").onclick=()=>$("sentTasksDialog").close();$("refreshSentTasks").onclick=()=>loadOutgoingSuggestions();
+
 $("refreshAdmin").onclick=()=>loadAdminPending({force:true});$("refreshRegistered").onclick=()=>loadRegisteredUsers({force:true});$("runDiagnostics").onclick=runDiagnostics;$("copyDiagnostics").onclick=copyDiagnostics;
 $("accountDialog").addEventListener("cancel",e=>{e.preventDefault();discardSettingsAndClose()});
 $("managementDialog").addEventListener("cancel",e=>{e.preventDefault();$("managementDialog").close()});
 $("sendTaskDialog").addEventListener("cancel",e=>{e.preventDefault();$("sendTaskDialog").close()});
-$("sentTasksDialog").addEventListener("cancel",e=>{e.preventDefault();$("sentTasksDialog").close()});
+
 document.addEventListener("click",e=>{if(!e.target.closest(".account-menu-wrap"))closeAccountMenu()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("accountDialog").open&&!$("managementDialog").open)closeAccountMenu()});
 $("logoutBtn").onclick=async()=>{closeAccountMenu();const token=getToken();try{if(token)await api("logout",{token})}catch(e){}clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();if($("accountDialog").open)$("accountDialog").close();if($("managementDialog").open)$("managementDialog").close();setSession("",null);applyTheme("lacivert");days={};pending=new Set();serverRevision=null;serverTaskMetaVersion=null;adminApprovals=null;registeredUsers=null;suggestionDirectory=null;incomingNotification=null;renderIncomingTaskNotice();render();setSyncStatus("idle");showGate(true);showPane("loginPane")};
