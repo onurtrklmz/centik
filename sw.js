@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v72: görev hiyerarşisi atomik server işlemiyle cihazlar ve paylaşım tarafları arasında authoritative senkronize edilir.
-const SURUM = "centik-v80-atomic-hierarchy-sync";
+// v46: kullanıcı simgesi daha dolgun glyph biçiminde güncellendi.
+const SURUM = "centik-v53-solid-account-icon";
 const KABUK = [
   "./",
   "./index.html",
