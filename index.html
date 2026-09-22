@@ -133,7 +133,7 @@ body::before{
   .brand-logo{width:2.2rem;height:2.2rem}
   .brand h1{font-size:1.72rem}
 }
-main{max-width:520px;min-height:calc(100vh - 64px);min-height:calc(100dvh - 64px);margin:0 auto;padding:20px 16px 116px;touch-action:pan-y}
+main{max-width:520px;min-height:calc(100vh - 64px);min-height:calc(100dvh - 64px);margin:0 auto;padding:20px 16px calc(116px + var(--edit-kb-pad,0px));touch-action:pan-y}
 h1,h2{font-family:var(--serif);font-weight:600;letter-spacing:-.015em;margin:0}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
@@ -258,7 +258,8 @@ body.task-reordering #list li.task-row{cursor:grabbing}
 .task-menu-item.danger{color:#b42318}
 .task-menu-item[disabled]{opacity:.48;cursor:not-allowed}
 .task-menu-item .soon{margin-left:auto;font-size:.65rem;font-weight:800;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 5px}
-.edit-input{flex:1;min-width:0;scroll-margin-top:84px;scroll-margin-bottom:24px;border:1px solid var(--focus);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;padding:7px 9px;outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 16%,transparent)}
+.edit-input{flex:1;min-width:0;scroll-margin-top:84px;scroll-margin-bottom:96px;border:1px solid var(--focus);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;padding:7px 9px;outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 16%,transparent)}
+body.edit-keyboard-active main{transition:padding-bottom .16s ease} 
 li.editing .check{opacity:.55}
 .edit-actions{display:flex;align-items:center;gap:4px;flex:none}.edit-actions button{width:32px;height:32px;border:0;border-radius:8px;display:grid;place-items:center;background:var(--bg);color:var(--muted);font-size:1rem;font-weight:800}.edit-actions .save-edit{color:var(--focus)}
 #moveTaskDialog{width:min(440px,calc(100% - 28px));max-width:none;padding:0;border:0;background:transparent;color:var(--ink);overflow:visible}
@@ -575,7 +576,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v49-mobile-modal-keyboard-fix", CENTIK_EXPECTED_SERVER_BUILD="v21-task-move";
+const CENTIK_CLIENT_BUILD="v50-keyboard-safe-edit", CENTIK_EXPECTED_SERVER_BUILD="v21-task-move";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -890,25 +891,84 @@ function expireSession(){clearTimeout(pendingDeleteTimer);pendingDeleteTimer=nul
 function addTask(t){t=t.trim();if(!t||!requireLocalSession())return;(days[current]=normalizeItems(days[current]||[])).push({id:uniqueTaskId(),t:t.slice(0,1000),done:false,parentId:""});persist(current);render()}
 function toggle(id){if(!requireLocalSession())return;if(pendingDelete?.id===id&&pendingDelete?.date===current)return;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id);if(!it)return;it.done=!it.done;lastPop=it.done?id:null;persist(current);render()}
 function updateTask(id,text){if(!requireLocalSession())return false;if(pendingDelete?.id===id&&pendingDelete?.date===current)return false;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id),t=String(text||'').trim();if(!it||!t)return false;it.t=t.slice(0,1000);persist(current);render();return true}
-let activeEditInput=null,editVisibilityTimer=null;
-function keepEditInputVisible(input=activeEditInput,behavior="smooth"){
-  if(!input||!document.contains(input)||document.activeElement!==input)return;
-  const row=input.closest(".task-row")||input,rect=row.getBoundingClientRect(),vv=window.visualViewport;
-  const viewportTop=vv?vv.offsetTop:0,viewportBottom=viewportTop+(vv?vv.height:window.innerHeight);
-  const safeTop=viewportTop+72,safeBottom=viewportBottom-18;let delta=0;
-  if(rect.bottom>safeBottom)delta=rect.bottom-safeBottom;else if(rect.top<safeTop)delta=rect.top-safeTop;
-  if(Math.abs(delta)>2)window.scrollBy({top:delta,behavior});
+let activeEditInput=null,editVisibilityTimer=null,editViewportBaseline=0,editKeyboardPad=0;
+function editViewportMetrics(){
+  const vv=window.visualViewport;
+  const layoutH=Math.max(window.innerHeight||0,document.documentElement.clientHeight||0,editViewportBaseline||0);
+  if(!vv)return {top:0,bottom:window.innerHeight||layoutH,height:window.innerHeight||layoutH,inset:0};
+  const top=Math.max(0,vv.offsetTop||0),height=vv.height||window.innerHeight||layoutH;
+  const baseline=Math.max(editViewportBaseline||0,layoutH,vv.height+(vv.offsetTop||0));
+  const rawInset=Math.max(0,baseline-height-top);
+  // Adres çubuğu gibi küçük viewport farklarını klavye sayma.
+  const inset=rawInset>80?rawInset:0;
+  return {top,bottom:top+height,height,inset};
+}
+function setEditKeyboardPad(px){
+  const next=Math.max(0,Math.round(px||0));
+  if(next===editKeyboardPad)return;
+  editKeyboardPad=next;
+  document.documentElement.style.setProperty("--edit-kb-pad",`${next}px`);
+  document.body.classList.toggle("edit-keyboard-active",next>0);
+}
+function clearEditKeyboardAssist(){
+  clearTimeout(editVisibilityTimer);editVisibilityTimer=null;
+  activeEditInput=null;editViewportBaseline=0;setEditKeyboardPad(0);
+}
+function keepEditInputVisible(input=activeEditInput,behavior="auto"){
+  if(!input||!document.contains(input)||document.activeElement!==input){
+    if(activeEditInput===input&&!document.contains(input))clearEditKeyboardAssist();
+    return;
+  }
+  const row=input.closest(".task-row")||input,m=editViewportMetrics();
+  // Klavye açıldığında dokümanın sonunda gerçek kaydırma alanı oluştur.
+  setEditKeyboardPad(m.inset?m.inset+72:0);
+  // Padding DOM yüksekliğine işlensin, sonra satırın konumunu yeniden ölç.
+  requestAnimationFrame(()=>{
+    if(!input||!document.contains(input)||document.activeElement!==input)return;
+    const rr=row.getBoundingClientRect(),mm=editViewportMetrics();
+    const safeTop=mm.top+70,safeBottom=mm.bottom-28;
+    let delta=0;
+    if(rr.bottom>safeBottom)delta=rr.bottom-safeBottom;
+    else if(rr.top<safeTop)delta=rr.top-safeTop;
+    if(Math.abs(delta)>1){
+      const maxScroll=Math.max(0,document.documentElement.scrollHeight-(window.innerHeight||mm.height));
+      const target=Math.max(0,Math.min(maxScroll,window.scrollY+delta));
+      window.scrollTo({top:target,behavior});
+    }
+    // Bazı mobil tarayıcılar ilk scroll'u klavye animasyonu sırasında geri alıyor.
+    requestAnimationFrame(()=>{
+      if(!document.contains(input)||document.activeElement!==input)return;
+      const r2=row.getBoundingClientRect(),m2=editViewportMetrics(),bottom2=m2.bottom-28;
+      if(r2.bottom>bottom2+2){
+        window.scrollBy({top:r2.bottom-bottom2,behavior:"auto"});
+      }
+    });
+  });
 }
 function scheduleEditVisibility(input){
-  activeEditInput=input;clearTimeout(editVisibilityTimer);
-  requestAnimationFrame(()=>keepEditInputVisible(input,"auto"));
-  [140,320,520].forEach((ms,i)=>setTimeout(()=>keepEditInputVisible(input,i?"smooth":"auto"),ms));
+  activeEditInput=input;
+  const vv=window.visualViewport;
+  editViewportBaseline=Math.max(window.innerHeight||0,document.documentElement.clientHeight||0,vv?(vv.height+(vv.offsetTop||0)):0);
+  clearTimeout(editVisibilityTimer);
+  [0,70,160,280,450,700,950].forEach((ms,i)=>setTimeout(()=>{
+    if(ms===160&&document.contains(input)&&document.activeElement===input){
+      const row=input.closest(".task-row")||input;
+      try{row.scrollIntoView({block:"center",inline:"nearest",behavior:"auto"})}catch(e){}
+    }
+    keepEditInputVisible(input,i<4?"auto":"smooth");
+  },ms));
+}
+function onEditViewportChange(){
+  if(!activeEditInput)return;
+  clearTimeout(editVisibilityTimer);
+  editVisibilityTimer=setTimeout(()=>keepEditInputVisible(activeEditInput,"auto"),20);
 }
 if(window.visualViewport){
-  const onEditViewportChange=()=>{clearTimeout(editVisibilityTimer);editVisibilityTimer=setTimeout(()=>keepEditInputVisible(activeEditInput,"smooth"),45)};
   window.visualViewport.addEventListener("resize",onEditViewportChange);
   window.visualViewport.addEventListener("scroll",onEditViewportChange);
 }
+window.addEventListener("resize",onEditViewportChange,{passive:true});
+window.addEventListener("orientationchange",()=>setTimeout(onEditViewportChange,120),{passive:true});
 function editTask(id,li){
   if(!requireLocalSession())return;
   const it=normalizeItems(days[current]||[]).find(x=>x.id===id);
@@ -924,7 +984,7 @@ function editTask(id,li){
   saveBtn.onclick=save;cancelBtn.onclick=()=>render();
   input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();save()}else if(e.key==="Escape"){e.preventDefault();render()}});
   input.addEventListener("focus",()=>scheduleEditVisibility(input));
-  input.addEventListener("blur",()=>setTimeout(()=>{if(document.activeElement!==input&&activeEditInput===input)activeEditInput=null},80));
+  input.addEventListener("blur",()=>setTimeout(()=>{if(document.activeElement!==input&&activeEditInput===input)clearEditKeyboardAssist()},120));
   requestAnimationFrame(()=>{try{input.focus({preventScroll:true})}catch(e){input.focus()}input.setSelectionRange(input.value.length,input.value.length);scheduleEditVisibility(input)});
 }
 function hideUndoToast(){}

@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v49: mobil tarih taşıma modalı ölçeklendi; görev düzenleme alanı klavye üstünde tutuluyor.
-const SURUM = "centik-v56-mobile-modal-keyboard-fix";
+// v50: mobil görev düzenleme alanı için klavye yüksekliği kadar kaydırma alanı ve güvenli görünürlük düzeltmesi.
+const SURUM = "centik-v57-keyboard-safe-edit";
 const KABUK = [
   "./",
   "./index.html",
