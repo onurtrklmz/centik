@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v64: çalışan v60 gönderim yolu korunur; çift yönlü paylaşım düzeltmeleri eklenir.
-const SURUM = "centik-v72-stable-share-rebase";
+// v65: ana görev silinince bağlı alt görevler de birlikte silinir.
+const SURUM = "centik-v73-cascade-delete";
 const KABUK = [
   "./",
   "./index.html",

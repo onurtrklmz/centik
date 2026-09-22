@@ -658,7 +658,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v64-stable-share-rebase", CENTIK_EXPECTED_SERVER_BUILD="v30-stable-share-rebase";
+const CENTIK_CLIENT_BUILD="v65-cascade-delete", CENTIK_EXPECTED_SERVER_BUILD="v30-stable-share-rebase";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, serverTaskMetaVersion=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -1089,11 +1089,24 @@ function editTask(id,li){
   requestAnimationFrame(()=>{try{input.focus({preventScroll:true})}catch(e){input.focus()}input.setSelectionRange(input.value.length,input.value.length);scheduleEditVisibility(input)});
 }
 function hideUndoToast(){}
+function deleteTreeIds(list,rootId){
+  const ids=new Set([String(rootId||"")]);
+  let changed=true;
+  while(changed){
+    changed=false;
+    list.forEach(it=>{
+      const id=String(it?.id||""),pid=String(it?.parentId||"");
+      if(id&&pid&&ids.has(pid)&&!ids.has(id)){ids.add(id);changed=true}
+    });
+  }
+  return ids;
+}
 function finalizeDelete(){
   if(!pendingDelete)return;clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;
-  const d=pendingDelete.date,id=pendingDelete.id,list=normalizeItems(days[d]||[]),idx=list.findIndex(x=>x.id===id);
-  if(idx>=0)list.splice(idx,1);
-  if(list.length)days[d]=list;else delete days[d];
+  const d=pendingDelete.date,id=pendingDelete.id,list=normalizeItems(days[d]||[]);
+  const removeIds=deleteTreeIds(list,id);
+  const next=list.filter(it=>!removeIds.has(String(it.id||"")));
+  if(next.length)days[d]=next;else delete days[d];
   pendingDelete=null;hideUndoToast();persist(d);render();
 }
 function undoDelete(){if(!pendingDelete)return;clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();render();setSyncStatus(pending.size?"loading":"success")}
@@ -1101,7 +1114,8 @@ function remove(id){
   if(!requireLocalSession())return;
   const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id);if(!it)return;
   if(pendingDelete)finalizeDelete();
-  pendingDelete={date:current,id,item:{...it}};
+  const treeIds=deleteTreeIds(list,id);
+  pendingDelete={date:current,id,item:{...it},treeIds:[...treeIds]};
   pendingDeleteTimer=setTimeout(finalizeDelete,DELETE_UNDO_MS);render();
 }
 function go(k){current=k;const d=fromKey(k);viewMonth=new Date(d.getFullYear(),d.getMonth(),1);render()}
@@ -1288,7 +1302,9 @@ async function moveTaskToDate(){
   }catch(e){days=before;saveLocal();render();btn.disabled=false;btn.textContent="Taşı";setSyncStatus("error")}
 }
 function createTaskRow(it,{received=false}={}){
-  const li=document.createElement("li"),isDeleting=pendingDelete?.date===current&&pendingDelete?.id===it.id;
+  const li=document.createElement("li"),isDeleting=pendingDelete?.date===current&&(
+    pendingDelete?.id===it.id||Array.isArray(pendingDelete?.treeIds)&&pendingDelete.treeIds.includes(it.id)
+  );
   li.classList.add("task-row");li.dataset.taskId=it.id;li.dataset.parentId=it.parentId||"";li.dataset.sourceSuggestionId=it.sourceSuggestionId||"";
   if(it.parentId)li.classList.add("subtask");if(it.done)li.classList.add("done");if(it.id===lastPop)li.classList.add("pop");if(isDeleting)li.classList.add("deleting");
   const slot=document.createElement("span");slot.className="check-slot";
