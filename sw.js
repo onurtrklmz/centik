@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v66: alınan göreve eklenen alt görev iki tarafa atomik olarak yazılır.
-const SURUM = "centik-v74-received-subtask-atomic";
+// v67: paylaşım tarih, sıra ve düzenlemelerde tam çift yönlü senkronize edilir.
+const SURUM = "centik-v75-full-bidirectional-sync";
 const KABUK = [
   "./",
   "./index.html",

@@ -658,7 +658,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v66-received-subtask-atomic", CENTIK_EXPECTED_SERVER_BUILD="v31-received-subtask-atomic";
+const CENTIK_CLIENT_BUILD="v67-full-bidirectional-sync", CENTIK_EXPECTED_SERVER_BUILD="v32-full-bidirectional-sync";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, serverTaskMetaVersion=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -1248,21 +1248,47 @@ function openSendTaskDialog(id){
   if(!requireLocalSession())return;closeTaskMenus();const ctx=suggestionItemsForTask(id);if(!ctx)return;sendTaskContext=ctx;selectedSuggestionRecipient=null;
   $("recipientSearch").value="";$("sendSuggestedDate").disabled=false;$("sendSuggestedDate").value=current;$("sendSuggestionStatus").textContent="";$("sendSuggestionStatus").classList.remove("error");$("confirmSendTask").disabled=false;$("confirmSendTask").textContent="Gönder";renderTaskTreePreview($("sendTaskPreview"),ctx.items);renderSelectedRecipient();$("sendTaskDialog").showModal();loadSuggestionDirectory();
 }
+async function ensureCurrentTaskSavedBeforeShare(){
+  const d=current;
+  clearTimeout(timers[d]);delete timers[d];
+  if(!pending.has(d))return true;
+  const ok=await enqueuePush(d);
+  return !!ok&&!pending.has(d);
+}
+
 async function sendTaskSuggestion(){
   if(!sendTaskContext||!requireLocalSession())return;const status=$("sendSuggestionStatus"),btn=$("confirmSendTask");status.classList.remove("error");
   if(!selectedSuggestionRecipient){status.textContent="Görevin gönderileceği kullanıcıyı seçin.";status.classList.add("error");return}
   const suggestedDate=String($("sendSuggestedDate").value||"");if(!/^\d{4}-\d{2}-\d{2}$/.test(suggestedDate)){status.textContent="Geçerli bir tarih seçin.";status.classList.add("error");return}
-  btn.disabled=true;btn.textContent="Gönderiliyor…";status.textContent="";
-  try{const j=await api("sendTaskSuggestion",{token:getToken(),recipientUserId:selectedSuggestionRecipient.id,suggestedDate,items:sendTaskContext.items},{timeout:30000});if(!j.ok){if(j.error==="oturum"){expireSession();return}throw new Error(j.error||"hata")}status.textContent=`${selectedSuggestionRecipient.name} kullanıcısına gönderildi.`;
+  btn.disabled=true;btn.textContent="Hazırlanıyor…";status.textContent="";
+  try{
+    const ready=await ensureCurrentTaskSavedBeforeShare();
+    if(!ready)throw new Error("on_kayit");
+    btn.textContent="Gönderiliyor…";
+    let j=await api("sendTaskSuggestion",{token:getToken(),recipientUserId:selectedSuggestionRecipient.id,suggestedDate,items:sendTaskContext.items},{timeout:30000});
+    if(j&&!j.ok&&["gorev","hiyerarsi","mesgul"].includes(String(j.error||""))){
+      if(j.error==="mesgul")await wait(650);
+      else{
+        pending.add(current);saveLocal();
+        const synced=await ensureCurrentTaskSavedBeforeShare();
+        if(!synced)throw new Error("on_kayit");
+      }
+      j=await api("sendTaskSuggestion",{token:getToken(),recipientUserId:selectedSuggestionRecipient.id,suggestedDate,items:sendTaskContext.items},{timeout:30000});
+    }
+    if(!j.ok){if(j.error==="oturum"){expireSession();return}throw new Error(j.error||"hata")}
+    status.textContent=`${selectedSuggestionRecipient.name} kullanıcısına gönderildi.`;
     try{
       const ids=new Set((sendTaskContext?.items||[]).map(x=>String(x.localId||"")));
       const list=normalizeItems(days[current]||[]);
       list.forEach(it=>{if(ids.has(String(it.id))){it.sharedTask=true;it.sharedRecipient={id:selectedSuggestionRecipient.id||"",name:selectedSuggestionRecipient.name||"",username:selectedSuggestionRecipient.username||""}}});
       days[current]=list;saveLocal();render();
     }catch(_){}
-    setTimeout(()=>{if($("sendTaskDialog").open)$("sendTaskDialog").close();sendTaskContext=null;selectedSuggestionRecipient=null},450)}catch(e){status.textContent="Görev gönderilemedi. Yeniden deneyin.";status.classList.add("error");btn.disabled=false;btn.textContent="Gönder"}
+    setTimeout(()=>{if($("sendTaskDialog").open)$("sendTaskDialog").close();sendTaskContext=null;selectedSuggestionRecipient=null},450);
+  }catch(e){
+    status.textContent=e?.message==="on_kayit"?"Görev önce sunucuya kaydedilemedi. Yenile düğmesine basıp tekrar deneyin.":"Görev gönderilemedi. Yeniden deneyin.";
+    status.classList.add("error");btn.disabled=false;btn.textContent="Gönder";
+  }
 }
-
 
 function taskMenuItem(label,svg,handler,cls=""){
   const b=document.createElement("button");b.type="button";b.className=`task-menu-item ${cls}`.trim();b.innerHTML=`${svg}<span>${label}</span>`;b.onclick=e=>{e.stopPropagation();handler?.()};return b;
