@@ -658,7 +658,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v63-send-reliability-schema-fix", CENTIK_EXPECTED_SERVER_BUILD="v29-send-reliability-schema-fix";
+const CENTIK_CLIENT_BUILD="v64-stable-share-rebase", CENTIK_EXPECTED_SERVER_BUILD="v30-stable-share-rebase";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, serverTaskMetaVersion=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -671,7 +671,7 @@ const LAST_GOOD_SUFFIX="last-good-days";
 let adminApprovals=null, adminApprovalsAt=0, adminLoadPromise=null;
 let registeredUsers=null, registeredUsersAt=0, registeredUsersLoadPromise=null;
 let diagnosticsResult=null;
-let incomingNotification=null, suggestionDirectory=null, suggestionDirectoryAt=0, selectedSuggestionRecipient=null, sendTaskContext=null, sendTaskRequestId=null;
+let incomingNotification=null, suggestionDirectory=null, suggestionDirectoryAt=0, selectedSuggestionRecipient=null, sendTaskContext=null;
 const DIAG_LOG_LIMIT=30;
 const $=id=>document.getElementById(id);
 const getToken=()=>{try{return localStorage.getItem(AUTH_TOKEN)||""}catch(e){return ""}};
@@ -1231,7 +1231,7 @@ async function loadSuggestionDirectory(force=false){
   try{const j=await api("searchUsers",{token:getToken(),query:""},{timeout:30000});if(!j.ok){if(j.error==="oturum"){expireSession();return false}throw new Error(j.error||"hata")}suggestionDirectory=Array.isArray(j.users)?j.users:[];suggestionDirectoryAt=Date.now();renderRecipientResults($("recipientSearch")?.value||"");return true}catch(e){if(box)box.innerHTML='<p class="directory-empty">Kullanıcı listesi alınamadı.</p>';return false}
 }
 function openSendTaskDialog(id){
-  if(!requireLocalSession())return;closeTaskMenus();const ctx=suggestionItemsForTask(id);if(!ctx)return;sendTaskContext=ctx;selectedSuggestionRecipient=null;sendTaskRequestId=(crypto.randomUUID?crypto.randomUUID():`${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  if(!requireLocalSession())return;closeTaskMenus();const ctx=suggestionItemsForTask(id);if(!ctx)return;sendTaskContext=ctx;selectedSuggestionRecipient=null;
   $("recipientSearch").value="";$("sendSuggestedDate").disabled=false;$("sendSuggestedDate").value=current;$("sendSuggestionStatus").textContent="";$("sendSuggestionStatus").classList.remove("error");$("confirmSendTask").disabled=false;$("confirmSendTask").textContent="Gönder";renderTaskTreePreview($("sendTaskPreview"),ctx.items);renderSelectedRecipient();$("sendTaskDialog").showModal();loadSuggestionDirectory();
 }
 async function sendTaskSuggestion(){
@@ -1239,7 +1239,14 @@ async function sendTaskSuggestion(){
   if(!selectedSuggestionRecipient){status.textContent="Görevin gönderileceği kullanıcıyı seçin.";status.classList.add("error");return}
   const suggestedDate=String($("sendSuggestedDate").value||"");if(!/^\d{4}-\d{2}-\d{2}$/.test(suggestedDate)){status.textContent="Geçerli bir tarih seçin.";status.classList.add("error");return}
   btn.disabled=true;btn.textContent="Gönderiliyor…";status.textContent="";
-  try{const j=await reliableApi("sendTaskSuggestion",{token:getToken(),recipientUserId:selectedSuggestionRecipient.id,suggestedDate,items:sendTaskContext.items,clientRequestId:sendTaskRequestId},{timeout:40000,retries:2});if(!j.ok){if(j.error==="oturum"){expireSession();return}throw new Error(j.error||"hata")}status.textContent=`${selectedSuggestionRecipient.name} kullanıcısına gönderildi.`;setTimeout(()=>{if($("sendTaskDialog").open)$("sendTaskDialog").close();sendTaskContext=null;selectedSuggestionRecipient=null;sendTaskRequestId=null;connect({force:true,silent:true,reason:"task-shared"}).catch(()=>{})},450)}catch(e){status.textContent=e?.message==="zaman_asimi"?"Sunucu yanıtı gecikti. Görev durumunu kontrol edip yeniden deneyin.":"Görev gönderilemedi. Yeniden deneyin.";status.classList.add("error");btn.disabled=false;btn.textContent="Gönder"}
+  try{const j=await api("sendTaskSuggestion",{token:getToken(),recipientUserId:selectedSuggestionRecipient.id,suggestedDate,items:sendTaskContext.items},{timeout:30000});if(!j.ok){if(j.error==="oturum"){expireSession();return}throw new Error(j.error||"hata")}status.textContent=`${selectedSuggestionRecipient.name} kullanıcısına gönderildi.`;
+    try{
+      const ids=new Set((sendTaskContext?.items||[]).map(x=>String(x.localId||"")));
+      const list=normalizeItems(days[current]||[]);
+      list.forEach(it=>{if(ids.has(String(it.id))){it.sharedTask=true;it.sharedRecipient={id:selectedSuggestionRecipient.id||"",name:selectedSuggestionRecipient.name||"",username:selectedSuggestionRecipient.username||""}}});
+      days[current]=list;saveLocal();render();
+    }catch(_){}
+    setTimeout(()=>{if($("sendTaskDialog").open)$("sendTaskDialog").close();sendTaskContext=null;selectedSuggestionRecipient=null},450)}catch(e){status.textContent="Görev gönderilemedi. Yeniden deneyin.";status.classList.add("error");btn.disabled=false;btn.textContent="Gönder"}
 }
 
 
