@@ -506,7 +506,7 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
   <dialog id="moveTaskDialog">
     <div class="move-task-box modal-box">
       <div class="move-task-content">
-        <button type="button" class="modal-close" id="closeMoveTaskX" aria-label="Tarih değiştirmeyi kapat" title="Kapat">×</button>
+        <button type="button" class="modal-close" id="closeMoveTaskX" aria-label="Taşımayı kapat" title="Kapat">×</button>
         <h2 class="move-task-title">Başka güne taşı</h2>
         <p class="move-task-name" id="moveTaskName"></p>
         <div class="move-quick">
@@ -576,7 +576,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v51-tap-edit-longpress-drag", CENTIK_EXPECTED_SERVER_BUILD="v21-task-move";
+const CENTIK_CLIENT_BUILD="v52-task-menu-cleanup", CENTIK_EXPECTED_SERVER_BUILD="v21-task-move";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -1126,16 +1126,12 @@ function render(){
     }else{
       const menuBtn=document.createElement("button");menuBtn.type="button";menuBtn.className="task-menu-btn";menuBtn.textContent="⋮";menuBtn.setAttribute("aria-label","Görev işlemleri");menuBtn.setAttribute("aria-haspopup","menu");menuBtn.setAttribute("aria-expanded","false");
       const pop=document.createElement("div");pop.className="task-menu-pop";pop.setAttribute("role","menu");pop.hidden=true;
-      const iconEdit='<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m4 14.8.7-3.2L13.2 3l3 3-8.6 8.5L4 14.8Z"></path><path d="m11.9 4.3 3 3"></path></svg>';
       const iconMove='<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3.2" y="4.7" width="13.6" height="11.8" rx="2"></rect><path d="M6.3 2.9v3.5M13.7 2.9v3.5M3.2 8h13.6"></path></svg>';
       const iconShare='<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="6" cy="10" r="2.1"></circle><circle cx="14.5" cy="5.3" r="2.1"></circle><circle cx="14.5" cy="14.7" r="2.1"></circle><path d="m7.8 9 4.8-2.7M7.8 11l4.8 2.7"></path></svg>';
       const iconDelete='<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 6h11M8 3.8h4M6.2 6l.7 10.2h6.2L13.8 6M8.5 8.5v5M11.5 8.5v5"></path></svg>';
-      pop.append(
-        taskMenuItem("Düzenle",iconEdit,()=>editTask(it.id,li)),
-        taskMenuItem("Tarih değiştir",iconMove,()=>openMoveTaskDialog(it.id))
-      );
-      const share=taskMenuItem("Paylaş",iconShare,()=>{});share.disabled=true;share.title="Görev önerileri altyapısı bir sonraki adımda bağlanacak";share.innerHTML+=`<span class="soon">yakında</span>`;pop.append(share);
       pop.append(taskMenuItem("Sil",iconDelete,()=>{closeTaskMenus();remove(it.id)},"danger"));
+      pop.append(taskMenuItem("Taşı",iconMove,()=>openMoveTaskDialog(it.id)));
+      const share=taskMenuItem("Paylaş",iconShare,()=>{});share.disabled=true;share.title="Görev önerileri altyapısı bir sonraki adımda bağlanacak";share.innerHTML+=`<span class="soon">yakında</span>`;pop.append(share);
       menuBtn.onclick=e=>{e.stopPropagation();toggleTaskMenu(li,pop,menuBtn)};pop.onclick=e=>e.stopPropagation();actions.append(menuBtn,pop);
     }
     li.append(slot,span,hint,actions);ul.append(li)

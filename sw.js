@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v51: görev metnine tek dokun/tık ile düzenleme; uzun basma/sürükleme ile taşıma-hiyerarşi ayrımı.
-const SURUM = "centik-v58-tap-edit-longpress-drag";
+// v52: görev işlem menüsü sadeleştirildi — Sil / Taşı / Paylaş.
+const SURUM = "centik-v59-task-menu-cleanup";
 const KABUK = [
   "./",
   "./index.html",
