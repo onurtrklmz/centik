@@ -664,7 +664,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v68-subtask-sync-unified", CENTIK_EXPECTED_SERVER_BUILD="v33-subtask-sync-unified";
+const CENTIK_CLIENT_BUILD="v69-authoritative-sync", CENTIK_EXPECTED_SERVER_BUILD="v34-authoritative-sync";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, serverTaskMetaVersion=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -928,7 +928,10 @@ async function pushNow(k){
     const opId=`${currentUser.id}|${k}|${Date.now().toString(36)}|${Math.random().toString(36).slice(2,7)}`;
     const j=await reliableApi("saveDay",{token,date:k,items:normalized,knownRevision:sentRevision,opId},{timeout:30000,retries:0});
     if(!j.ok){if(j.error==="oturum"){expireSession();return false}throw new Error(j.error||"hata")}
-    if(j.needsSync)invalidateRevision();else if(j.revision!==undefined)saveRevision(j.revision);
+    if(j.needsSync){
+      if(Array.isArray(j.mergedItems)){const merged=normalizeItems(j.mergedItems);if(merged.length)days[k]=merged;else delete days[k]}
+      invalidateRevision();
+    }else if(j.revision!==undefined)saveRevision(j.revision);
     pending.delete(k);saveLocal();saveLastGood();
     if(j.needsSync)scheduleForcedSync();
     setSyncStatus(pending.size?"loading":"success");return true;
@@ -972,7 +975,7 @@ async function connectNow({silent=false,force=false,reason=""}={}){
   lastSyncAttemptAt=Date.now();setSyncStatus("loading");recordSyncControl("start",reason,{force});
   try{
     // Revision her zaman gönderilir. "Force" yalnız HTTP kontrolünü zorlar; Sheet'i gereksiz yere tam taratmaz.
-    const j=await reliableApi("sync",{token,knownRevision:serverRevision,knownTaskMetaVersion:serverTaskMetaVersion},{timeout:30000,retries:0});
+    const j=await reliableApi("sync",{token,knownRevision:serverRevision,knownTaskMetaVersion:serverTaskMetaVersion,forceRead:!!force},{timeout:30000,retries:0});
     if(!j.ok){if(j.error==="oturum"){expireSession();return false}throw new Error(j.error||"hata")}
     currentUser=j.user||currentUser;setSession(token,currentUser);applyUserTheme(true);incomingNotification=j.incomingNotification||null;updateUserUI();renderIncomingTaskNotice();
     if(!j.unchanged){
@@ -1891,7 +1894,13 @@ $("moveTomorrow").onclick=()=>{$("moveTaskDate").value=addDays(todayKey(),1)};
 $("closeMoveTaskX").onclick=()=>$("moveTaskDialog").close();$("cancelMoveTask").onclick=()=>$("moveTaskDialog").close();$("confirmMoveTask").onclick=moveTaskToDate;
 $("moveTaskDialog").addEventListener("close",()=>{moveTaskContext=null;$("confirmMoveTask").disabled=false;$("confirmMoveTask").textContent="Taşı"});
 
-$("refresh").onclick=()=>connect({force:true,silent:false,reason:"manual"});
+$("refresh").onclick=async()=>{
+  if(pending.size){
+    const ok=await flushPending();
+    if(!ok&&pending.size){setSyncStatus("error");return}
+  }
+  await connect({force:true,silent:false,reason:"manual"});
+};
 
 let calendarOpen=false,calendarAnimating=false,drawerGesture=null,suppressCalendarClickUntil=0;
 const prefersReducedMotion=()=>window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;

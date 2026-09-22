@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v68: alt görev hiyerarşisi normal ve alınan görevlerde tek sürükle-bırak sistemiyle çift yönlü senkronize edilir.
-const SURUM = "centik-v76-subtask-sync-unified";
+// v69: manuel yenileme sunucuyu zorla okur; cihazlar ve paylaşımlar arasında stale veri kaybı engellenir.
+const SURUM = "centik-v77-authoritative-sync";
 const KABUK = [
   "./",
   "./index.html",
