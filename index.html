@@ -228,7 +228,7 @@ li.done .txt{color:var(--muted)}
 .check-slot{position:relative;flex:none;width:28px;height:28px;display:grid;place-items:center}
 .check-slot .check{position:absolute;inset:0}
 .drag-cue{position:absolute;inset:0;display:grid;place-items:center;color:var(--focus);opacity:0;transform:scale(.84);transition:opacity .12s ease,transform .16s ease;pointer-events:none}
-.drag-cue svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.drag-cue svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
 #list li.task-row.dragging{z-index:6;background:var(--paper);box-shadow:0 12px 28px rgba(0,0,0,.16);transform:translateX(var(--drag-x,0px)) scale(1.012);opacity:.98}
 #list li.task-row.dragging .txt{cursor:grabbing}
 #list li.task-row.dragging .check{opacity:0;pointer-events:none}
@@ -542,7 +542,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v45-upcoming-task-strip", CENTIK_EXPECTED_SERVER_BUILD="v20-task-hierarchy";
+const CENTIK_CLIENT_BUILD="v47-spaced-move-cue", CENTIK_EXPECTED_SERVER_BUILD="v20-task-hierarchy";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -941,7 +941,7 @@ function render(){
     if(it.parentId)li.classList.add("subtask");if(it.done)li.classList.add("done");if(it.id===lastPop)li.classList.add("pop");if(isDeleting)li.classList.add("deleting");
     const slot=document.createElement("span");slot.className="check-slot";
     const c=document.createElement("button");c.className="check";c.setAttribute("aria-label",it.done?"Tamamlandı işaretini kaldır":"Tamamlandı olarak işaretle");c.setAttribute("aria-pressed",it.done);c.disabled=isDeleting;c.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3L13 4.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';c.onclick=()=>toggle(it.id);
-    const cue=document.createElement("span");cue.className="drag-cue";cue.setAttribute("aria-hidden","true");cue.innerHTML='<svg viewBox="0 0 20 20"><path d="M10 2.6v14.8M6.8 5.8 10 2.6l3.2 3.2M6.8 14.2 10 17.4l3.2-3.2M2.6 10h14.8M5.8 6.8 2.6 10l3.2 3.2M14.2 6.8 17.4 10l-3.2 3.2"/></svg>';slot.append(c,cue);
+    const cue=document.createElement("span");cue.className="drag-cue";cue.setAttribute("aria-hidden","true");cue.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.25 7.9 12 3.65l2.75 4.25Z"/><path d="M7.9 9.25 3.65 12l4.25 2.75Z"/><path d="m16.1 9.25 4.25 2.75-4.25 2.75Z"/><path d="m9.25 16.1 2.75 4.25 2.75-4.25Z"/></svg>';slot.append(c,cue);
     const span=document.createElement("span");span.className="txt";span.textContent=it.t;
     const hint=document.createElement("span");hint.className="hierarchy-hint";hint.textContent="Alt görev";
     const actions=document.createElement("div");actions.className="task-actions";
