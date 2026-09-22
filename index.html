@@ -253,6 +253,13 @@ li.done .txt{color:var(--muted)}
 #list li.task-row.subtask::after{content:"";position:absolute;left:25px;top:50%;width:10px;height:1px;background:color-mix(in srgb,var(--focus) 34%,var(--line))}
 #list li.task-row.nest-parent-candidate{background:color-mix(in srgb,var(--focus) 9%,var(--paper));box-shadow:inset 3px 0 0 color-mix(in srgb,var(--focus) 70%,transparent)}
 #list li.task-row.nest-preview,#list li.task-row.outdent-preview{box-shadow:0 12px 28px rgba(0,0,0,.16),inset 0 0 0 2px color-mix(in srgb,var(--focus) 48%,transparent)}
+.received-list li.task-row.dragging{z-index:6;background:var(--paper);box-shadow:0 12px 28px rgba(0,0,0,.16);transform:translateX(var(--drag-x,0px)) scale(1.012);opacity:.98}
+.received-list li.task-row.dragging .check{opacity:0;pointer-events:none}
+.received-list li.task-row.dragging .drag-cue{opacity:1;transform:scale(1)}
+.received-list.reordering li.task-row:not(.dragging){will-change:transform}
+.received-list li.task-row.nest-parent-candidate{background:color-mix(in srgb,var(--focus) 9%,var(--paper));box-shadow:inset 3px 0 0 color-mix(in srgb,var(--focus) 70%,transparent)}
+.received-list li.task-row.nest-preview,.received-list li.task-row.outdent-preview{box-shadow:0 12px 28px rgba(0,0,0,.16),inset 0 0 0 2px color-mix(in srgb,var(--focus) 48%,transparent)}
+.received-sheet.external-nest-target{box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 52%,transparent),var(--shadow)}
 #list li.task-row.nest-preview::marker,#list li.task-row.outdent-preview::marker{display:none}
 #list li.task-row .hierarchy-hint{position:absolute;right:48px;top:50%;transform:translateY(-50%);padding:3px 7px;border-radius:999px;background:color-mix(in srgb,var(--focus) 12%,var(--paper));border:1px solid color-mix(in srgb,var(--focus) 28%,var(--line));color:var(--focus);font-size:.68rem;font-weight:800;letter-spacing:.01em;opacity:0;pointer-events:none;transition:opacity .12s ease}
 #list li.task-row.nest-preview .hierarchy-hint,#list li.task-row.outdent-preview .hierarchy-hint{opacity:1}
@@ -416,7 +423,6 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
 .outgoing-progress{margin-top:9px;color:var(--muted);font-size:.76rem;font-weight:750}.outgoing-progress b{color:var(--focus)}
 .outgoing-status{flex:none;border-radius:999px;padding:4px 8px;font-size:.7rem;font-weight:800;background:var(--accent-soft);color:var(--focus)}.outgoing-status.rejected{background:color-mix(in srgb,#b42318 10%,var(--paper));color:#b42318}.outgoing-status.pending{background:color-mix(in srgb,#f59e0b 12%,var(--paper));color:#9a6700}
 .outgoing-task-line{display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-size:.86rem;overflow-wrap:anywhere}.outgoing-task-line.sub{margin-left:20px;color:var(--muted)}.outgoing-task-line .state{flex:none;width:16px;text-align:center;color:var(--focus);font-weight:900}.outgoing-task-line.done .text{text-decoration:line-through;color:var(--muted)}
-.received-add-subtask{margin:8px 0 0 40px;border:0;background:transparent;color:var(--focus);font:750 .78rem var(--sans);padding:5px 2px;cursor:pointer}.received-add-subtask:hover{text-decoration:underline}
 @media(max-width:420px){#sendTaskDialog{width:calc(100vw - 20px)}.suggestion-box{padding:16px}.suggestion-card{padding:11px}.suggestion-footer{flex-wrap:wrap}.suggestion-footer button{min-height:40px}}
 
 </style>
@@ -658,7 +664,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v67-full-bidirectional-sync", CENTIK_EXPECTED_SERVER_BUILD="v32-full-bidirectional-sync";
+const CENTIK_CLIENT_BUILD="v68-subtask-sync-unified", CENTIK_EXPECTED_SERVER_BUILD="v33-subtask-sync-unified";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, serverTaskMetaVersion=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -1354,39 +1360,6 @@ function createTaskRow(it,{received=false}={}){
   }
   li.append(slot,span,hint,actions);return li;
 }
-async function addReceivedSubtask(sourceSuggestionId,rootId){
-  if(!requireLocalSession())return;
-  const text=window.prompt("Alt görev"),t=String(text||"").trim();
-  if(!t)return;
-  const sid=String(sourceSuggestionId||""),pid=String(rootId||"");
-  if(!sid||!pid)return;
-  setSyncStatus("loading");
-  try{
-    const j=await api("addReceivedSubtask",{token:getToken(),suggestionId:sid,parentTaskId:pid,text:t.slice(0,1000)},{timeout:30000});
-    if(!j?.ok){
-      if(j?.error==="oturum"){expireSession();return}
-      throw new Error(j?.error||"hata");
-    }
-    const item=j.item||{};
-    const list=normalizeItems(days[current]||[]);
-    if(item.id&&!list.some(x=>x.id===item.id)){
-      list.push({
-        id:String(item.id),
-        t:String(item.t||t).slice(0,1000),
-        done:!!item.done,
-        parentId:String(item.parentId||pid),
-        sourceSuggestionId:String(item.sourceSuggestionId||sid),
-        sourceSuggestionItemId:String(item.sourceSuggestionItemId||"")
-      });
-      days[current]=normalizeItems(list);
-    }
-    if(j.recipientRevision!==undefined)saveRevision(j.recipientRevision);
-    saveLocal();saveLastGood();render();setSyncStatus("success");
-  }catch(e){
-    setSyncStatus("error");
-    alert("Alt görev karşı tarafa eklenemedi. Yeniden deneyin.");
-  }
-}
 function renderReceivedTasks(items){
   const host=$("receivedTasks");host.innerHTML="";
   const groups=new Map();
@@ -1400,11 +1373,9 @@ function renderReceivedTasks(items){
     const title=document.createElement("strong");title.textContent="Alınan görevler";
     const who=document.createElement("span");who.className="received-sender";who.textContent=`Gönderen: ${sender.username?`@${sender.username}`:(sender.name||"Kullanıcı")}`;
     head.append(title,who);
-    const ul=document.createElement("ul");ul.className="received-list";
+    const ul=document.createElement("ul");ul.className="received-list";ul.dataset.suggestionId=String(first.sourceSuggestionId||"");
     group.forEach(it=>ul.append(createTaskRow(it,{received:true})));
-    const root=group.find(x=>!x.parentId)||group[0];
-    const addSub=document.createElement("button");addSub.type="button";addSub.className="received-add-subtask";addSub.textContent="+ Alt görev ekle";addSub.onclick=()=>addReceivedSubtask(first.sourceSuggestionId,root?.id||"");
-    box.append(head,ul,addSub);host.append(box);
+    box.append(head,ul);host.append(box);
   });
 }
 function render(){
@@ -1676,21 +1647,30 @@ globalDaySwipeSurface.addEventListener("pointerup",e=>{
 });
 globalDaySwipeSurface.addEventListener("pointercancel",resetGlobalDayGesture);
 
-// Görev sıralama + tek seviyeli alt görev: dikey hareket sıralar, belirgin yatay hareket hiyerarşiyi değiştirir.
-// Checkbox, düzenleme, silme ve input kontrolleri sıralamayı başlatmaz.
+// Görev sıralama + tek seviyeli alt görev.
+// Aynı motor hem normal görev listesinde hem "Alınan görevler" listelerinde çalışır.
+// Normal bir görev, alınan görev kutusunun üzerine sürüklenip sağa çekilirse o paylaşım grubunun alt görevi olur.
 const taskList=$("list");
+const receivedTaskHost=$("receivedTasks");
 const TASK_REORDER_HOLD_MS=320;
 const TASK_REORDER_FLIP_MS=190;
 const TASK_NEST_THRESHOLD=42;
 const TASK_NEST_RELEASE=24;
 let taskReorder=null,taskReorderHoldTimer=null,lastTaskFlipAt=0,suppressTaskEditUntil=0;
 const taskFlipAnimations=new WeakMap();
+
 function clearTaskReorderHold(){if(taskReorderHoldTimer){clearTimeout(taskReorderHoldTimer);taskReorderHoldTimer=null}}
-function taskReorderRow(target){return target?.closest?.("#list li.task-row[data-task-id]")||null}
+function taskReorderRow(target){return target?.closest?.("#list li.task-row[data-task-id],.received-list li.task-row[data-task-id]")||null}
 function taskReorderBlocked(target){return !target||!!target.closest("button,input,textarea,select,a,[contenteditable='true'],.editing,.deleting")}
-function taskRows(){return [...taskList.querySelectorAll("li.task-row[data-task-id]")]}
+function reorderListForRow(row){return row?.closest?.("ul")||taskList}
+function rowsForList(list){return [...(list||taskList).querySelectorAll(":scope > li.task-row[data-task-id]")]}
+function taskRows(){return rowsForList(taskReorder?.list||taskList)}
 function rowParentId(row){return String(row?.dataset?.parentId||"")}
 function rowHasChildren(row){const id=row?.dataset?.taskId||"";return !!id&&taskRows().some(x=>rowParentId(x)===id)}
+function listSuggestionId(list){return String(list?.dataset?.suggestionId||"")}
+function allTaskRows(){return [...document.querySelectorAll("#list > li.task-row[data-task-id],.received-list > li.task-row[data-task-id]")]}
+function clearExternalNestTarget(){document.querySelectorAll(".received-sheet.external-nest-target").forEach(x=>x.classList.remove("external-nest-target"))}
+
 function topLevelBlocks(){
   const rows=taskRows(),blocks=[];let currentBlock=null;
   rows.forEach(row=>{
@@ -1703,7 +1683,8 @@ function topLevelBlocks(){
 }
 function siblingRows(parentId,excludeRow){return taskRows().filter(r=>r!==excludeRow&&rowParentId(r)===parentId)}
 function clearHierarchyPreview(){
-  taskRows().forEach(r=>{r.classList.remove("nest-preview","outdent-preview","nest-parent-candidate");const h=r.querySelector(".hierarchy-hint");if(h)h.textContent=r.dataset.parentId?"Alt görev":""});
+  allTaskRows().forEach(r=>{r.classList.remove("nest-preview","outdent-preview","nest-parent-candidate");const h=r.querySelector(".hierarchy-hint");if(h){h.textContent=r.dataset.parentId?"Alt görev":"";h.hidden=!r.dataset.parentId}});
+  clearExternalNestTarget();
   if(taskReorder?.row)taskReorder.row.style.setProperty("--drag-x","0px");
 }
 function previousTopLevelRow(row){
@@ -1711,14 +1692,20 @@ function previousTopLevelRow(row){
   while(p){if(p.matches?.("li.task-row[data-task-id]")&&!rowParentId(p))return p;p=p.previousElementSibling}
   return null;
 }
+function receivedRootAt(clientX,clientY){
+  const hit=document.elementFromPoint(clientX,clientY),list=hit?.closest?.(".received-list");
+  if(!list)return null;
+  return rowsForList(list).find(r=>!rowParentId(r))||null;
+}
 function beginTaskReorder(row,clientX,clientY){
   if(!requireLocalSession())return;
   if(!taskReorder||taskReorder.active||!row||current!==taskReorder.date)return;
-  taskReorder.active=true;taskReorder.lastX=clientX;taskReorder.lastY=clientY;taskReorder.intent="";taskReorder.nestParentId="";lastTaskFlipAt=0;
+  taskReorder.list=reorderListForRow(row);
+  taskReorder.active=true;taskReorder.lastX=clientX;taskReorder.lastY=clientY;taskReorder.intent="";taskReorder.nestParentId="";taskReorder.externalNest=false;lastTaskFlipAt=0;
   taskReorder.originalParentId=rowParentId(row);taskReorder.hasChildren=rowHasChildren(row);
   row.classList.add("dragging");row.setAttribute("aria-grabbed","true");
   if(!taskReorder.originalParentId){const id=row.dataset.taskId;taskRows().filter(x=>rowParentId(x)===id).forEach(x=>x.classList.add("dragging-companion"))}
-  taskList.classList.add("reordering");document.body.classList.add("task-reordering");
+  taskReorder.list.classList.add("reordering");document.body.classList.add("task-reordering");
 }
 function animateTaskReorder(mutator){
   const rows=taskRows(),first=new Map(rows.map(el=>[el,el.getBoundingClientRect()]));
@@ -1739,86 +1726,147 @@ function moveTopLevelBlock(clientY){
   const d=taskReorder,row=d.row,blocks=topLevelBlocks(),own=blocks.find(b=>b.root===row);if(!own)return;
   const others=blocks.filter(b=>b!==own);let beforeBlock=null;
   for(const b of others){const r=b.root.getBoundingClientRect();if(clientY<r.top+r.height/2){beforeBlock=b;break}}
-  const ownRows=own.rows,firstOwn=ownRows[0],lastOwn=ownRows[ownRows.length-1];
-  const ref=beforeBlock?.root||null;
-  const already=ref?lastOwn.nextElementSibling===ref:taskList.lastElementChild===lastOwn;
+  const ownRows=own.rows,lastOwn=ownRows[ownRows.length-1],ref=beforeBlock?.root||null,list=d.list;
+  const already=ref?lastOwn.nextElementSibling===ref:list.lastElementChild===lastOwn;
   if(already)return;
-  animateTaskReorder(()=>{const frag=document.createDocumentFragment();ownRows.forEach(x=>frag.appendChild(x));if(ref)taskList.insertBefore(frag,ref);else taskList.appendChild(frag)});
+  animateTaskReorder(()=>{const frag=document.createDocumentFragment();ownRows.forEach(x=>frag.appendChild(x));if(ref)list.insertBefore(frag,ref);else list.appendChild(frag)});
 }
 function moveChildWithinSiblings(clientY){
   const d=taskReorder,row=d.row,pid=d.originalParentId,sibs=siblingRows(pid,row);if(!sibs.length)return;
   let before=null;for(const el of sibs){const r=el.getBoundingClientRect();if(clientY<r.top+r.height/2){before=el;break}}
-  const shouldMove=before?row.nextElementSibling!==before:sibs[sibs.length-1].nextElementSibling!==row&&taskList.lastElementChild!==row;
+  const list=d.list,shouldMove=before?row.nextElementSibling!==before:sibs[sibs.length-1].nextElementSibling!==row&&list.lastElementChild!==row;
   if(!shouldMove)return;
-  animateTaskReorder(()=>{
-    if(before)taskList.insertBefore(row,before);
-    else{const last=sibs[sibs.length-1];last.insertAdjacentElement("afterend",row)}
-  });
+  animateTaskReorder(()=>{if(before)list.insertBefore(row,before);else{sibs[sibs.length-1].insertAdjacentElement("afterend",row)}});
 }
-function updateHierarchyIntent(clientX){
-  const d=taskReorder;if(!d?.active)return false;const dx=clientX-d.startX;d.dragVisualX=Math.max(-34,Math.min(34,dx*.55));d.row.style.setProperty("--drag-x",`${d.dragVisualX}px`);
-  let next="";
-  if(d.originalParentId&&dx<=-TASK_NEST_THRESHOLD)next="outdent";
+function updateHierarchyIntent(clientX,clientY){
+  const d=taskReorder;if(!d?.active)return false;
+  const dx=clientX-d.startX;d.dragVisualX=Math.max(-34,Math.min(34,dx*.55));d.row.style.setProperty("--drag-x",`${d.dragVisualX}px`);
+  let next="",externalCandidate=null;
+  if(d.list===taskList&&!d.originalParentId&&!d.hasChildren&&dx>=TASK_NEST_THRESHOLD)externalCandidate=receivedRootAt(clientX,clientY);
+  if(externalCandidate)next="nest";
+  else if(d.originalParentId&&dx<=-TASK_NEST_THRESHOLD)next="outdent";
   else if(!d.originalParentId&&!d.hasChildren&&dx>=TASK_NEST_THRESHOLD)next="nest";
   else if(Math.abs(dx)<=TASK_NEST_RELEASE)next="";
   else next=d.intent||"";
   if(next===d.intent&&next!=="nest")return !!next;
-  clearHierarchyPreview();d.intent=next;d.nestParentId="";d.row.style.setProperty("--drag-x",`${d.dragVisualX}px`);
+  clearHierarchyPreview();d.intent=next;d.nestParentId="";d.externalNest=false;d.row.style.setProperty("--drag-x",`${d.dragVisualX}px`);
   if(next==="nest"){
-    const candidate=previousTopLevelRow(d.row);
-    if(candidate){d.nestParentId=candidate.dataset.taskId;candidate.classList.add("nest-parent-candidate");d.row.classList.add("nest-preview");const h=d.row.querySelector(".hierarchy-hint");if(h)h.textContent="Alt görev"}
-    else{d.intent="";d.row.style.setProperty("--drag-x",`${d.dragVisualX}px`)}
+    const candidate=externalCandidate||previousTopLevelRow(d.row);
+    if(candidate){
+      d.nestParentId=candidate.dataset.taskId;d.externalNest=!!externalCandidate;
+      candidate.classList.add("nest-parent-candidate");candidate.closest(".received-sheet")?.classList.toggle("external-nest-target",d.externalNest);
+      d.row.classList.add("nest-preview");const h=d.row.querySelector(".hierarchy-hint");if(h){h.textContent="Alt görev";h.hidden=false}
+    }else{d.intent="";d.row.style.setProperty("--drag-x",`${d.dragVisualX}px`)}
   }else if(next==="outdent"){
-    d.row.classList.add("outdent-preview");const h=d.row.querySelector(".hierarchy-hint");if(h)h.textContent="Ana görev";
+    d.row.classList.add("outdent-preview");const h=d.row.querySelector(".hierarchy-hint");if(h){h.textContent="Ana görev";h.hidden=false}
   }
   return !!d.intent;
 }
 function moveTaskReorder(clientX,clientY){
   const d=taskReorder;if(!d?.active||current!==d.date)return;d.lastX=clientX;d.lastY=clientY;
-  const hierarchyMode=updateHierarchyIntent(clientX);
+  const hierarchyMode=updateHierarchyIntent(clientX,clientY);
   if(!hierarchyMode&&Date.now()-lastTaskFlipAt>55){lastTaskFlipAt=Date.now();if(d.originalParentId)moveChildWithinSiblings(clientY);else moveTopLevelBlock(clientY)}
   const edge=72;if(clientY<edge)window.scrollBy({top:-10,behavior:"auto"});else if(clientY>window.innerHeight-edge)window.scrollBy({top:10,behavior:"auto"});
 }
 function commitHierarchyIntent(d,byId){
   const row=d.row,item=byId.get(row.dataset.taskId);if(!item)return false;let changed=false;
   if(d.intent==="nest"&&d.nestParentId&&d.nestParentId!==item.id){
-    item.parentId=d.nestParentId;row.dataset.parentId=d.nestParentId;row.classList.add("subtask");changed=true;
-    const candidate=taskRows().find(x=>x.dataset.taskId===d.nestParentId);if(candidate){
-      const children=taskRows().filter(x=>x!==row&&rowParentId(x)===d.nestParentId);const last=children.length?children[children.length-1]:candidate;
+    const parent=byId.get(d.nestParentId);
+    item.parentId=d.nestParentId;
+    if(d.externalNest&&parent?.sourceSuggestionId){
+      item.sourceSuggestionId=String(parent.sourceSuggestionId||"");
+      item.sourceSuggestionItemId="";
+    }
+    row.dataset.parentId=d.nestParentId;row.classList.add("subtask");changed=true;
+    const candidate=allTaskRows().find(x=>x.dataset.taskId===d.nestParentId);
+    if(candidate&&!d.externalNest){
+      const children=taskRows().filter(x=>x!==row&&rowParentId(x)===d.nestParentId),last=children.length?children[children.length-1]:candidate;
       animateTaskReorder(()=>last.insertAdjacentElement("afterend",row));
     }
   }else if(d.intent==="outdent"&&item.parentId){
     const oldPid=item.parentId,oldParent=taskRows().find(x=>x.dataset.taskId===oldPid);item.parentId="";row.dataset.parentId="";row.classList.remove("subtask");changed=true;
-    if(oldParent){const remaining=taskRows().filter(x=>x!==row&&rowParentId(x)===oldPid);const last=remaining.length?remaining[remaining.length-1]:oldParent;animateTaskReorder(()=>last.insertAdjacentElement("afterend",row))}
+    if(oldParent){const remaining=taskRows().filter(x=>x!==row&&rowParentId(x)===oldPid),last=remaining.length?remaining[remaining.length-1]:oldParent;animateTaskReorder(()=>last.insertAdjacentElement("afterend",row))}
   }
   return changed;
 }
 function finishTaskReorder(commit=true){
   clearTaskReorderHold();const d=taskReorder;if(!d)return;
   taskRows().forEach(el=>{const a=taskFlipAnimations.get(el);if(a){try{a.finish()}catch(_){ }taskFlipAnimations.delete(el)}});
-  const wasActive=d.active;if(wasActive)suppressTaskEditUntil=Date.now()+420;taskReorder=null;
+  const rowsBeforeClear=taskRows(),wasActive=d.active;if(wasActive)suppressTaskEditUntil=Date.now()+420;
   clearHierarchyPreview();
-  d.row?.classList.remove("dragging","nest-preview","outdent-preview");d.row?.removeAttribute("aria-grabbed");d.row?.style.removeProperty("--drag-x");taskRows().forEach(x=>x.classList.remove("dragging-companion","nest-parent-candidate"));taskList.classList.remove("reordering");document.body.classList.remove("task-reordering");
+  d.row?.classList.remove("dragging","nest-preview","outdent-preview");d.row?.removeAttribute("aria-grabbed");d.row?.style.removeProperty("--drag-x");
+  rowsBeforeClear.forEach(x=>x.classList.remove("dragging-companion","nest-parent-candidate"));d.list?.classList.remove("reordering");document.body.classList.remove("task-reordering");
+  taskReorder=null;
   if(!commit||!wasActive||current!==d.date)return;
-  const existing=normalizeItems(days[d.date]||[]),byId=new Map(existing.map(it=>[it.id,{...it}]));
+
+  const existingAll=normalizeItems(days[d.date]||[]),byId=new Map(existingAll.map(it=>[it.id,{...it}]));
   const hierarchyChanged=commitHierarchyIntent(d,byId);
-  const ids=taskRows().map(li=>li.dataset.taskId).filter(id=>byId.has(id));if(ids.length!==existing.length)return render();
-  const candidate=ids.map(id=>byId.get(id));const normalized=normalizeItems(candidate);
-  const oldSig=existing.map(it=>`${it.id}|${it.parentId||""}`).join("\u001f"),newSig=normalized.map(it=>`${it.id}|${it.parentId||""}`).join("\u001f");
+  const domIds=rowsForList(d.list).map(li=>li.dataset.taskId).filter(id=>byId.has(id));
+  const sid=listSuggestionId(d.list);
+
+  let subsetExisting;
+  if(d.list===taskList)subsetExisting=existingAll.filter(it=>!it.sourceSuggestionId);
+  else subsetExisting=existingAll.filter(it=>String(it.sourceSuggestionId||"")===sid);
+
+  if(domIds.length!==subsetExisting.length){
+    // Dışarıdaki bir paylaşım grubuna yeni taşınan görev, normal listedeki subseti bir azaltır.
+    if(!(d.externalNest&&d.list===taskList&&domIds.length===subsetExisting.length))return render();
+  }
+
+  const subsetCandidate=domIds.map(id=>byId.get(id)).filter(Boolean);
+  const oldSig=subsetExisting.map(it=>`${it.id}|${it.parentId||""}`).join("\u001f");
+  const newSig=subsetCandidate.map(it=>`${it.id}|${it.parentId||""}`).join("\u001f");
   if(!hierarchyChanged&&oldSig===newSig)return;
-  // Normalize sonucu ile DOM'u eşitle; render() çağırmayarak bırakma animasyonunun yarıda kesilmesini önle.
-  const rowMap=new Map(taskRows().map(r=>[r.dataset.taskId,r]));
-  normalized.forEach(it=>{const r=rowMap.get(it.id);if(!r)return;r.dataset.parentId=it.parentId||"";r.classList.toggle("subtask",!!it.parentId)});
-  const normalizedIds=normalized.map(it=>it.id),domIds=taskRows().map(r=>r.dataset.taskId);
-  if(normalizedIds.some((id,i)=>id!==domIds[i]))animateTaskReorder(()=>normalizedIds.forEach(id=>{const r=rowMap.get(id);if(r)taskList.appendChild(r)}));
-  days[d.date]=normalized;persist(d.date);
+
+  const subsetIds=new Set(subsetCandidate.map(it=>it.id));
+  let merged=[];
+  if(d.list===taskList){
+    // Normal liste sırası + günün alınan görevleri. External nest olan satır artık sourceSuggestionId taşıdığı için alınan gruba geçer.
+    subsetCandidate.forEach(it=>{if(!it.sourceSuggestionId)merged.push(it)});
+    existingAll.forEach(orig=>{
+      const it=byId.get(orig.id);
+      if(it&&it.sourceSuggestionId&&!subsetIds.has(it.id))merged.push(it);
+    });
+    subsetCandidate.forEach(it=>{if(it.sourceSuggestionId)merged.push(it)});
+  }else{
+    existingAll.forEach(orig=>{
+      const it=byId.get(orig.id);if(!it)return;
+      if(String(it.sourceSuggestionId||"")!==sid)merged.push(it);
+    });
+    subsetCandidate.forEach(it=>{
+      it.sourceSuggestionId=sid||it.sourceSuggestionId||"";
+      merged.push(it);
+    });
+  }
+
+  days[d.date]=normalizeItems(merged);persist(d.date);render();
 }
 
-// Masaüstü: kısa tık görev metnini düzenler; basıp anlamlı miktarda sürükleme taşıma/hiyerarşi modunu başlatır.
-taskList.addEventListener("mousedown",e=>{
-  if(e.button!==0||taskReorderBlocked(e.target))return;const row=taskReorderRow(e.target);if(!row)return;
-  taskReorder={mode:"mouse",active:false,row,date:current,startX:e.clientX,startY:e.clientY,lastX:e.clientX,lastY:e.clientY};
-});
+function beginReorderFromEvent(row,mode,x,y){
+  taskReorder={mode,active:false,row,date:current,list:reorderListForRow(row),startX:x,startY:y,lastX:x,lastY:y};
+}
+function bindTaskReorderSurface(surface){
+  surface.addEventListener("mousedown",e=>{
+    if(e.button!==0||taskReorderBlocked(e.target))return;const row=taskReorderRow(e.target);if(!row||!surface.contains(row))return;
+    beginReorderFromEvent(row,"mouse",e.clientX,e.clientY);
+  });
+  surface.addEventListener("touchstart",e=>{
+    if(e.touches.length!==1||taskReorderBlocked(e.target))return;const row=taskReorderRow(e.target);if(!row||!surface.contains(row))return;
+    const t=e.touches[0];clearTaskReorderHold();beginReorderFromEvent(row,"touch",t.clientX,t.clientY);
+    taskReorderHoldTimer=setTimeout(()=>{if(taskReorder?.mode==="touch"&&!taskReorder.active){beginTaskReorder(taskReorder.row,taskReorder.lastX,taskReorder.lastY);try{navigator.vibrate?.(8)}catch(_){}}},TASK_REORDER_HOLD_MS);
+  },{passive:true});
+  surface.addEventListener("touchmove",e=>{
+    const d=taskReorder;if(!d||d.mode!=="touch"||e.touches.length!==1)return;const t=e.touches[0];d.lastX=t.clientX;d.lastY=t.clientY;
+    if(!d.active){if(Math.hypot(t.clientX-d.startX,t.clientY-d.startY)>9){clearTaskReorderHold();taskReorder=null}return}
+    e.preventDefault();moveTaskReorder(t.clientX,t.clientY);
+  },{passive:false});
+  surface.addEventListener("touchend",()=>{if(taskReorder?.mode==="touch")finishTaskReorder(true)});
+  surface.addEventListener("touchcancel",()=>{if(taskReorder?.mode==="touch")finishTaskReorder(false)});
+  surface.addEventListener("contextmenu",e=>{if(taskReorder?.active&&taskReorderRow(e.target))e.preventDefault()});
+}
+bindTaskReorderSurface(taskList);
+bindTaskReorderSurface(receivedTaskHost);
+
 window.addEventListener("mousemove",e=>{
   const d=taskReorder;if(!d||d.mode!=="mouse")return;
   if(!d.active){const dx=e.clientX-d.startX,dy=e.clientY-d.startY;if(Math.hypot(dx,dy)<8)return;beginTaskReorder(d.row,e.clientX,e.clientY)}
@@ -1826,28 +1874,15 @@ window.addEventListener("mousemove",e=>{
 });
 window.addEventListener("mouseup",()=>{if(taskReorder?.mode==="mouse")finishTaskReorder(true)});
 
-// Dokunmatik: kısa dokunma görev metnini düzenler; uzun basılı tut + sürükle taşıma/hiyerarşi modunu başlatır.
-taskList.addEventListener("touchstart",e=>{
-  if(e.touches.length!==1||taskReorderBlocked(e.target))return;const row=taskReorderRow(e.target);if(!row)return;
-  const t=e.touches[0];clearTaskReorderHold();taskReorder={mode:"touch",active:false,row,date:current,startX:t.clientX,startY:t.clientY,lastX:t.clientX,lastY:t.clientY};
-  taskReorderHoldTimer=setTimeout(()=>{if(taskReorder?.mode==="touch"&&!taskReorder.active){beginTaskReorder(taskReorder.row,taskReorder.lastX,taskReorder.lastY);try{navigator.vibrate?.(8)}catch(_){}}},TASK_REORDER_HOLD_MS);
-},{passive:true});
-taskList.addEventListener("touchmove",e=>{
-  const d=taskReorder;if(!d||d.mode!=="touch"||e.touches.length!==1)return;const t=e.touches[0];d.lastX=t.clientX;d.lastY=t.clientY;
-  if(!d.active){if(Math.hypot(t.clientX-d.startX,t.clientY-d.startY)>9){clearTaskReorderHold();taskReorder=null}return}
-  e.preventDefault();moveTaskReorder(t.clientX,t.clientY);
-},{passive:false});
-taskList.addEventListener("touchend",()=>{if(taskReorder?.mode==="touch")finishTaskReorder(true)});
-taskList.addEventListener("touchcancel",()=>{if(taskReorder?.mode==="touch")finishTaskReorder(false)});
-taskList.addEventListener("contextmenu",e=>{if(taskReorder?.active&&taskReorderRow(e.target))e.preventDefault()});
-
-// Görev metnine kısa dokun/tık = düzenle. Uzun basma/sürükleme bittikten sonra oluşabilecek sentetik click bastırılır.
-taskList.addEventListener("click",e=>{
+// Normal ve alınan görevlerde kısa tık = düzenle.
+function taskTextClickHandler(e){
   const text=e.target.closest?.(".txt");if(!text)return;
   if(Date.now()<suppressTaskEditUntil)return;
   const row=taskReorderRow(text);if(!row||row.classList.contains("dragging")||row.classList.contains("deleting"))return;
   editTask(row.dataset.taskId,row);
-});
+}
+taskList.addEventListener("click",taskTextClickHandler);
+receivedTaskHost.addEventListener("click",taskTextClickHandler);
 
 document.addEventListener("click",e=>{if(!e.target.closest?.(".task-actions"))closeTaskMenus()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&openTaskMenu){closeTaskMenus();return}if(e.key==="Escape"&&$("moveTaskDialog")?.open)$("moveTaskDialog").close()});
