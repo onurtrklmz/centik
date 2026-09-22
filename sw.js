@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v60: gelen görevler otomatik eklenir; ana ekranda tek seferlik yeni görev bildirimi gösterilir.
-const SURUM = "centik-v69-bidirectional-task-share";
+const SURUM = "centik-v70-send-reliability";
 const KABUK = [
   "./",
   "./index.html",
