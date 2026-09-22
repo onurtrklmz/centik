@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v71: paylaşılan göreve eklenen alt görev paylaşım simgesini anında ve save sonrası doğrulanmış biçimde devralır.
-const SURUM = "centik-v79-share-mark-propagation";
+// v72: görev hiyerarşisi atomik server işlemiyle cihazlar ve paylaşım tarafları arasında authoritative senkronize edilir.
+const SURUM = "centik-v80-atomic-hierarchy-sync";
 const KABUK = [
   "./",
   "./index.html",

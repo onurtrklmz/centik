@@ -664,7 +664,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v71-share-mark-propagation", CENTIK_EXPECTED_SERVER_BUILD="v36-share-mark-propagation";
+const CENTIK_CLIENT_BUILD="v72-atomic-hierarchy-sync", CENTIK_EXPECTED_SERVER_BUILD="v37-atomic-hierarchy-sync";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, serverTaskMetaVersion=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -891,6 +891,48 @@ function saveRevision(r){if(!currentUser||r===null||r===undefined)return;const n
 function invalidateRevision(){serverRevision=null;if(!currentUser)return;try{localStorage.removeItem(userKey("revision"))}catch(e){}}
 function saveLocal(){if(!currentUser)return;const norm=normalizeDays(days);days=norm.days;try{localStorage.setItem(userKey("days"),JSON.stringify(days));localStorage.setItem(userKey("pending"),JSON.stringify([...pending]));if(serverRevision!==null)localStorage.setItem(userKey("revision"),String(serverRevision));if(serverTaskMetaVersion!==null)localStorage.setItem(userKey("taskMetaVersion"),String(serverTaskMetaVersion))}catch(e){}}
 function clearUserLocal(){if(!currentUser)return;try{localStorage.removeItem(userKey("days"));localStorage.removeItem(userKey("pending"));localStorage.removeItem(userKey("revision"));localStorage.removeItem(userKey("taskMetaVersion"));localStorage.removeItem(userKey(LAST_GOOD_SUFFIX))}catch(e){}serverRevision=null;serverTaskMetaVersion=null}
+async function commitHierarchyToServer(date,item){
+  if(!currentUser||!getToken()||!item?.id)return false;
+  setSyncStatus("loading");
+  try{
+    const j=await api("setTaskHierarchy",{
+      token:getToken(),
+      date:date,
+      item:{id:item.id,t:item.t,done:!!item.done,parentId:item.parentId||""}
+    },{timeout:30000});
+    if(!j?.ok){
+      if(j?.error==="oturum"){expireSession();return false}
+      throw new Error(j?.error||"hata");
+    }
+    if(j.revision!==undefined)saveRevision(j.revision);
+
+    const list=normalizeItems(days[date]||[]),local=list.find(x=>x.id===item.id);
+    if(local&&j.item){
+      local.parentId=String(j.item.parentId||"");
+      local.sourceSuggestionId=String(j.item.sourceSuggestionId||local.sourceSuggestionId||"");
+      local.sourceSuggestionItemId=String(j.item.sourceSuggestionItemId||local.sourceSuggestionItemId||"");
+    }
+    if(j.sharedMappedTaskIds)applySharedMappedMetaLocally(date,j.sharedMappedTaskIds);
+    days[date]=normalizeItems(list);saveLocal();saveLastGood();
+    return true;
+  }catch(e){
+    setSyncStatus("error");
+    return false;
+  }
+}
+
+function persistHierarchy(k,item){
+  if(!requireLocalSession())return;
+  pending.add(k);saveLocal();clearTimeout(timers[k]);
+  // Hiyerarşi server'a atomik yazılmadan saveDay çalışmasın.
+  timers[k]=setTimeout(async()=>{
+    const ok=await commitHierarchyToServer(k,item);
+    if(!ok)return;
+    // Parent artık server'da authoritative; aynı günün sıra/metin/tik durumu normal saveDay ile yazılır.
+    enqueuePush(k);
+  },80);
+}
+
 function persist(k){
   if(!requireLocalSession())return;pending.add(k);saveLocal();clearTimeout(timers[k]);
   timers[k]=setTimeout(()=>enqueuePush(k),700);
@@ -1873,7 +1915,11 @@ function finishTaskReorder(commit=true){
     });
   }
 
-  days[d.date]=normalizeItems(merged);persist(d.date);render();
+  days[d.date]=normalizeItems(merged);
+  const changedItem=byId.get(d.row?.dataset?.taskId||"");
+  if(hierarchyChanged&&changedItem)persistHierarchy(d.date,changedItem);
+  else persist(d.date);
+  render();
 }
 
 function beginReorderFromEvent(row,mode,x,y){
@@ -1926,6 +1972,8 @@ $("closeMoveTaskX").onclick=()=>$("moveTaskDialog").close();$("cancelMoveTask").
 $("moveTaskDialog").addEventListener("close",()=>{moveTaskContext=null;$("confirmMoveTask").disabled=false;$("confirmMoveTask").textContent="Taşı"});
 
 $("refresh").onclick=async()=>{
+  // Yeni hierarchy commit timer'ı varsa önce onun atomik parent yazımına fırsat ver.
+  await wait(120);
   if(pending.size){
     const ok=await flushPending();
     if(!ok&&pending.size){setSyncStatus("error");return}
