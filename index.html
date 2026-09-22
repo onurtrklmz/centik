@@ -664,7 +664,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v70-mirror-result-verify", CENTIK_EXPECTED_SERVER_BUILD="v35-mirror-result-verify";
+const CENTIK_CLIENT_BUILD="v71-share-mark-propagation", CENTIK_EXPECTED_SERVER_BUILD="v36-share-mark-propagation";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, serverTaskMetaVersion=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -920,6 +920,27 @@ async function flushPending(){
   if(!pushWorker)pushWorker=drainPushQueue().finally(()=>{pushWorker=null});
   return pushWorker||true;
 }
+function applySharedMappedMetaLocally(date,mappedIds){
+  if(!Array.isArray(mappedIds)||!mappedIds.length)return;
+  const wanted=new Set(mappedIds.map(String)),list=normalizeItems(days[date]||[]),byId=new Map(list.map(it=>[String(it.id),it]));
+  let changed=false;
+  list.forEach(it=>{
+    if(!wanted.has(String(it.id))||it.sharedTask)return;
+    let parent=it.parentId?byId.get(String(it.parentId)):null;
+    if(parent?.sharedTask){
+      it.sharedTask=true;
+      it.sharedSuggestionId=String(parent.sharedSuggestionId||"");
+      it.sharedRecipient=parent.sharedRecipient?{
+        id:String(parent.sharedRecipient.id||""),
+        name:String(parent.sharedRecipient.name||""),
+        username:String(parent.sharedRecipient.username||"")
+      }:null;
+      changed=true;
+    }
+  });
+  if(changed){days[date]=normalizeItems(list);saveLocal();render()}
+}
+
 async function pushNow(k){
   const token=getToken();if(!token||!currentUser)return false;setSyncStatus("loading");
   try{
@@ -932,6 +953,7 @@ async function pushNow(k){
       if(Array.isArray(j.mergedItems)){const merged=normalizeItems(j.mergedItems);if(merged.length)days[k]=merged;else delete days[k]}
       invalidateRevision();
     }else if(j.revision!==undefined)saveRevision(j.revision);
+    applySharedMappedMetaLocally(k,j.sharedMappedTaskIds||[]);
     pending.delete(k);saveLocal();saveLastGood();
     if(j.needsSync)scheduleForcedSync();
     setSyncStatus(pending.size?"loading":"success");return true;
@@ -1776,6 +1798,15 @@ function commitHierarchyIntent(d,byId){
   if(d.intent==="nest"&&d.nestParentId&&d.nestParentId!==item.id){
     const parent=byId.get(d.nestParentId);
     item.parentId=d.nestParentId;
+    if(parent?.sharedTask){
+      item.sharedTask=true;
+      item.sharedSuggestionId=String(parent.sharedSuggestionId||"");
+      item.sharedRecipient=parent.sharedRecipient?{
+        id:String(parent.sharedRecipient.id||""),
+        name:String(parent.sharedRecipient.name||""),
+        username:String(parent.sharedRecipient.username||"")
+      }:null;
+    }
     if(d.externalNest&&parent?.sourceSuggestionId){
       item.sourceSuggestionId=String(parent.sourceSuggestionId||"");
       item.sourceSuggestionItemId="";

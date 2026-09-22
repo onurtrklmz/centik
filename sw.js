@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v70: paylaşım mirror doğrulaması ikinci Sheet taraması olmadan ilk mirror sonucundan yapılır.
-const SURUM = "centik-v78-mirror-result-verify";
+// v71: paylaşılan göreve eklenen alt görev paylaşım simgesini anında ve save sonrası doğrulanmış biçimde devralır.
+const SURUM = "centik-v79-share-mark-propagation";
 const KABUK = [
   "./",
   "./index.html",
