@@ -373,6 +373,23 @@ body.day-swipe-active{cursor:grabbing}
 body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!important}
 @media(max-width:560px){.user-chip{display:none!important}.auth-card{padding:20px;border-radius:18px}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+
+/* ——— Görev önerileri / kullanıcı adı ——— */
+.account-menu-wrap{position:relative}
+.suggestion-badge{position:absolute;left:-5px;top:-5px;z-index:4;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#D92D20;color:#fff;border:2px solid var(--bar);font:800 .62rem/14px var(--sans);text-align:center;box-shadow:0 2px 7px rgba(217,45,32,.28);pointer-events:none}
+.account-menu-count{margin-left:auto;min-width:21px;height:21px;padding:0 6px;border-radius:999px;background:#D92D20;color:#fff;display:inline-grid;place-items:center;font-size:.68rem;font-weight:800}
+.username-settings{margin:18px 0 4px;padding:14px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--paper) 88%,transparent)}
+.username-settings h3{margin:0 0 4px;font-size:.96rem}.username-settings p{margin:0 0 11px;color:var(--muted);font-size:.82rem}.username-field{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:10px;background:var(--bg);overflow:hidden}.username-field span{padding:0 0 0 11px;color:var(--muted);font-weight:800}.username-field input{min-width:0;width:100%;border:0;background:transparent;color:var(--ink);padding:10px 11px 10px 2px;font:inherit;outline:none}.username-field:focus-within{border-color:var(--focus);box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 14%,transparent)}
+.username-help{margin:7px 0 0!important;font-size:.75rem!important}
+#sendTaskDialog,#suggestionsDialog{width:min(92vw,500px);max-height:min(90vh,780px);padding:0;border:0;background:transparent;color:var(--ink);overflow:visible}
+#sendTaskDialog::backdrop,#suggestionsDialog::backdrop{background:rgba(5,9,20,.46);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+.suggestion-box{padding:20px}.suggestion-section{margin-top:16px}.suggestion-label{display:block;margin:0 0 7px;color:var(--muted);font-size:.78rem;font-weight:800}.suggestion-search{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:11px 12px;font:inherit;outline:none}.suggestion-search:focus{border-color:var(--focus);box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 14%,transparent)}
+.directory-list{display:grid;gap:6px;margin-top:8px;max-height:190px;overflow:auto}.directory-user{width:100%;min-width:0;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:9px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left}.directory-user:hover,.directory-user:focus-visible,.directory-user.selected{border-color:var(--focus);background:color-mix(in srgb,var(--focus) 8%,var(--paper));outline:none}.directory-user strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.directory-user small{display:block;color:var(--muted);font-size:.73rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.directory-user .pick{flex:none;color:var(--focus);font-weight:800}.directory-empty{margin:8px 2px;color:var(--muted);font-size:.8rem}
+.selected-recipient{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;padding:9px 11px;border-radius:10px;background:color-mix(in srgb,var(--focus) 9%,var(--paper));border:1px solid color-mix(in srgb,var(--focus) 28%,var(--line));font-size:.84rem}.selected-recipient button{border:0;background:transparent;color:var(--muted);font-weight:800;padding:2px 4px}.task-preview{border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:11px 12px}.task-preview-root{font-weight:750;overflow-wrap:anywhere}.task-preview-sub{position:relative;margin:7px 0 0 18px;padding-left:13px;color:var(--muted);font-size:.84rem;overflow-wrap:anywhere}.task-preview-sub::before{content:"";position:absolute;left:0;top:.72em;width:7px;height:1px;background:var(--focus);opacity:.58}
+.send-date-row{display:flex;align-items:center;gap:10px}.send-date-row input[type="checkbox"]{accent-color:var(--focus)}.send-date-row label{font-size:.82rem;font-weight:700}.send-date-input{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:10px 11px;font:inherit}.send-date-input:disabled{opacity:.48}.suggestion-status{min-height:1.35em;margin:10px 0 0;color:var(--muted);font-size:.8rem}.suggestion-status.error{color:#c63232}.suggestion-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}.suggestion-footer button{border:1px solid var(--line);border-radius:9px;padding:9px 13px;background:var(--paper);color:var(--ink);font-weight:750}.suggestion-footer .primary{background:linear-gradient(135deg,var(--accent-start),var(--accent-end));border-color:transparent;color:#fff}.suggestion-footer button:disabled{opacity:.55;cursor:default}
+.incoming-toolbar{display:flex;justify-content:flex-end;margin:6px 0 10px}.incoming-toolbar button{border:0;background:transparent;color:var(--focus);font-weight:750;padding:4px 0}.incoming-list{display:grid;gap:11px;max-height:min(65vh,560px);overflow:auto;padding-right:2px}.suggestion-card{border:1px solid var(--line);border-radius:13px;background:var(--bg);padding:13px}.suggestion-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}.suggestion-card-head strong{display:block;font-size:.9rem}.suggestion-card-head small{display:block;color:var(--muted);margin-top:2px;font-size:.73rem}.suggestion-date-tag{flex:none;border-radius:999px;background:var(--accent-soft);color:var(--focus);padding:4px 8px;font-size:.7rem;font-weight:800}.suggestion-card .task-preview{background:var(--paper)}.accept-date{display:grid;gap:5px;margin-top:11px;color:var(--muted);font-size:.74rem;font-weight:750}.accept-date input{width:100%;border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);padding:9px 10px;font:inherit}.suggestion-privacy{margin:9px 0 0;color:var(--muted);font-size:.72rem;line-height:1.4}.suggestion-card-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:11px}.suggestion-card-actions button{border:1px solid var(--line);border-radius:9px;padding:8px 11px;background:var(--paper);font-weight:750}.suggestion-card-actions .reject{color:#b42318}.suggestion-card-actions .accept{background:linear-gradient(135deg,var(--accent-start),var(--accent-end));border-color:transparent;color:#fff}.suggestion-card-actions button:disabled{opacity:.55}.incoming-empty{color:var(--muted);font-size:.88rem;padding:14px 2px}
+@media(max-width:420px){#sendTaskDialog,#suggestionsDialog{width:calc(100vw - 20px)}.suggestion-box{padding:16px}.suggestion-card{padding:11px}.suggestion-footer{flex-wrap:wrap}.suggestion-footer button{min-height:40px}}
+
 </style>
 </head>
 <body class="auth-locked">
@@ -389,10 +406,12 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
   </button>
   <span class="user-chip" id="userChip" hidden></span>
   <div class="account-menu-wrap">
+    <span class="suggestion-badge" id="suggestionBadge" hidden aria-label="0 bekleyen görev önerisi">0</span>
     <button class="ubtn" id="settings" type="button" aria-label="Hesap menüsü" title="Hesap" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="6.15" r="3.35" fill="currentColor"/><path d="M3.55 17.25c.18-3.72 2.72-5.82 6.45-5.82s6.27 2.1 6.45 5.82a.72.72 0 0 1-.72.75H4.27a.72.72 0 0 1-.72-.75Z" fill="currentColor"/></svg></button>
     <div class="account-menu" id="accountMenu" role="menu" hidden>
       <div class="account-menu-user" id="accountMenuUser" title=""></div>
       <div class="account-menu-sep" aria-hidden="true"></div>
+      <button class="account-menu-item" id="menuSuggestions" type="button" role="menuitem"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 5.2h13v9.6h-13z"></path><path d="m4.2 6 5.8 4.5L15.8 6"></path></svg><span>Görev önerileri</span><span class="account-menu-count" id="suggestionsMenuCount" hidden>0</span></button>
       <button class="account-menu-item" id="menuSettings" type="button" role="menuitem"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="2.45"/><path d="M7.4 3.55 6.85 5.1a5.6 5.6 0 0 0-1.75 1.75l-1.55.55v5.2l1.55.55a5.6 5.6 0 0 0 1.75 1.75l.55 1.55h5.2l.55-1.55a5.6 5.6 0 0 0 1.75-1.75l1.55-.55V7.4l-1.55-.55a5.6 5.6 0 0 0-1.75-1.75l-.55-1.55h-5.2Z"/></svg><span>Ayarlar</span></button>
       <button class="account-menu-item" id="menuAdmin" type="button" role="menuitem" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.8 16 5v4.3c0 3.8-2.35 6.45-6 7.9-3.65-1.45-6-4.1-6-7.9V5l6-2.2Z"/><path d="M7.2 9.8 9 11.6l3.8-4"/></svg><span>Yönetim</span></button>
       <div class="account-menu-sep" aria-hidden="true"></div>
@@ -465,6 +484,12 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
       <button type="button" class="modal-close" id="closeSettingsX" aria-label="Ayarları kapat" title="Kapat">×</button>
       <div class="modal-head"><h2>Ayarlar</h2></div>
       <p class="sub" id="accountText"></p>
+      <section class="username-settings" aria-labelledby="usernameSettingsTitle">
+        <h3 id="usernameSettingsTitle">Çentik kullanıcı adı</h3>
+        <p>Diğer kullanıcılar sizi bu adla bulabilir. E-posta adresiniz paylaşılmaz.</p>
+        <div class="username-field"><span aria-hidden="true">@</span><input id="usernameInput" type="text" inputmode="text" autocomplete="off" maxlength="24" placeholder="kullanici.adi" aria-label="Çentik kullanıcı adı"></div>
+        <p class="username-help">3–24 karakter · harf, rakam, nokta ve alt çizgi</p>
+      </section>
       <section class="theme-settings" aria-labelledby="themeSettingsTitle">
         <h3 id="themeSettingsTitle">Tema</h3>
         <p>Renk ailesini seçin. Açık/koyu görünüm cihazınızın sistem temasını otomatik izler.</p>
@@ -522,6 +547,38 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
       <div class="move-task-footer"><button type="button" id="cancelMoveTask">Vazgeç</button><button type="button" class="primary" id="confirmMoveTask">Taşı</button></div>
     </div>
   </dialog>
+
+  <dialog id="sendTaskDialog">
+    <div class="modal-box suggestion-box">
+      <button type="button" class="modal-close" id="closeSendTaskX" aria-label="Gönderme ekranını kapat" title="Kapat">×</button>
+      <div class="modal-head"><h2>Görev gönder</h2></div>
+      <section class="suggestion-section">
+        <span class="suggestion-label">Görev</span>
+        <div class="task-preview" id="sendTaskPreview"></div>
+      </section>
+      <section class="suggestion-section">
+        <label class="suggestion-label" for="recipientSearch">Kime?</label>
+        <input class="suggestion-search" id="recipientSearch" type="search" autocomplete="off" placeholder="Ad veya @kullanıcı adı ara...">
+        <div class="selected-recipient" id="selectedRecipient" hidden></div>
+        <div class="directory-list" id="recipientResults"><p class="directory-empty">Kullanıcılar yükleniyor…</p></div>
+      </section>
+      <section class="suggestion-section">
+        <div class="send-date-row"><input id="sendDateEnabled" type="checkbox" checked><label for="sendDateEnabled">Tarih öner</label></div>
+        <input class="send-date-input" id="sendSuggestedDate" type="date">
+      </section>
+      <p class="suggestion-status" id="sendSuggestionStatus" aria-live="polite"></p>
+      <div class="suggestion-footer"><button type="button" id="cancelSendTask">Vazgeç</button><button type="button" class="primary" id="confirmSendTask">Gönder</button></div>
+    </div>
+  </dialog>
+
+  <dialog id="suggestionsDialog">
+    <div class="modal-box suggestion-box">
+      <button type="button" class="modal-close" id="closeSuggestionsX" aria-label="Görev önerilerini kapat" title="Kapat">×</button>
+      <div class="modal-head"><h2>Görev önerileri</h2></div>
+      <div class="incoming-toolbar"><button type="button" id="refreshSuggestions">Yenile</button></div>
+      <div class="incoming-list" id="incomingSuggestionsList"><p class="incoming-empty">Öneriler yükleniyor…</p></div>
+    </div>
+  </dialog>
 </main>
 
 <div class="auth-gate" id="authGate">
@@ -576,7 +633,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v52-task-menu-cleanup", CENTIK_EXPECTED_SERVER_BUILD="v21-task-move";
+const CENTIK_CLIENT_BUILD="v56-task-suggestions-ui", CENTIK_EXPECTED_SERVER_BUILD="v22-task-suggestions";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -589,6 +646,7 @@ const LAST_GOOD_SUFFIX="last-good-days";
 let adminApprovals=null, adminApprovalsAt=0, adminLoadPromise=null;
 let registeredUsers=null, registeredUsersAt=0, registeredUsersLoadPromise=null;
 let diagnosticsResult=null;
+let pendingSuggestionCount=0, suggestionDirectory=null, suggestionDirectoryAt=0, selectedSuggestionRecipient=null, sendTaskContext=null, incomingSuggestionsCache=null;
 const DIAG_LOG_LIMIT=30;
 const $=id=>document.getElementById(id);
 const getToken=()=>{try{return localStorage.getItem(AUTH_TOKEN)||""}catch(e){return ""}};
@@ -716,11 +774,33 @@ function showGate(show){
   [main,bar].forEach(el=>{if(!el)return;try{el.inert=!!show}catch(e){}if(show)el.setAttribute("aria-hidden","true");else el.removeAttribute("aria-hidden")});
   if(show)document.body.style.overflow="hidden";else document.body.style.overflow="";
 }
+function setPendingSuggestionCount(value){
+  const n=Math.max(0,Number(value)||0);pendingSuggestionCount=n;
+  const badge=$("suggestionBadge"),menuCount=$("suggestionsMenuCount");
+  if(badge){badge.textContent=n>9?"9+":String(n);badge.hidden=n<1;badge.setAttribute("aria-label",`${n} bekleyen görev önerisi`)}
+  if(menuCount){menuCount.textContent=n>99?"99+":String(n);menuCount.hidden=n<1}
+}
+function usernameErrorMessage(code){
+  const map={kullanici_adi:"Kullanıcı adı 3–24 karakter olmalı; yalnız harf, rakam, nokta ve alt çizgi kullanın.",kullanici_adi_alinmis:"Bu kullanıcı adı alınmış.",mesgul:"Sistem meşgul. Biraz sonra yeniden deneyin."};
+  return map[code]||"Kullanıcı adı kaydedilemedi.";
+}
+async function syncUsernamePreference(){
+  const input=$("usernameInput");if(!input||!currentUser?.id)return true;
+  const raw=String(input.value||"").trim(),existing=String(currentUser.username||"");
+  if(raw===existing)return true;if(!raw){$("settingsSaveStatus").textContent="Kullanıcı adı boş bırakılamaz.";return false}
+  try{
+    const j=await api("setUsername",{token:getToken(),username:raw},{timeout:30000});
+    if(!j.ok){if(j.error==="oturum"){expireSession();return false}$("settingsSaveStatus").textContent=usernameErrorMessage(j.error);return false}
+    currentUser={...currentUser,username:String(j.username||raw)};setSession(getToken(),currentUser);input.value=currentUser.username;return true;
+  }catch(e){$("settingsSaveStatus").textContent="Kullanıcı adı kaydedilemedi. Yeniden deneyin.";return false}
+}
+
 function updateUserUI(){
   const name=currentUser?.name||currentUser?.email||"";$("userChip").textContent=name;$("userChip").hidden=!name;
   $("accountText").textContent=currentUser?`${currentUser.name} · ${currentUser.email}${currentUser.role==="admin"?" · Yönetici":""}`:"";
   const menuUser=$("accountMenuUser");if(menuUser){menuUser.textContent=name;menuUser.title=name}
-  $("menuAdmin").hidden=currentUser?.role!=="admin";$("adminPanel").hidden=currentUser?.role!=="admin";
+  const usernameInput=$("usernameInput");if(usernameInput&&document.activeElement!==usernameInput)usernameInput.value=String(currentUser?.username||"");
+  $("menuAdmin").hidden=currentUser?.role!=="admin";$("adminPanel").hidden=currentUser?.role!=="admin";setPendingSuggestionCount(pendingSuggestionCount);
 }
 function normalizeItems(list){
   const arr=Array.isArray(list)?list:[],out=[],pos=new Map();
@@ -868,7 +948,7 @@ async function connectNow({silent=false,force=false,reason=""}={}){
     // Revision her zaman gönderilir. "Force" yalnız HTTP kontrolünü zorlar; Sheet'i gereksiz yere tam taratmaz.
     const j=await reliableApi("sync",{token,knownRevision:serverRevision},{timeout:30000,retries:0});
     if(!j.ok){if(j.error==="oturum"){expireSession();return false}throw new Error(j.error||"hata")}
-    currentUser=j.user||currentUser;setSession(token,currentUser);applyUserTheme(true);updateUserUI();
+    currentUser=j.user||currentUser;setSession(token,currentUser);applyUserTheme(true);if(j.pendingSuggestionCount!==undefined)setPendingSuggestionCount(j.pendingSuggestionCount);updateUserUI();
     if(!j.unchanged){
       if(!j.days||typeof j.days!=="object"||Array.isArray(j.days))throw new Error("veri");
       const serverNorm=normalizeDays(j.days),fresh=serverNorm.days;
@@ -886,7 +966,7 @@ async function connectNow({silent=false,force=false,reason=""}={}){
   }
 }
 
-function expireSession(){clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();setSession("",null);days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);setAuthStatus("Oturum süresi doldu. Yeniden giriş yapın.",true)}
+function expireSession(){clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();setSession("",null);days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;setPendingSuggestionCount(0);render();setSyncStatus("idle");showGate(true);setAuthStatus("Oturum süresi doldu. Yeniden giriş yapın.",true)}
 
 function addTask(t){t=t.trim();if(!t||!requireLocalSession())return;(days[current]=normalizeItems(days[current]||[])).push({id:uniqueTaskId(),t:t.slice(0,1000),done:false,parentId:""});persist(current);render()}
 function toggle(id){if(!requireLocalSession())return;if(pendingDelete?.id===id&&pendingDelete?.date===current)return;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id);if(!it)return;it.done=!it.done;lastPop=it.done?id:null;persist(current);render()}
@@ -1062,6 +1142,77 @@ function closeTaskMenus(except=null){
 function toggleTaskMenu(li,pop,btn){
   const opening=pop.hidden;closeTaskMenus(opening?li:null);pop.hidden=!opening;li.classList.toggle("menu-open",opening);btn.setAttribute("aria-expanded",opening?"true":"false");openTaskMenu=opening?li:null;
 }
+function suggestionItemsForTask(taskId){
+  const list=normalizeItems(days[current]||[]),item=list.find(x=>x.id===taskId);if(!item)return null;
+  if(item.parentId)return {root:item,items:[{localId:"root",parentLocalId:"",text:item.t,order:0}],hasChildren:false};
+  const children=list.filter(x=>x.parentId===taskId);
+  const items=[{localId:"root",parentLocalId:"",text:item.t,order:0}];
+  children.forEach((x,i)=>items.push({localId:`sub-${i}`,parentLocalId:"root",text:x.t,order:i+1}));
+  return {root:item,items,hasChildren:children.length>0};
+}
+function renderTaskTreePreview(container,items){
+  container.innerHTML="";if(!Array.isArray(items)||!items.length)return;
+  const root=items.find(x=>!x.parentLocalId&&!x.parentItemId)||items[0];
+  const r=document.createElement("div");r.className="task-preview-root";r.textContent=root.text||root.t||"";container.append(r);
+  items.filter(x=>x!==root).forEach(x=>{const e=document.createElement("div");e.className="task-preview-sub";e.textContent=x.text||x.t||"";container.append(e)});
+}
+function localDirectoryFilter(query){
+  const q=String(query||"").trim().toLocaleLowerCase("tr-TR");
+  const list=Array.isArray(suggestionDirectory)?suggestionDirectory:[];
+  if(!q)return list;
+  const clean=q.replace(/^@/,"");
+  return list.filter(u=>String(u.name||"").toLocaleLowerCase("tr-TR").includes(q)||String(u.username||"").toLocaleLowerCase("tr-TR").includes(clean));
+}
+function renderRecipientResults(query=""){
+  const box=$("recipientResults");if(!box)return;box.innerHTML="";
+  if(!Array.isArray(suggestionDirectory)){const p=document.createElement("p");p.className="directory-empty";p.textContent="Kullanıcılar yükleniyor…";box.append(p);return}
+  const users=localDirectoryFilter(query);
+  if(!users.length){const p=document.createElement("p");p.className="directory-empty";p.textContent="Kullanıcı bulunamadı.";box.append(p);return}
+  users.forEach(u=>{const b=document.createElement("button");b.type="button";b.className="directory-user"+(selectedSuggestionRecipient?.id===u.id?" selected":"");const info=document.createElement("span");const strong=document.createElement("strong");strong.textContent=u.name||"Çentik kullanıcısı";const small=document.createElement("small");small.textContent=u.username?`@${u.username}`:"Kullanıcı adı henüz yok";info.append(strong,small);const pick=document.createElement("span");pick.className="pick";pick.textContent=selectedSuggestionRecipient?.id===u.id?"Seçildi":"Seç";b.append(info,pick);b.onclick=()=>{selectedSuggestionRecipient=u;renderSelectedRecipient();renderRecipientResults($("recipientSearch").value)};box.append(b)});
+}
+function renderSelectedRecipient(){
+  const box=$("selectedRecipient");if(!box)return;if(!selectedSuggestionRecipient){box.hidden=true;box.innerHTML="";return}
+  box.hidden=false;box.innerHTML="";const t=document.createElement("span");t.textContent=`${selectedSuggestionRecipient.name}${selectedSuggestionRecipient.username?` · @${selectedSuggestionRecipient.username}`:""}`;const x=document.createElement("button");x.type="button";x.textContent="×";x.setAttribute("aria-label","Alıcı seçimini kaldır");x.onclick=()=>{selectedSuggestionRecipient=null;renderSelectedRecipient();renderRecipientResults($("recipientSearch").value)};box.append(t,x);
+}
+async function loadSuggestionDirectory(force=false){
+  if(!requireLocalSession())return false;
+  if(!force&&Array.isArray(suggestionDirectory)&&Date.now()-suggestionDirectoryAt<120000){renderRecipientResults($("recipientSearch")?.value||"");return true}
+  const box=$("recipientResults");if(box)box.innerHTML='<p class="directory-empty">Kullanıcılar yükleniyor…</p>';
+  try{const j=await api("searchUsers",{token:getToken(),query:""},{timeout:30000});if(!j.ok){if(j.error==="oturum"){expireSession();return false}throw new Error(j.error||"hata")}suggestionDirectory=Array.isArray(j.users)?j.users:[];suggestionDirectoryAt=Date.now();renderRecipientResults($("recipientSearch")?.value||"");return true}catch(e){if(box)box.innerHTML='<p class="directory-empty">Kullanıcı listesi alınamadı.</p>';return false}
+}
+function openSendTaskDialog(id){
+  if(!requireLocalSession())return;closeTaskMenus();const ctx=suggestionItemsForTask(id);if(!ctx)return;sendTaskContext=ctx;selectedSuggestionRecipient=null;
+  $("recipientSearch").value="";$("sendDateEnabled").checked=true;$("sendSuggestedDate").disabled=false;$("sendSuggestedDate").value=current;$("sendSuggestionStatus").textContent="";$("sendSuggestionStatus").classList.remove("error");$("confirmSendTask").disabled=false;$("confirmSendTask").textContent="Gönder";renderTaskTreePreview($("sendTaskPreview"),ctx.items);renderSelectedRecipient();$("sendTaskDialog").showModal();loadSuggestionDirectory();
+}
+async function sendTaskSuggestion(){
+  if(!sendTaskContext||!requireLocalSession())return;const status=$("sendSuggestionStatus"),btn=$("confirmSendTask");status.classList.remove("error");
+  if(!selectedSuggestionRecipient){status.textContent="Görevin gönderileceği kullanıcıyı seçin.";status.classList.add("error");return}
+  const suggestedDate=$("sendDateEnabled").checked?String($("sendSuggestedDate").value||""):"";if($("sendDateEnabled").checked&&!/^\d{4}-\d{2}-\d{2}$/.test(suggestedDate)){status.textContent="Geçerli bir tarih seçin.";status.classList.add("error");return}
+  btn.disabled=true;btn.textContent="Gönderiliyor…";status.textContent="";
+  try{const j=await api("sendTaskSuggestion",{token:getToken(),recipientUserId:selectedSuggestionRecipient.id,suggestedDate,items:sendTaskContext.items},{timeout:30000});if(!j.ok){if(j.error==="oturum"){expireSession();return}throw new Error(j.error||"hata")}status.textContent=`${selectedSuggestionRecipient.name} kullanıcısına gönderildi.`;setTimeout(()=>{if($("sendTaskDialog").open)$("sendTaskDialog").close();sendTaskContext=null;selectedSuggestionRecipient=null},450)}catch(e){status.textContent="Görev gönderilemedi. Yeniden deneyin.";status.classList.add("error");btn.disabled=false;btn.textContent="Gönder"}
+}
+function suggestionSenderLabel(sender){return `${sender?.name||"Bir kullanıcı"}${sender?.username?` · @${sender.username}`:""}`}
+function suggestionDateLabel(k){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(k||"")))return "Tarih önerilmedi";const d=fromKey(k);return `${d.getDate()} ${AYLAR[d.getMonth()]}`}
+function renderIncomingSuggestions(list){
+  const box=$("incomingSuggestionsList");box.innerHTML="";const arr=Array.isArray(list)?list:[];
+  if(!arr.length){const p=document.createElement("p");p.className="incoming-empty";p.textContent="Bekleyen görev önerisi yok.";box.append(p);return}
+  arr.forEach(sug=>{const card=document.createElement("article");card.className="suggestion-card";card.dataset.suggestionId=sug.id;
+    const head=document.createElement("div");head.className="suggestion-card-head";const info=document.createElement("div");const strong=document.createElement("strong");strong.textContent=`${sug.sender?.name||"Bir kullanıcı"} sana bir görev önerdi`;const small=document.createElement("small");small.textContent=`${sug.sender?.username?`@${sug.sender.username} · `:""}Kabul edersen kendi görev listene eklenir.`;info.append(strong,small);const tag=document.createElement("span");tag.className="suggestion-date-tag";tag.textContent=suggestionDateLabel(sug.suggestedDate);head.append(info,tag);
+    const preview=document.createElement("div");preview.className="task-preview";renderTaskTreePreview(preview,sug.items||[]);
+    const dateLabel=document.createElement("label");dateLabel.className="accept-date";dateLabel.textContent="Görevin ekleneceği tarih";const date=document.createElement("input");date.type="date";date.value=sug.suggestedDate||todayKey();dateLabel.append(date);
+    const privacy=document.createElement("p");privacy.className="suggestion-privacy";privacy.textContent="Bu görevin tamamlanma durumu öneren kullanıcı tarafından görülebilir.";
+    const actions=document.createElement("div");actions.className="suggestion-card-actions";const reject=document.createElement("button");reject.type="button";reject.className="reject";reject.textContent="Reddet";const accept=document.createElement("button");accept.type="button";accept.className="accept";accept.textContent="Kabul et";reject.onclick=()=>resolveIncomingSuggestion(sug.id,"reject",date.value,reject,accept);accept.onclick=()=>resolveIncomingSuggestion(sug.id,"accept",date.value,reject,accept);actions.append(reject,accept);card.append(head,preview,dateLabel,privacy,actions);box.append(card)});
+}
+async function loadIncomingSuggestions(force=false){
+  if(!requireLocalSession())return false;const box=$("incomingSuggestionsList");if(box)box.innerHTML='<p class="incoming-empty">Öneriler yükleniyor…</p>';
+  try{if(connectPromise){try{await connectPromise}catch(e){}}const j=await api("listIncomingSuggestions",{token:getToken(),includeResolved:false},{timeout:30000});if(!j.ok){if(j.error==="oturum"){expireSession();return false}throw new Error(j.error||"hata")}incomingSuggestionsCache=Array.isArray(j.suggestions)?j.suggestions:[];setPendingSuggestionCount(j.pendingCount);renderIncomingSuggestions(incomingSuggestionsCache);return true}catch(e){if(box)box.innerHTML='<p class="incoming-empty">Görev önerileri alınamadı.</p>';return false}
+}
+async function resolveIncomingSuggestion(id,mode,date,rejectBtn,acceptBtn){
+  if(!requireLocalSession())return;if(mode==="accept"&&!/^\d{4}-\d{2}-\d{2}$/.test(String(date||"")))return;rejectBtn.disabled=true;acceptBtn.disabled=true;
+  try{const action=mode==="accept"?"acceptSuggestion":"rejectSuggestion";const payload={token:getToken(),suggestionId:id};if(mode==="accept")payload.date=date;const j=await api(action,payload,{timeout:30000});if(!j.ok){if(j.error==="oturum"){expireSession();return}throw new Error(j.error||"hata")}setPendingSuggestionCount(j.pendingCount);incomingSuggestionsCache=(Array.isArray(incomingSuggestionsCache)?incomingSuggestionsCache:[]).filter(x=>x.id!==id);renderIncomingSuggestions(incomingSuggestionsCache);if(mode==="accept")connect({force:true,silent:true,reason:"suggestion-accepted"});}catch(e){rejectBtn.disabled=false;acceptBtn.disabled=false}
+}
+async function openSuggestionsDialog(){closeAccountMenu();$("suggestionsDialog").showModal();await loadIncomingSuggestions()}
+
 function taskMenuItem(label,svg,handler,cls=""){
   const b=document.createElement("button");b.type="button";b.className=`task-menu-item ${cls}`.trim();b.innerHTML=`${svg}<span>${label}</span>`;b.onclick=e=>{e.stopPropagation();handler?.()};return b;
 }
@@ -1131,7 +1282,7 @@ function render(){
       const iconDelete='<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 6h11M8 3.8h4M6.2 6l.7 10.2h6.2L13.8 6M8.5 8.5v5M11.5 8.5v5"></path></svg>';
       pop.append(taskMenuItem("Sil",iconDelete,()=>{closeTaskMenus();remove(it.id)},"danger"));
       pop.append(taskMenuItem("Taşı",iconMove,()=>openMoveTaskDialog(it.id)));
-      const share=taskMenuItem("Paylaş",iconShare,()=>{});share.disabled=true;share.title="Görev önerileri altyapısı bir sonraki adımda bağlanacak";share.innerHTML+=`<span class="soon">yakında</span>`;pop.append(share);
+      pop.append(taskMenuItem("Gönder",iconShare,()=>openSendTaskDialog(it.id)));
       menuBtn.onclick=e=>{e.stopPropagation();toggleTaskMenu(li,pop,menuBtn)};pop.onclick=e=>e.stopPropagation();actions.append(menuBtn,pop);
     }
     li.append(slot,span,hint,actions);ul.append(li)
@@ -1680,7 +1831,7 @@ setCalendarOpen(false);
 function closeAccountMenu(){const m=$("accountMenu");if(!m)return;m.hidden=true;$("settings").setAttribute("aria-expanded","false")}
 function toggleAccountMenu(){const m=$("accountMenu");if(!m)return;const willOpen=m.hidden;closeAccountMenu();if(willOpen){m.hidden=false;$("settings").setAttribute("aria-expanded","true")}}
 function openSettingsDialog(){
-  closeAccountMenu();updateUserUI();refreshThemeButtons();settingsOriginalTheme=theme;$("settingsSaveStatus").textContent="";$("accountDialog").showModal();
+  closeAccountMenu();updateUserUI();refreshThemeButtons();settingsOriginalTheme=theme;$("settingsSaveStatus").textContent="";if($("usernameInput"))$("usernameInput").value=String(currentUser?.username||"");$("accountDialog").showModal();
 }
 function discardSettingsAndClose(){
   if(settingsOriginalTheme){currentUser={...currentUser,theme:settingsOriginalTheme};setSession(getToken(),currentUser);rememberTheme(settingsOriginalTheme,currentUser,false);applyTheme(settingsOriginalTheme)}
@@ -1699,22 +1850,28 @@ async function openManagementDialog(){
 async function saveSettings(){
   const b=$("saveSettings");if(b.disabled)return;b.disabled=true;b.classList.add("is-saving");$("settingsSaveStatus").textContent="";
   try{
-    const [ok]=await Promise.all([syncThemePreference(),wait(350)]);
-    if(ok!==false){settingsOriginalTheme=null;$("accountDialog").close()}
+    const usernameOk=await syncUsernamePreference();if(usernameOk===false)return;
+    const themeOk=await syncThemePreference();await wait(250);
+    if(themeOk!==false){settingsOriginalTheme=null;updateUserUI();$("accountDialog").close()}
     else $("settingsSaveStatus").textContent="Ayar kaydedilemedi. Yeniden deneyin.";
   }catch(e){$("settingsSaveStatus").textContent="Ayar kaydedilemedi. Yeniden deneyin."}
   finally{b.disabled=false;b.classList.remove("is-saving")}
 }
 $("settings").onclick=e=>{e.stopPropagation();toggleAccountMenu()};
-$("menuSettings").onclick=openSettingsDialog;$("menuAdmin").onclick=openManagementDialog;
+$("menuSuggestions").onclick=openSuggestionsDialog;$("menuSettings").onclick=openSettingsDialog;$("menuAdmin").onclick=openManagementDialog;
 $("closeSettingsX").onclick=discardSettingsAndClose;$("saveSettings").onclick=saveSettings;
 $("closeManagementX").onclick=()=>$("managementDialog").close();
+$("closeSendTaskX").onclick=()=>$("sendTaskDialog").close();$("cancelSendTask").onclick=()=>$("sendTaskDialog").close();$("confirmSendTask").onclick=sendTaskSuggestion;
+$("recipientSearch").addEventListener("input",e=>renderRecipientResults(e.target.value));$("sendDateEnabled").onchange=()=>{$("sendSuggestedDate").disabled=!$("sendDateEnabled").checked};
+$("closeSuggestionsX").onclick=()=>$("suggestionsDialog").close();$("refreshSuggestions").onclick=()=>loadIncomingSuggestions(true);
 $("refreshAdmin").onclick=()=>loadAdminPending({force:true});$("refreshRegistered").onclick=()=>loadRegisteredUsers({force:true});$("runDiagnostics").onclick=runDiagnostics;$("copyDiagnostics").onclick=copyDiagnostics;
 $("accountDialog").addEventListener("cancel",e=>{e.preventDefault();discardSettingsAndClose()});
 $("managementDialog").addEventListener("cancel",e=>{e.preventDefault();$("managementDialog").close()});
+$("sendTaskDialog").addEventListener("cancel",e=>{e.preventDefault();$("sendTaskDialog").close()});
+$("suggestionsDialog").addEventListener("cancel",e=>{e.preventDefault();$("suggestionsDialog").close()});
 document.addEventListener("click",e=>{if(!e.target.closest(".account-menu-wrap"))closeAccountMenu()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("accountDialog").open&&!$("managementDialog").open)closeAccountMenu()});
-$("logoutBtn").onclick=async()=>{closeAccountMenu();const token=getToken();try{if(token)await api("logout",{token})}catch(e){}clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();if($("accountDialog").open)$("accountDialog").close();if($("managementDialog").open)$("managementDialog").close();setSession("",null);applyTheme("lacivert");days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);showPane("loginPane")};
+$("logoutBtn").onclick=async()=>{closeAccountMenu();const token=getToken();try{if(token)await api("logout",{token})}catch(e){}clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();if($("accountDialog").open)$("accountDialog").close();if($("managementDialog").open)$("managementDialog").close();setSession("",null);applyTheme("lacivert");days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;suggestionDirectory=null;incomingSuggestionsCache=null;setPendingSuggestionCount(0);render();setSyncStatus("idle");showGate(true);showPane("loginPane")};
 const brandEl=$("brand");brandEl.onclick=()=>{go(todayKey());window.scrollTo({top:0,behavior:"smooth"})};brandEl.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();brandEl.onclick()}};
 
 function requestForegroundSync(reason,{minAge=15000}={}){
@@ -1800,7 +1957,7 @@ async function boot(){
   }
   // Yarım kalmış/eski local kimlik bilgisini temizle.
   if(cachedUser||token)setSession("",null);
-  currentUser=null;days={};pending=new Set();serverRevision=null;
+  currentUser=null;days={};pending=new Set();serverRevision=null;setPendingSuggestionCount(0);
   applyTheme("lacivert");setSyncStatus("idle");showGate(true);showPane("loginPane");
 }
 boot();

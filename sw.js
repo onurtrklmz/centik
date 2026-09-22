@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v52: görev işlem menüsü sadeleştirildi — Sil / Taşı / Paylaş.
-const SURUM = "centik-v59-task-menu-cleanup";
+// v56: görev önerileri frontend entegrasyonu.
+const SURUM = "centik-v64-task-suggestions-ui";
 const KABUK = [
   "./",
   "./index.html",
