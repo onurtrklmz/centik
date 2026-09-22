@@ -258,10 +258,13 @@ body.task-reordering #list li.task-row{cursor:grabbing}
 .task-menu-item.danger{color:#b42318}
 .task-menu-item[disabled]{opacity:.48;cursor:not-allowed}
 .task-menu-item .soon{margin-left:auto;font-size:.65rem;font-weight:800;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 5px}
-.edit-input{flex:1;min-width:0;border:1px solid var(--focus);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;padding:7px 9px;outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 16%,transparent)}
+.edit-input{flex:1;min-width:0;scroll-margin-top:84px;scroll-margin-bottom:24px;border:1px solid var(--focus);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;padding:7px 9px;outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 16%,transparent)}
 li.editing .check{opacity:.55}
 .edit-actions{display:flex;align-items:center;gap:4px;flex:none}.edit-actions button{width:32px;height:32px;border:0;border-radius:8px;display:grid;place-items:center;background:var(--bg);color:var(--muted);font-size:1rem;font-weight:800}.edit-actions .save-edit{color:var(--focus)}
-.move-task-box{width:min(440px,calc(100vw - 28px));padding:0;overflow:hidden}.move-task-content{padding:18px}.move-task-title{margin:0 0 4px;font:700 1.15rem/1.2 var(--serif);color:var(--ink)}.move-task-name{margin:0 0 14px;color:var(--muted);font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.move-quick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}.move-quick button{border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--paper);color:var(--ink);font-weight:700}.move-quick button:hover,.move-quick button:focus-visible{border-color:var(--focus);color:var(--focus);outline:none}.move-date-label{display:grid;gap:6px;font-size:.78rem;font-weight:750;color:var(--muted)}.move-date-label input{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:10px;padding:10px 11px;background:var(--bg);color:var(--ink);font:inherit;outline:none}.move-date-label input:focus{border-color:var(--focus);box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 14%,transparent)}.move-children{display:flex;align-items:center;gap:9px;margin-top:12px;font-size:.84rem;color:var(--ink)}.move-children input{accent-color:var(--focus)}.move-hint{margin:10px 0 0;color:var(--muted);font-size:.76rem;line-height:1.45}.move-task-footer{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16px;border-top:1px solid var(--line)}.move-task-footer button{border:1px solid var(--line);border-radius:9px;padding:9px 13px;background:var(--paper);color:var(--ink);font-weight:750}.move-task-footer .primary{background:linear-gradient(135deg,var(--accent-start),var(--accent-end));border-color:transparent;color:#fff}.move-task-footer button:disabled{opacity:.6}
+#moveTaskDialog{width:min(440px,calc(100% - 28px));max-width:none;padding:0;border:0;background:transparent;color:var(--ink);overflow:visible}
+#moveTaskDialog::backdrop{background:rgba(5,9,20,.46);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.move-task-box{width:100%;max-width:100%;min-width:0;padding:0;overflow:hidden}.move-task-content{min-width:0;padding:18px}.move-task-title{margin:0 0 4px;font:700 1.15rem/1.2 var(--serif);color:var(--ink)}.move-task-name{margin:0 0 14px;color:var(--muted);font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.move-quick{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-bottom:12px}.move-quick button{min-width:0;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--paper);color:var(--ink);font-weight:700}.move-quick button:hover,.move-quick button:focus-visible{border-color:var(--focus);color:var(--focus);outline:none}.move-date-label{display:grid;min-width:0;gap:6px;font-size:.78rem;font-weight:750;color:var(--muted)}.move-date-label input{width:100%;min-width:0;box-sizing:border-box;border:1px solid var(--line);border-radius:10px;padding:10px 11px;background:var(--bg);color:var(--ink);font:inherit;outline:none}.move-date-label input:focus{border-color:var(--focus);box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 14%,transparent)}.move-children{display:flex;align-items:center;gap:9px;margin-top:12px;font-size:.84rem;color:var(--ink)}.move-children input{accent-color:var(--focus)}.move-hint{margin:10px 0 0;color:var(--muted);font-size:.76rem;line-height:1.45;overflow-wrap:anywhere}.move-task-footer{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;padding:12px 18px 16px;border-top:1px solid var(--line)}.move-task-footer button{border:1px solid var(--line);border-radius:9px;padding:9px 13px;background:var(--paper);color:var(--ink);font-weight:750}.move-task-footer .primary{background:linear-gradient(135deg,var(--accent-start),var(--accent-end));border-color:transparent;color:#fff}.move-task-footer button:disabled{opacity:.6}
+@media(max-width:430px){#moveTaskDialog{width:calc(100% - 16px);margin:auto}.move-task-content{padding:16px 14px}.move-task-footer{padding:11px 14px 14px}.move-task-title{padding-right:42px}.move-task-name{max-width:100%}}
 .empty{padding:18px 14px;color:var(--muted)}
 li.pop .check{animation:pop .3s ease-out}
 @keyframes pop{50%{transform:scale(1.2)}}
@@ -572,7 +575,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v48-separated-fourway-drag-icon", CENTIK_EXPECTED_SERVER_BUILD="v21-task-move";
+const CENTIK_CLIENT_BUILD="v49-mobile-modal-keyboard-fix", CENTIK_EXPECTED_SERVER_BUILD="v21-task-move";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -887,6 +890,25 @@ function expireSession(){clearTimeout(pendingDeleteTimer);pendingDeleteTimer=nul
 function addTask(t){t=t.trim();if(!t||!requireLocalSession())return;(days[current]=normalizeItems(days[current]||[])).push({id:uniqueTaskId(),t:t.slice(0,1000),done:false,parentId:""});persist(current);render()}
 function toggle(id){if(!requireLocalSession())return;if(pendingDelete?.id===id&&pendingDelete?.date===current)return;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id);if(!it)return;it.done=!it.done;lastPop=it.done?id:null;persist(current);render()}
 function updateTask(id,text){if(!requireLocalSession())return false;if(pendingDelete?.id===id&&pendingDelete?.date===current)return false;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id),t=String(text||'').trim();if(!it||!t)return false;it.t=t.slice(0,1000);persist(current);render();return true}
+let activeEditInput=null,editVisibilityTimer=null;
+function keepEditInputVisible(input=activeEditInput,behavior="smooth"){
+  if(!input||!document.contains(input)||document.activeElement!==input)return;
+  const row=input.closest(".task-row")||input,rect=row.getBoundingClientRect(),vv=window.visualViewport;
+  const viewportTop=vv?vv.offsetTop:0,viewportBottom=viewportTop+(vv?vv.height:window.innerHeight);
+  const safeTop=viewportTop+72,safeBottom=viewportBottom-18;let delta=0;
+  if(rect.bottom>safeBottom)delta=rect.bottom-safeBottom;else if(rect.top<safeTop)delta=rect.top-safeTop;
+  if(Math.abs(delta)>2)window.scrollBy({top:delta,behavior});
+}
+function scheduleEditVisibility(input){
+  activeEditInput=input;clearTimeout(editVisibilityTimer);
+  requestAnimationFrame(()=>keepEditInputVisible(input,"auto"));
+  [140,320,520].forEach((ms,i)=>setTimeout(()=>keepEditInputVisible(input,i?"smooth":"auto"),ms));
+}
+if(window.visualViewport){
+  const onEditViewportChange=()=>{clearTimeout(editVisibilityTimer);editVisibilityTimer=setTimeout(()=>keepEditInputVisible(activeEditInput,"smooth"),45)};
+  window.visualViewport.addEventListener("resize",onEditViewportChange);
+  window.visualViewport.addEventListener("scroll",onEditViewportChange);
+}
 function editTask(id,li){
   if(!requireLocalSession())return;
   const it=normalizeItems(days[current]||[]).find(x=>x.id===id);
@@ -901,7 +923,9 @@ function editTask(id,li){
   const save=()=>{if(!updateTask(id,input.value)){input.focus();input.select()}};
   saveBtn.onclick=save;cancelBtn.onclick=()=>render();
   input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();save()}else if(e.key==="Escape"){e.preventDefault();render()}});
-  requestAnimationFrame(()=>{input.focus();input.setSelectionRange(input.value.length,input.value.length)});
+  input.addEventListener("focus",()=>scheduleEditVisibility(input));
+  input.addEventListener("blur",()=>setTimeout(()=>{if(document.activeElement!==input&&activeEditInput===input)activeEditInput=null},80));
+  requestAnimationFrame(()=>{try{input.focus({preventScroll:true})}catch(e){input.focus()}input.setSelectionRange(input.value.length,input.value.length);scheduleEditVisibility(input)});
 }
 function hideUndoToast(){}
 function finalizeDelete(){

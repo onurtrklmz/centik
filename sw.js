@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v48: görev taşıma simgesi ayrık dört yönlü ok uçlarıyla güncellendi.
-const SURUM = "centik-v55-separated-fourway-drag-icon";
+// v49: mobil tarih taşıma modalı ölçeklendi; görev düzenleme alanı klavye üstünde tutuluyor.
+const SURUM = "centik-v56-mobile-modal-keyboard-fix";
 const KABUK = [
   "./",
   "./index.html",
