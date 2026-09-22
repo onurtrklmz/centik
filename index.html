@@ -233,7 +233,6 @@ li.done .txt{color:var(--muted)}
 #list li.task-row.dragging .txt{cursor:grabbing}
 #list li.task-row.dragging .check{opacity:0;pointer-events:none}
 #list li.task-row.dragging .drag-cue{opacity:1;transform:scale(1)}
-#list li.task-row.dragging .task-actions{opacity:0;pointer-events:none}
 #list li.task-row.dragging-companion{background:color-mix(in srgb,var(--focus) 4%,var(--paper))}
 #list.reordering li.task-row:not(.dragging){transition:box-shadow .14s ease,background-color .16s ease,padding-left .18s ease;will-change:transform}
 #list li.task-row.dragging{will-change:transform}
@@ -247,14 +246,7 @@ li.done .txt{color:var(--muted)}
 #list li.task-row.nest-preview .hierarchy-hint,#list li.task-row.outdent-preview .hierarchy-hint{opacity:1}
 body.task-reordering{user-select:none;-webkit-user-select:none;cursor:grabbing}
 body.task-reordering #list li.task-row{cursor:grabbing}
- .task-actions{display:flex;align-items:center;gap:0;flex:none;position:relative}
-.task-actions.inline-actions{gap:0;padding-left:4px;border-left:1px solid var(--line)}
-.task-action-btn{width:34px;height:40px;flex:0 0 34px;border:0;border-radius:9px;background:transparent;color:var(--muted);padding:0;display:grid;place-items:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-.task-action-btn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
-.task-action-btn:hover,.task-action-btn:focus-visible{background:color-mix(in srgb,var(--focus) 7%,transparent);color:var(--focus);outline:none}
-.task-action-btn[disabled]{opacity:1;color:var(--muted);cursor:default}.task-action-btn[disabled]:hover{background:transparent;color:var(--muted)}
-@media(max-width:430px){.task-actions.inline-actions{gap:0;padding-left:3px}.task-action-btn{width:33px;height:40px;flex-basis:33px}.task-action-btn svg{width:22px;height:22px}}
-@media(max-width:360px){.task-actions.inline-actions{gap:0;padding-left:2px}.task-action-btn{width:31px;height:38px;flex-basis:31px}.task-action-btn svg{width:21px;height:21px}}
+.task-actions{display:flex;align-items:center;gap:2px;flex:none;position:relative}
 .task-menu-btn{border:0;background:none;color:var(--muted);width:34px;height:34px;border-radius:8px;display:grid;place-items:center;padding:0;font-size:1.45rem;line-height:1;font-weight:800;letter-spacing:1px}
 .task-menu-btn:hover,.task-menu-btn:focus-visible,.task-row.menu-open .task-menu-btn{color:var(--focus);background:var(--bg);outline:none}
 .task-menu-pop{position:absolute;right:0;top:36px;z-index:35;min-width:184px;padding:6px;border:1px solid var(--line);border-radius:12px;background:var(--paper);box-shadow:0 14px 34px rgba(0,0,0,.2);display:grid;gap:2px}
@@ -278,7 +270,7 @@ li.editing .check{opacity:.55}
 li.pop .check{animation:pop .3s ease-out}
 @keyframes pop{50%{transform:scale(1.2)}}
 li.deleting{animation:deleteBlink .42s ease-in-out infinite alternate;background:color-mix(in srgb,#b42318 8%,var(--paper));border-color:color-mix(in srgb,#b42318 24%,var(--line))}
-li.deleting .check,li.deleting .task-menu-btn,li.deleting .task-action-btn{pointer-events:none;opacity:.45}
+li.deleting .check,li.deleting .task-menu-btn{pointer-events:none;opacity:.45}
 .undo-inline{border:1px solid color-mix(in srgb,var(--focus) 45%,var(--line));background:color-mix(in srgb,var(--focus) 12%,var(--paper));color:var(--focus);min-width:72px;height:32px;border-radius:8px;padding:0 10px;font-weight:800;font-size:.82rem;display:grid;place-items:center;white-space:nowrap}.undo-inline:hover,.undo-inline:focus-visible{background:color-mix(in srgb,var(--focus) 20%,var(--paper));outline:none}
 @keyframes deleteBlink{from{opacity:1}to{opacity:.38}}
 @media (prefers-reduced-motion:reduce){li.deleting{animation:none;opacity:.58}}
@@ -584,7 +576,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v55-inline-actions-balanced", CENTIK_EXPECTED_SERVER_BUILD="v21-task-move";
+const CENTIK_CLIENT_BUILD="v52-task-menu-cleanup", CENTIK_EXPECTED_SERVER_BUILD="v21-task-move";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -1132,17 +1124,15 @@ function render(){
     if(isDeleting){
       const undo=document.createElement("button");undo.type="button";undo.className="undo-inline";undo.textContent="Geri al";undo.setAttribute("aria-label","Silmeyi geri al");undo.onclick=()=>undoDelete();actions.append(undo);
     }else{
-      actions.classList.add("inline-actions");
+      const menuBtn=document.createElement("button");menuBtn.type="button";menuBtn.className="task-menu-btn";menuBtn.textContent="⋮";menuBtn.setAttribute("aria-label","Görev işlemleri");menuBtn.setAttribute("aria-haspopup","menu");menuBtn.setAttribute("aria-expanded","false");
+      const pop=document.createElement("div");pop.className="task-menu-pop";pop.setAttribute("role","menu");pop.hidden=true;
+      const iconMove='<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3.2" y="4.7" width="13.6" height="11.8" rx="2"></rect><path d="M6.3 2.9v3.5M13.7 2.9v3.5M3.2 8h13.6"></path></svg>';
+      const iconShare='<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="6" cy="10" r="2.1"></circle><circle cx="14.5" cy="5.3" r="2.1"></circle><circle cx="14.5" cy="14.7" r="2.1"></circle><path d="m7.8 9 4.8-2.7M7.8 11l4.8 2.7"></path></svg>';
       const iconDelete='<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 6h11M8 3.8h4M6.2 6l.7 10.2h6.2L13.8 6M8.5 8.5v5M11.5 8.5v5"></path></svg>';
-      const iconMove='<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4.7h11.5a1.7 1.7 0 0 1 1.7 1.7v6.1"></path><path d="M6.5 2.9v3.2M13.4 2.9v3.2M4 8h13.2"></path><path d="M4 6.4v7.2a1.7 1.7 0 0 0 1.7 1.7h4.2"></path><path d="M10.8 17.1c1.4-2.1 3.4-3.2 6-3.2H19"></path><path d="m16.6 11.6 2.4 2.3-2.4 2.3"></path></svg>';
-      const iconShare='<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="5.4" cy="10" r="2"></circle><circle cx="14.6" cy="5" r="2"></circle><circle cx="14.6" cy="15" r="2"></circle><path d="m7.2 9 5.5-3M7.2 11l5.5 3"></path></svg>';
-      const makeAction=(label,svg,handler,{disabled=false,title=label}={})=>{
-        const b=document.createElement("button");b.type="button";b.className="task-action-btn";b.innerHTML=svg;b.setAttribute("aria-label",label);b.title=title;b.disabled=disabled;b.onclick=e=>{e.stopPropagation();if(!b.disabled)handler?.()};return b;
-      };
-      const delBtn=makeAction("Sil",iconDelete,()=>remove(it.id));
-      const moveBtn=makeAction("Taşı",iconMove,()=>openMoveTaskDialog(it.id));
-      const shareBtn=makeAction("Paylaş",iconShare,null,{disabled:true,title:"Görev paylaşımı yakında"});
-      actions.append(delBtn,moveBtn,shareBtn);
+      pop.append(taskMenuItem("Sil",iconDelete,()=>{closeTaskMenus();remove(it.id)},"danger"));
+      pop.append(taskMenuItem("Taşı",iconMove,()=>openMoveTaskDialog(it.id)));
+      const share=taskMenuItem("Paylaş",iconShare,()=>{});share.disabled=true;share.title="Görev önerileri altyapısı bir sonraki adımda bağlanacak";share.innerHTML+=`<span class="soon">yakında</span>`;pop.append(share);
+      menuBtn.onclick=e=>{e.stopPropagation();toggleTaskMenu(li,pop,menuBtn)};pop.onclick=e=>e.stopPropagation();actions.append(menuBtn,pop);
     }
     li.append(slot,span,hint,actions);ul.append(li)
   });

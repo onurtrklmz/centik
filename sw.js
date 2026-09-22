@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v53: üç noktalı görev menüsü yerine kompakt Sil / Taşı / Paylaş ikonları.
-const SURUM = "centik-v62-inline-actions-balanced";
+// v52: görev işlem menüsü sadeleştirildi — Sil / Taşı / Paylaş.
+const SURUM = "centik-v59-task-menu-cleanup";
 const KABUK = [
   "./",
   "./index.html",
