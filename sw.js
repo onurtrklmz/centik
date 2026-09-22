@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v46: kullanıcı simgesi daha dolgun glyph biçiminde güncellendi.
-const SURUM = "centik-v53-solid-account-icon";
+// v48: görev taşıma simgesi ayrık dört yönlü ok uçlarıyla güncellendi.
+const SURUM = "centik-v55-separated-fourway-drag-icon";
 const KABUK = [
   "./",
   "./index.html",

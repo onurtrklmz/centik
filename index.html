@@ -246,17 +246,27 @@ li.done .txt{color:var(--muted)}
 #list li.task-row.nest-preview .hierarchy-hint,#list li.task-row.outdent-preview .hierarchy-hint{opacity:1}
 body.task-reordering{user-select:none;-webkit-user-select:none;cursor:grabbing}
 body.task-reordering #list li.task-row{cursor:grabbing}
-.task-actions{display:flex;align-items:center;gap:2px;flex:none}
-.edit,.del{border:0;background:none;color:var(--muted);width:32px;height:32px;border-radius:6px;display:grid;place-items:center;padding:0}
-.edit{font-size:1rem}.edit svg{width:16px;height:16px;fill:currentColor}.edit:hover,.edit:focus-visible{color:var(--focus);background:var(--bg)}
-.del{font-size:1.3rem}.del:hover,.del:focus-visible{color:#b42318;background:var(--bg)}
+.task-actions{display:flex;align-items:center;gap:2px;flex:none;position:relative}
+.task-menu-btn{border:0;background:none;color:var(--muted);width:34px;height:34px;border-radius:8px;display:grid;place-items:center;padding:0;font-size:1.45rem;line-height:1;font-weight:800;letter-spacing:1px}
+.task-menu-btn:hover,.task-menu-btn:focus-visible,.task-row.menu-open .task-menu-btn{color:var(--focus);background:var(--bg);outline:none}
+.task-menu-pop{position:absolute;right:0;top:36px;z-index:35;min-width:184px;padding:6px;border:1px solid var(--line);border-radius:12px;background:var(--paper);box-shadow:0 14px 34px rgba(0,0,0,.2);display:grid;gap:2px}
+.task-menu-pop[hidden]{display:none}
+.task-row.menu-open{z-index:32}
+.task-menu-item{border:0;background:transparent;color:var(--ink);border-radius:8px;padding:9px 10px;display:flex;align-items:center;gap:10px;text-align:left;font:inherit;font-size:.88rem;font-weight:650;white-space:nowrap}
+.task-menu-item svg{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.task-menu-item:hover,.task-menu-item:focus-visible{background:var(--bg);outline:none;color:var(--focus)}
+.task-menu-item.danger{color:#b42318}
+.task-menu-item[disabled]{opacity:.48;cursor:not-allowed}
+.task-menu-item .soon{margin-left:auto;font-size:.65rem;font-weight:800;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 5px}
 .edit-input{flex:1;min-width:0;border:1px solid var(--focus);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;padding:7px 9px;outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 16%,transparent)}
 li.editing .check{opacity:.55}
+.edit-actions{display:flex;align-items:center;gap:4px;flex:none}.edit-actions button{width:32px;height:32px;border:0;border-radius:8px;display:grid;place-items:center;background:var(--bg);color:var(--muted);font-size:1rem;font-weight:800}.edit-actions .save-edit{color:var(--focus)}
+.move-task-box{width:min(440px,calc(100vw - 28px));padding:0;overflow:hidden}.move-task-content{padding:18px}.move-task-title{margin:0 0 4px;font:700 1.15rem/1.2 var(--serif);color:var(--ink)}.move-task-name{margin:0 0 14px;color:var(--muted);font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.move-quick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}.move-quick button{border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--paper);color:var(--ink);font-weight:700}.move-quick button:hover,.move-quick button:focus-visible{border-color:var(--focus);color:var(--focus);outline:none}.move-date-label{display:grid;gap:6px;font-size:.78rem;font-weight:750;color:var(--muted)}.move-date-label input{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:10px;padding:10px 11px;background:var(--bg);color:var(--ink);font:inherit;outline:none}.move-date-label input:focus{border-color:var(--focus);box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 14%,transparent)}.move-children{display:flex;align-items:center;gap:9px;margin-top:12px;font-size:.84rem;color:var(--ink)}.move-children input{accent-color:var(--focus)}.move-hint{margin:10px 0 0;color:var(--muted);font-size:.76rem;line-height:1.45}.move-task-footer{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px 16px;border-top:1px solid var(--line)}.move-task-footer button{border:1px solid var(--line);border-radius:9px;padding:9px 13px;background:var(--paper);color:var(--ink);font-weight:750}.move-task-footer .primary{background:linear-gradient(135deg,var(--accent-start),var(--accent-end));border-color:transparent;color:#fff}.move-task-footer button:disabled{opacity:.6}
 .empty{padding:18px 14px;color:var(--muted)}
 li.pop .check{animation:pop .3s ease-out}
 @keyframes pop{50%{transform:scale(1.2)}}
 li.deleting{animation:deleteBlink .42s ease-in-out infinite alternate;background:color-mix(in srgb,#b42318 8%,var(--paper));border-color:color-mix(in srgb,#b42318 24%,var(--line))}
-li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
+li.deleting .check,li.deleting .task-menu-btn{pointer-events:none;opacity:.45}
 .undo-inline{border:1px solid color-mix(in srgb,var(--focus) 45%,var(--line));background:color-mix(in srgb,var(--focus) 12%,var(--paper));color:var(--focus);min-width:72px;height:32px;border-radius:8px;padding:0 10px;font-weight:800;font-size:.82rem;display:grid;place-items:center;white-space:nowrap}.undo-inline:hover,.undo-inline:focus-visible{background:color-mix(in srgb,var(--focus) 20%,var(--paper));outline:none}
 @keyframes deleteBlink{from{opacity:1}to{opacity:.38}}
 @media (prefers-reduced-motion:reduce){li.deleting{animation:none;opacity:.58}}
@@ -488,6 +498,26 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
       </section>
     </div>
   </dialog>
+
+  <dialog id="moveTaskDialog">
+    <div class="move-task-box modal-box">
+      <div class="move-task-content">
+        <button type="button" class="modal-close" id="closeMoveTaskX" aria-label="Tarih değiştirmeyi kapat" title="Kapat">×</button>
+        <h2 class="move-task-title">Başka güne taşı</h2>
+        <p class="move-task-name" id="moveTaskName"></p>
+        <div class="move-quick">
+          <button type="button" id="moveToday">Bugün</button>
+          <button type="button" id="moveTomorrow">Yarın</button>
+        </div>
+        <label class="move-date-label">Tarih
+          <input id="moveTaskDate" type="date" required>
+        </label>
+        <label class="move-children" id="moveChildrenWrap" hidden><input id="moveChildren" type="checkbox" checked> <span>Alt görevlerle birlikte taşı</span></label>
+        <p class="move-hint" id="moveTaskHint"></p>
+      </div>
+      <div class="move-task-footer"><button type="button" id="cancelMoveTask">Vazgeç</button><button type="button" class="primary" id="confirmMoveTask">Taşı</button></div>
+    </div>
+  </dialog>
 </main>
 
 <div class="auth-gate" id="authGate">
@@ -542,7 +572,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v45-upcoming-task-strip", CENTIK_EXPECTED_SERVER_BUILD="v20-task-hierarchy";
+const CENTIK_CLIENT_BUILD="v48-separated-fourway-drag-icon", CENTIK_EXPECTED_SERVER_BUILD="v21-task-move";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -857,7 +887,22 @@ function expireSession(){clearTimeout(pendingDeleteTimer);pendingDeleteTimer=nul
 function addTask(t){t=t.trim();if(!t||!requireLocalSession())return;(days[current]=normalizeItems(days[current]||[])).push({id:uniqueTaskId(),t:t.slice(0,1000),done:false,parentId:""});persist(current);render()}
 function toggle(id){if(!requireLocalSession())return;if(pendingDelete?.id===id&&pendingDelete?.date===current)return;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id);if(!it)return;it.done=!it.done;lastPop=it.done?id:null;persist(current);render()}
 function updateTask(id,text){if(!requireLocalSession())return false;if(pendingDelete?.id===id&&pendingDelete?.date===current)return false;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id),t=String(text||'').trim();if(!it||!t)return false;it.t=t.slice(0,1000);persist(current);render();return true}
-function editTask(id,li){if(!requireLocalSession())return;const it=normalizeItems(days[current]||[]).find(x=>x.id===id);if(!it||li.classList.contains("editing")||(pendingDelete?.id===id&&pendingDelete?.date===current))return;li.classList.add("editing");const span=li.querySelector(".txt"),btn=li.querySelector(".edit");const input=document.createElement("input");input.className="edit-input";input.type="text";input.maxLength=1000;input.value=it.t;input.setAttribute("aria-label","Görevi düzenle");span.replaceWith(input);const save=()=>{if(!updateTask(id,input.value)){input.focus();input.select()}};btn.innerHTML='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.485 1.929a.75.75 0 0 1 .086 1.056l-7.5 8.75a.75.75 0 0 1-1.08.037L1.93 8.71a.75.75 0 0 1 1.06-1.06l2.49 2.49 6.95-8.11a.75.75 0 0 1 1.056-.101Z"/></svg>';btn.setAttribute("aria-label","Düzenlemeyi kaydet");btn.title="Kaydet";btn.onclick=save;input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();save()}else if(e.key==="Escape"){e.preventDefault();render()}});requestAnimationFrame(()=>{input.focus();input.setSelectionRange(input.value.length,input.value.length)})}
+function editTask(id,li){
+  if(!requireLocalSession())return;
+  const it=normalizeItems(days[current]||[]).find(x=>x.id===id);
+  if(!it||li.classList.contains("editing")||(pendingDelete?.id===id&&pendingDelete?.date===current))return;
+  closeTaskMenus();li.classList.add("editing");
+  const span=li.querySelector(".txt"),actions=li.querySelector(".task-actions");
+  const input=document.createElement("input");input.className="edit-input";input.type="text";input.maxLength=1000;input.value=it.t;input.setAttribute("aria-label","Görevi düzenle");span.replaceWith(input);
+  actions.innerHTML="";actions.classList.add("edit-actions");
+  const saveBtn=document.createElement("button");saveBtn.type="button";saveBtn.className="save-edit";saveBtn.textContent="✓";saveBtn.setAttribute("aria-label","Düzenlemeyi kaydet");
+  const cancelBtn=document.createElement("button");cancelBtn.type="button";cancelBtn.textContent="×";cancelBtn.setAttribute("aria-label","Düzenlemeyi iptal et");
+  actions.append(saveBtn,cancelBtn);
+  const save=()=>{if(!updateTask(id,input.value)){input.focus();input.select()}};
+  saveBtn.onclick=save;cancelBtn.onclick=()=>render();
+  input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();save()}else if(e.key==="Escape"){e.preventDefault();render()}});
+  requestAnimationFrame(()=>{input.focus();input.setSelectionRange(input.value.length,input.value.length)});
+}
 function hideUndoToast(){}
 function finalizeDelete(){
   if(!pendingDelete)return;clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;
@@ -923,6 +968,53 @@ function renderTomorrowNotice(){
     });
   }
 }
+let openTaskMenu=null,moveTaskContext=null;
+function closeTaskMenus(except=null){
+  document.querySelectorAll(".task-row.menu-open").forEach(li=>{
+    if(li===except)return;li.classList.remove("menu-open");const pop=li.querySelector(".task-menu-pop");const btn=li.querySelector(".task-menu-btn");if(pop)pop.hidden=true;if(btn)btn.setAttribute("aria-expanded","false");
+  });
+  if(!except)openTaskMenu=null;
+}
+function toggleTaskMenu(li,pop,btn){
+  const opening=pop.hidden;closeTaskMenus(opening?li:null);pop.hidden=!opening;li.classList.toggle("menu-open",opening);btn.setAttribute("aria-expanded",opening?"true":"false");openTaskMenu=opening?li:null;
+}
+function taskMenuItem(label,svg,handler,cls=""){
+  const b=document.createElement("button");b.type="button";b.className=`task-menu-item ${cls}`.trim();b.innerHTML=`${svg}<span>${label}</span>`;b.onclick=e=>{e.stopPropagation();handler?.()};return b;
+}
+function openMoveTaskDialog(id){
+  if(!requireLocalSession())return;closeTaskMenus();const list=normalizeItems(days[current]||[]),it=list.find(x=>x.id===id);if(!it)return;
+  const children=list.filter(x=>x.parentId===id);moveTaskContext={id,fromDate:current,hasChildren:children.length>0,isChild:!!it.parentId};
+  $("moveTaskName").textContent=it.t;$("moveTaskDate").value=current;$("moveChildren").checked=true;$("moveChildrenWrap").hidden=!children.length;
+  $("moveTaskHint").textContent=it.parentId?"Alt görev başka bir güne taşındığında ana görevden ayrılarak normal görev olur.":children.length?"Varsayılan olarak alt görevler de aynı güne taşınır.":"";
+  $("confirmMoveTask").disabled=false;$("confirmMoveTask").textContent="Taşı";$("moveTaskDialog").showModal();
+}
+function localMovePreview(fromDate,toDate,id,includeChildren){
+  const source=normalizeItems(days[fromDate]||[]),target=normalizeItems(days[toDate]||[]),item=source.find(x=>x.id===id);if(!item)return false;
+  const moveIds=new Set([id]);if(includeChildren&&!item.parentId)source.forEach(x=>{if(x.parentId===id)moveIds.add(x.id)});
+  const moved=source.filter(x=>moveIds.has(x.id)).map(x=>({...x}));const remaining=source.filter(x=>!moveIds.has(x.id)).map(x=>({...x}));
+  if(item.parentId&&moved[0])moved[0].parentId="";
+  if(!includeChildren&&!item.parentId)remaining.forEach(x=>{if(x.parentId===id)x.parentId=""});
+  const targetIds=new Set(moved.map(x=>x.id));const nextTarget=target.filter(x=>!targetIds.has(x.id)).concat(moved);
+  if(remaining.length)days[fromDate]=normalizeItems(remaining);else delete days[fromDate];days[toDate]=normalizeItems(nextTarget);saveLocal();return true;
+}
+async function moveTaskToDate(){
+  const ctx=moveTaskContext;if(!ctx||!requireLocalSession())return;const toDate=String($("moveTaskDate").value||"");if(!/^\d{4}-\d{2}-\d{2}$/.test(toDate))return;
+  if(toDate===ctx.fromDate){$("moveTaskDialog").close();return}
+  const includeChildren=ctx.hasChildren&&$("moveChildren").checked;const btn=$("confirmMoveTask");btn.disabled=true;btn.textContent="Taşınıyor…";setSyncStatus("loading");
+  const pendingOk=await flushPending();if(pending.size&&!pendingOk){btn.disabled=false;btn.textContent="Taşı";setSyncStatus("error");return}
+  const before=JSON.parse(JSON.stringify(days));
+  if(!localMovePreview(ctx.fromDate,toDate,ctx.id,includeChildren)){btn.disabled=false;btn.textContent="Taşı";return}
+  render();
+  try{
+    const opId=`move|${currentUser.id}|${ctx.id}|${Date.now().toString(36)}|${Math.random().toString(36).slice(2,7)}`;
+    const j=await reliableApi("moveTask",{token:getToken(),fromDate:ctx.fromDate,toDate,taskId:ctx.id,includeChildren,knownRevision:serverRevision,opId},{timeout:30000,retries:0});
+    if(!j.ok){if(j.error==="oturum"){expireSession();return}throw new Error(j.error||"hata")}
+    if(Array.isArray(j.fromItems)){if(j.fromItems.length)days[ctx.fromDate]=normalizeItems(j.fromItems);else delete days[ctx.fromDate]}
+    if(Array.isArray(j.toItems)){if(j.toItems.length)days[toDate]=normalizeItems(j.toItems);else delete days[toDate]}
+    pending.delete(ctx.fromDate);pending.delete(toDate);if(j.revision!==undefined)saveRevision(j.revision);saveLocal();saveLastGood();
+    $("moveTaskDialog").close();moveTaskContext=null;goDayAnimated(toDate);setSyncStatus("success");
+  }catch(e){days=before;saveLocal();render();btn.disabled=false;btn.textContent="Taşı";setSyncStatus("error")}
+}
 function render(){
   const d=fromKey(current),tk=todayKey(),rel=current===tk?"Bugün":current===addDays(tk,-1)?"Dün":current===addDays(tk,1)?"Yarın":null;
   $("dayTitle").textContent=rel||`${d.getDate()} ${AYLAR[d.getMonth()]}`;const sub=$("daySub");sub.textContent=`${d.getDate()} ${AYLAR[d.getMonth()]} ${d.getFullYear()}, ${DAYNAMES[d.getDay()]}`;
@@ -941,13 +1033,28 @@ function render(){
     if(it.parentId)li.classList.add("subtask");if(it.done)li.classList.add("done");if(it.id===lastPop)li.classList.add("pop");if(isDeleting)li.classList.add("deleting");
     const slot=document.createElement("span");slot.className="check-slot";
     const c=document.createElement("button");c.className="check";c.setAttribute("aria-label",it.done?"Tamamlandı işaretini kaldır":"Tamamlandı olarak işaretle");c.setAttribute("aria-pressed",it.done);c.disabled=isDeleting;c.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3L13 4.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';c.onclick=()=>toggle(it.id);
-    const cue=document.createElement("span");cue.className="drag-cue";cue.setAttribute("aria-hidden","true");cue.innerHTML='<svg viewBox="0 0 20 20"><path d="M10 2.6v14.8M6.8 5.8 10 2.6l3.2 3.2M6.8 14.2 10 17.4l3.2-3.2M2.6 10h14.8M5.8 6.8 2.6 10l3.2 3.2M14.2 6.8 17.4 10l-3.2 3.2"/></svg>';slot.append(c,cue);
+    const cue=document.createElement("span");cue.className="drag-cue";cue.setAttribute("aria-hidden","true");cue.innerHTML='<svg viewBox="0 0 20 20"><path d="M7.7 6.2 10 3l2.3 3.2Z"/><path d="M7.7 13.8 10 17l2.3-3.2Z"/><path d="M6.2 7.7 3 10l3.2 2.3Z"/><path d="M13.8 7.7 17 10l-3.2 2.3Z"/></svg>';slot.append(c,cue);
     const span=document.createElement("span");span.className="txt";span.textContent=it.t;
     const hint=document.createElement("span");hint.className="hierarchy-hint";hint.textContent="Alt görev";
     const actions=document.createElement("div");actions.className="task-actions";
-    const edit=document.createElement("button");edit.className="edit";edit.type="button";edit.disabled=isDeleting;edit.innerHTML='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M12.146.854a.5.5 0 0 1 .708 0l2.292 2.292a.5.5 0 0 1 0 .708l-9.5 9.5a.5.5 0 0 1-.168.11l-4 1.5a.5.5 0 0 1-.642-.642l1.5-4a.5.5 0 0 1 .11-.168zM11.207 2.5 3.342 10.365l-.823 2.195 2.195-.823L12.58 3.872z"/></svg>';edit.setAttribute("aria-label","Görevi düzenle");edit.title="Düzenle";edit.onclick=()=>editTask(it.id,li);
-    const x=document.createElement("button");x.type="button";if(isDeleting){x.className="undo-inline";x.textContent="Geri al";x.setAttribute("aria-label","Silmeyi geri al");x.title="Geri al";x.onclick=()=>undoDelete()}else{x.className="del";x.textContent="×";x.setAttribute("aria-label","Sil");x.title="Sil";x.onclick=()=>remove(it.id)}
-    actions.append(edit,x);li.append(slot,span,hint,actions);ul.append(li)
+    if(isDeleting){
+      const undo=document.createElement("button");undo.type="button";undo.className="undo-inline";undo.textContent="Geri al";undo.setAttribute("aria-label","Silmeyi geri al");undo.onclick=()=>undoDelete();actions.append(undo);
+    }else{
+      const menuBtn=document.createElement("button");menuBtn.type="button";menuBtn.className="task-menu-btn";menuBtn.textContent="⋮";menuBtn.setAttribute("aria-label","Görev işlemleri");menuBtn.setAttribute("aria-haspopup","menu");menuBtn.setAttribute("aria-expanded","false");
+      const pop=document.createElement("div");pop.className="task-menu-pop";pop.setAttribute("role","menu");pop.hidden=true;
+      const iconEdit='<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m4 14.8.7-3.2L13.2 3l3 3-8.6 8.5L4 14.8Z"></path><path d="m11.9 4.3 3 3"></path></svg>';
+      const iconMove='<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3.2" y="4.7" width="13.6" height="11.8" rx="2"></rect><path d="M6.3 2.9v3.5M13.7 2.9v3.5M3.2 8h13.6"></path></svg>';
+      const iconShare='<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="6" cy="10" r="2.1"></circle><circle cx="14.5" cy="5.3" r="2.1"></circle><circle cx="14.5" cy="14.7" r="2.1"></circle><path d="m7.8 9 4.8-2.7M7.8 11l4.8 2.7"></path></svg>';
+      const iconDelete='<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 6h11M8 3.8h4M6.2 6l.7 10.2h6.2L13.8 6M8.5 8.5v5M11.5 8.5v5"></path></svg>';
+      pop.append(
+        taskMenuItem("Düzenle",iconEdit,()=>editTask(it.id,li)),
+        taskMenuItem("Tarih değiştir",iconMove,()=>openMoveTaskDialog(it.id))
+      );
+      const share=taskMenuItem("Paylaş",iconShare,()=>{});share.disabled=true;share.title="Görev önerileri altyapısı bir sonraki adımda bağlanacak";share.innerHTML+=`<span class="soon">yakında</span>`;pop.append(share);
+      pop.append(taskMenuItem("Sil",iconDelete,()=>{closeTaskMenus();remove(it.id)},"danger"));
+      menuBtn.onclick=e=>{e.stopPropagation();toggleTaskMenu(li,pop,menuBtn)};pop.onclick=e=>e.stopPropagation();actions.append(menuBtn,pop);
+    }
+    li.append(slot,span,hint,actions);ul.append(li)
   });
   lastPop=null;renderTomorrowNotice();renderCal();
 }
@@ -1371,6 +1478,13 @@ taskList.addEventListener("touchmove",e=>{
 taskList.addEventListener("touchend",()=>{if(taskReorder?.mode==="touch")finishTaskReorder(true)});
 taskList.addEventListener("touchcancel",()=>{if(taskReorder?.mode==="touch")finishTaskReorder(false)});
 taskList.addEventListener("contextmenu",e=>{if(taskReorder?.active&&taskReorderRow(e.target))e.preventDefault()});
+
+document.addEventListener("click",e=>{if(!e.target.closest?.(".task-actions"))closeTaskMenus()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&openTaskMenu){closeTaskMenus();return}if(e.key==="Escape"&&$("moveTaskDialog")?.open)$("moveTaskDialog").close()});
+$("moveToday").onclick=()=>{$("moveTaskDate").value=todayKey()};
+$("moveTomorrow").onclick=()=>{$("moveTaskDate").value=addDays(todayKey(),1)};
+$("closeMoveTaskX").onclick=()=>$("moveTaskDialog").close();$("cancelMoveTask").onclick=()=>$("moveTaskDialog").close();$("confirmMoveTask").onclick=moveTaskToDate;
+$("moveTaskDialog").addEventListener("close",()=>{moveTaskContext=null;$("confirmMoveTask").disabled=false;$("confirmMoveTask").textContent="Taşı"});
 
 $("refresh").onclick=()=>connect({force:true,silent:false,reason:"manual"});
 
