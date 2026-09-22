@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v58: gelen/gönderilen görevlerin canlı aynasını ve ana-görev istatistiklerini destekler.
-const SURUM = "centik-v66-live-suggestion-mirror";
+// v60: gelen görevler otomatik eklenir; ana ekranda tek seferlik yeni görev bildirimi gösterilir.
+const SURUM = "centik-v68-auto-received-notice";
 const KABUK = [
   "./",
   "./index.html",
