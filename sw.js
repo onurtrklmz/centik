@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v46 yaması: hiyerarşik silme ve ayrık dört yönlü taşıma simgesi.
-const SURUM = "centik-v54-cascade-delete-arrow-gap";
+// v46 yaması: hiyerarşik silme, v48 taşıma simgesi ve mobil ilk-görev sıralama düzeltmesi.
+const SURUM = "centik-v55-v48-arrow-mobile-reorder";
 const KABUK = [
   "./",
   "./index.html",

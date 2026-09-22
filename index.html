@@ -952,7 +952,7 @@ function render(){
     if(it.parentId)li.classList.add("subtask");if(it.done)li.classList.add("done");if(it.id===lastPop)li.classList.add("pop");if(isDeleting)li.classList.add("deleting");
     const slot=document.createElement("span");slot.className="check-slot";
     const c=document.createElement("button");c.className="check";c.setAttribute("aria-label",it.done?"Tamamlandı işaretini kaldır":"Tamamlandı olarak işaretle");c.setAttribute("aria-pressed",it.done);c.disabled=isDeleting;c.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3L13 4.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';c.onclick=()=>toggle(it.id);
-    const cue=document.createElement("span");cue.className="drag-cue";cue.setAttribute("aria-hidden","true");cue.innerHTML='<svg viewBox="0 0 20 20"><path d="M10 2.4 7.2 5.2M10 2.4l2.8 2.8M10 2.4v4.1M10 17.6l-2.8-2.8M10 17.6l2.8-2.8M10 17.6v-4.1M2.4 10l2.8-2.8M2.4 10l2.8 2.8M2.4 10h4.1M17.6 10l-2.8-2.8M17.6 10l-2.8 2.8M17.6 10h-4.1"/></svg>';slot.append(c,cue);
+    const cue=document.createElement("span");cue.className="drag-cue";cue.setAttribute("aria-hidden","true");cue.innerHTML='<svg viewBox="0 0 20 20"><path d="M7.7 6.2 10 3l2.3 3.2Z"/><path d="M7.7 13.8 10 17l2.3-3.2Z"/><path d="M6.2 7.7 3 10l3.2 2.3Z"/><path d="M13.8 7.7 17 10l-3.2 2.3Z"/></svg>';slot.append(c,cue);
     const span=document.createElement("span");span.className="txt";span.textContent=it.t;
     const hint=document.createElement("span");hint.className="hierarchy-hint";hint.textContent="Alt görev";
     const actions=document.createElement("div");actions.className="task-actions";
@@ -1374,6 +1374,12 @@ taskList.addEventListener("touchstart",e=>{
   const t=e.touches[0];clearTaskReorderHold();taskReorder={mode:"touch",active:false,row,date:current,startX:t.clientX,startY:t.clientY,lastX:t.clientX,lastY:t.clientY};
   taskReorderHoldTimer=setTimeout(()=>{if(taskReorder?.mode==="touch"&&!taskReorder.active){beginTaskReorder(taskReorder.row,taskReorder.lastX,taskReorder.lastY);try{navigator.vibrate?.(8)}catch(_){}}},TASK_REORDER_HOLD_MS);
 },{passive:true});
+// Uzun basıştan sonra ilk dikey hareketi tarayıcının sayfa kaydırması olarak sahiplenmesini engelle.
+// Capture dinleyicisi yalnız aktif görev sürüklemesinde devreye girer; normal mobil kaydırma etkilenmez.
+document.addEventListener("touchmove",e=>{
+  if(taskReorder?.mode==="touch"&&taskReorder.active&&e.touches.length===1&&e.cancelable)e.preventDefault();
+},{passive:false,capture:true});
+
 taskList.addEventListener("touchmove",e=>{
   const d=taskReorder;if(!d||d.mode!=="touch"||e.touches.length!==1)return;const t=e.touches[0];d.lastX=t.clientX;d.lastY=t.clientY;
   if(!d.active){if(Math.hypot(t.clientX-d.startX,t.clientY-d.startY)>9){clearTaskReorderHold();taskReorder=null}return}
