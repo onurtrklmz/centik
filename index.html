@@ -689,7 +689,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v56-title-baseline-fix", CENTIK_EXPECTED_SERVER_BUILD="v23-cetele";
+const CENTIK_CLIENT_BUILD="v58-cetele-empty-message", CENTIK_EXPECTED_SERVER_BUILD="v24-cetele";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -816,7 +816,7 @@ async function api(action,data={},options={}){
 }
 
 function authMessage(code){
-  const map={giris:"E-posta veya parola hatalı.",kilitli:"Çok fazla hatalı deneme yapıldı. Hesap geçici olarak kilitlendi.",pasif:"Bu hesap aktif değil.",bekliyor:"Hesabınız yönetici onayı bekliyor.",reddedildi:"Hesap başvurunuz onaylanmadı.",eposta:"Geçerli bir e-posta yazın.",parola:"Parola en az 10 karakter olmalı.",ad:"Adınızı yazın.",hesap_var:"Bu e-posta ile zaten bir hesap var.",kayit_limiti:"Yeni hesap başvurusu şu anda alınamıyor.",basvuru_limiti:"Çok sayıda bekleyen başvuru var. Yönetici onayından sonra tekrar deneyin.",admin_ayarsiz:"Süper yönetici e-posta adresi henüz yapılandırılmamış.",yetki:"Bu işlem için yönetici yetkisi gerekli.",oturum:"Oturum süresi doldu. Yeniden giriş yapın.",eposta_gonderilemedi:"Sıfırlama e-postası gönderilemedi.",sifirlama:"Kod geçersiz veya süresi dolmuş.",tema:"Geçersiz tema seçimi.",sunucu:"Sunucu hatası oluştu.",zaman_asimi:"Sunucu yanıtı gecikti. Yeniden deneyin.",cetele_pin:"PIN hatalı.",cetele_pin_gerekli:"Bu Çetele PIN ile korunuyor.",cetele_pin_kilitli:"Çok sayıda hatalı PIN denemesi yapıldı. Çetele geçici olarak kilitlendi.",cetele_pin_bicim:"PIN 4 veya 6 rakamdan oluşmalı.",cetele_uzun:"Çetele sınıra ulaştı."};
+  const map={giris:"E-posta veya parola hatalı.",kilitli:"Çok fazla hatalı deneme yapıldı. Hesap geçici olarak kilitlendi.",pasif:"Bu hesap aktif değil.",bekliyor:"Hesabınız yönetici onayı bekliyor.",reddedildi:"Hesap başvurunuz onaylanmadı.",eposta:"Geçerli bir e-posta yazın.",parola:"Parola en az 10 karakter olmalı.",ad:"Adınızı yazın.",hesap_var:"Bu e-posta ile zaten bir hesap var.",kayit_limiti:"Yeni hesap başvurusu şu anda alınamıyor.",basvuru_limiti:"Çok sayıda bekleyen başvuru var. Yönetici onayından sonra tekrar deneyin.",admin_ayarsiz:"Süper yönetici e-posta adresi henüz yapılandırılmamış.",yetki:"Bu işlem için yönetici yetkisi gerekli.",oturum:"Oturum süresi doldu. Yeniden giriş yapın.",eposta_gonderilemedi:"Sıfırlama e-postası gönderilemedi.",sifirlama:"Kod geçersiz veya süresi dolmuş.",tema:"Geçersiz tema seçimi.",sunucu:"Sunucu hatası oluştu.",zaman_asimi:"Sunucu yanıtı gecikti. Yeniden deneyin.",cetele_pin:"PIN hatalı.",cetele_pin_gerekli:"Bu Çetele PIN ile korunuyor.",cetele_pin_kilitli:"Çok sayıda hatalı PIN denemesi yapıldı. Çetele geçici olarak kilitlendi.",cetele_pin_bicim:"PIN 4 veya 6 rakamdan oluşmalı.",cetele_uzun:"Çetele sınıra ulaştı.",cetele_bos:"Çetele boş, kaydedilemedi."};
   return map[code]||"İşlem tamamlanamadı.";
 }
 function setAuthStatus(text,error=false){$("authStatus").textContent=text||"";$("authStatus").classList.toggle("error",!!error)}
@@ -1239,14 +1239,16 @@ function enforceJournalLimit(){
 $("journalText").addEventListener("input",enforceJournalLimit);
 $("journalButton").onclick=openJournalForCurrent;$("closeJournal").onclick=()=>closeJournalView(false);
 async function saveJournal(){
-  if(!journalContext||!requireLocalSession())return;const btn=$("saveJournal"),date=journalContext.date,content=$("journalText").value;btn.disabled=true;$("journalSaveStatus").className="journal-save-status";$("journalSaveStatus").textContent="Kaydediliyor…";
+  if(!journalContext||!requireLocalSession())return;const btn=$("saveJournal"),date=journalContext.date,content=$("journalText").value;
+  if(!content.trim()){setJournalPanelMode("editor",date);$("journalSaveStatus").className="journal-save-status error";$("journalSaveStatus").textContent="Çetele boş, kaydedilemedi.";return}
+  btn.disabled=true;$("journalSaveStatus").className="journal-save-status";$("journalSaveStatus").textContent="Kaydediliyor…";
   try{
     let j=await api("journalSave",{token:getToken(),date,content,pin:journalActivePin},{timeout:30000});
     if(!j.ok&&(j.error==="cetele_pin_gerekli"||j.error==="cetele_pin")){
       setCurrentUserPinEnabled(true);const pin=await requestJournalPin(j.error==="cetele_pin"?"PIN hatalı. Yeniden deneyin.":"");if(pin===null)return;journalActivePin=pin;j=await api("journalSave",{token:getToken(),date,content,pin},{timeout:30000});
       if(j.ok)setJournalPanelMode("editor",date);
     }
-    if(!j.ok){if(j.error==="oturum"){expireSession();return}if(j.error==="cetele_pin"||j.error==="cetele_pin_gerekli"||j.error==="cetele_pin_kilitli"){setJournalPanelMode("pin",date,pinErrorText(j));return}setJournalPanelMode("editor",date);$("journalSaveStatus").className="journal-save-status error";$("journalSaveStatus").textContent=j.error==="cetele_uzun"?"Çetele sınıra ulaştı":pinErrorText(j);return}
+    if(!j.ok){if(j.error==="oturum"){expireSession();return}if(j.error==="cetele_pin"||j.error==="cetele_pin_gerekli"||j.error==="cetele_pin_kilitli"){setJournalPanelMode("pin",date,pinErrorText(j));return}setJournalPanelMode("editor",date);$("journalSaveStatus").className="journal-save-status error";$("journalSaveStatus").textContent=j.error==="cetele_uzun"?"Çetele sınıra ulaştı":j.error==="cetele_bos"?"Çetele boş, kaydedilemedi.":pinErrorText(j);return}
     if(typeof j.pinEnabled==="boolean")setCurrentUserPinEnabled(j.pinEnabled);setJournalStatus(date,!!j.exists);journalContext.exists=!!j.exists;journalContext.original=content;journalDirty=false;setJournalPanelMode("editor",date);$("journalSaveStatus").className="journal-save-status ok";$("journalSaveStatus").textContent=j.exists?"Çetele tutuldu.":"Çetele kaydı kaldırıldı.";closeJournalView(false);
   }catch(e){setJournalPanelMode("editor",date);$("journalSaveStatus").className="journal-save-status error";$("journalSaveStatus").textContent="Çetele kaydedilemedi. Bağlantınızı kontrol edin."}finally{btn.disabled=false}
 }

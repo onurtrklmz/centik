@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v56: Gün başlığının dikey hizası ve Türkçe alt uzantıları düzeltildi.
-const SURUM = "centik-v56-title-baseline-fix";
+// v57: Çetele boş kayıt doğrulaması eklendi.
+const SURUM = "centik-v58-cetele-empty-message";
 const KABUK = [
   "./",
   "./index.html",
