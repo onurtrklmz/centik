@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v67: Backend isteği başlatan kullanıcı butonları tek pulse/yükleme dili altında birleştirildi.
-const SURUM = "centik-v67-unified-backend-button-pulse";
+const SURUM = "centik-v68-day-header-vertical-align";
 const KABUK = [
   "./",
   "./index.html",
