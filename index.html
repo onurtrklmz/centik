@@ -476,7 +476,7 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
       <button class="jump-notice today-inline" id="todayNotice" type="button" hidden>
         <svg viewBox="0 0 20 20" aria-hidden="true">
           <rect x="3.4" y="3.1" width="12.8" height="9.7" rx="2"></rect><path d="M6.3 1.9v2.8M13.7 1.9v2.8M3.4 6.3h12.8"></path>
-          <path class="today-return-arrow" d="M12.9 17.15c-1.62-2.98-3.98-4.67-6.95-5.03v-1.96c0-.51-.61-.77-.99-.43L1.8 12.64a.61.61 0 0 0 0 .9l3.16 2.91c.38.35.99.08.99-.43v-1.83c2.46.26 4.47 1.24 6.16 3.18.36.42 1.09.27.79-.22Z"></path>
+          <path class="today-return-arrow" d="M1.9 13.35 7.15 8.9v2.72h2.6c4.36 0 7.16 2.05 8.32 6.1-2.1-2.28-4.57-3.22-8.32-3.22h-2.6v2.72L1.9 13.35Z"></path>
         </svg>
         <span>Bugün</span>
       </button>
@@ -689,7 +689,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v59-left-thick-return-arrow", CENTIK_EXPECTED_SERVER_BUILD="v24-cetele";
+const CENTIK_CLIENT_BUILD="v60-bold-left-reply-arrow", CENTIK_EXPECTED_SERVER_BUILD="v24-cetele";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;

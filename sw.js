@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v57: Çetele boş kayıt doğrulaması eklendi.
-const SURUM = "centik-v59-left-thick-return-arrow";
+const SURUM = "centik-v60-bold-left-reply-arrow";
 const KABUK = [
   "./",
   "./index.html",
