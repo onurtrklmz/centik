@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v52: Çetele terminolojisi tamamen temizlendi; evrensel kayan kart davranışı korunur.
-const SURUM = "centik-v52-cetele-clean";
+// v53: Çetele üst başlık düzeni, açık tema kontrastı ve daha hızlı boş Çetele açılışı.
+const SURUM = "centik-v53-cetele-ui-speed";
 const KABUK = [
   "./",
   "./index.html",
