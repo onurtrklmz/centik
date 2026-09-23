@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v54: Dün/Bugün/Yarın başlığı geri alındı; Bugün üst satırda, Çetele tarih satırında; trackpad yatay gün geçişi eklendi.
-const SURUM = "centik-v54-cetele-title-trackpad";
+// v55: Bugün düğmesindeki küçük dönüş oku WhatsApp ilet oku formunda yenilendi.
+const SURUM = "centik-v55-cetele-whatsapp-arrow";
 const KABUK = [
   "./",
   "./index.html",
