@@ -187,7 +187,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 }
 .today-inline::after{display:none}
 .today-inline svg{width:18px;height:18px;fill:none;stroke:var(--notice-today-accent);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.today-inline .today-return-arrow{fill:var(--notice-today-accent);stroke:none}
+.today-inline .today-return-arrow{fill:#2F9BFF;stroke:none}
 .today-inline:hover{background:color-mix(in srgb,var(--notice-today-accent) 14%,var(--paper))}
 
 /* ——— Çetele ——— */
@@ -479,7 +479,7 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
       <button class="jump-notice today-inline" id="todayNotice" type="button" hidden>
         <svg viewBox="0 0 20 20" aria-hidden="true">
           <rect x="3.4" y="3.1" width="12.8" height="9.7" rx="2"></rect><path d="M6.3 1.9v2.8M13.7 1.9v2.8M3.4 6.3h12.8"></path>
-          <path class="today-return-arrow" d="M1.9 13.35 7.15 8.9v2.72h2.6c4.36 0 7.16 2.05 8.32 6.1-2.1-2.28-4.57-3.22-8.32-3.22h-2.6v2.72L1.9 13.35Z"></path>
+          <path class="today-return-arrow" d="M3.1 14.55 8.45 10.15c.3-.25.76-.04.76.35v2.05c3.3.12 5.78 1.55 7.5 4.72-2.25-1.53-4.63-2.02-7.5-1.94v2.18c0 .39-.46.6-.76.35L3.1 14.55Z"></path>
         </svg>
         <span>Bugün</span>
       </button>
@@ -692,7 +692,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v61-cetele-calendar-mark", CENTIK_EXPECTED_SERVER_BUILD="v25-cetele-calendar";
+const CENTIK_CLIENT_BUILD="v64-cetele-blue-return-arrow", CENTIK_EXPECTED_SERVER_BUILD="v25-cetele-calendar";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;

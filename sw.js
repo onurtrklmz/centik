@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v61: Takvimde Çetele bulunan günler için mini kitap göstergesi eklendi.
-const SURUM = "centik-v61-cetele-calendar-mark";
+// v64: Bugün düğmesinde normal takvim + mavi sola dönüş oku.
+const SURUM = "centik-v64-blue-return-arrow";
 const KABUK = [
   "./",
   "./index.html",
