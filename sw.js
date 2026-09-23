@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v55: Bugün düğmesindeki küçük dönüş oku WhatsApp ilet oku formunda yenilendi.
-const SURUM = "centik-v55-cetele-whatsapp-arrow";
+// v56: Gün başlığının dikey hizası ve Türkçe alt uzantıları düzeltildi.
+const SURUM = "centik-v56-title-baseline-fix";
 const KABUK = [
   "./",
   "./index.html",
