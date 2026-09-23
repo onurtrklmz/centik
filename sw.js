@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v64: Bugün düğmesinde normal takvim + mavi sola dönüş oku.
-const SURUM = "centik-v64-blue-return-arrow";
+// v67: Backend isteği başlatan kullanıcı butonları tek pulse/yükleme dili altında birleştirildi.
+const SURUM = "centik-v67-unified-backend-button-pulse";
 const KABUK = [
   "./",
   "./index.html",

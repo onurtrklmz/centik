@@ -224,13 +224,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 .journal-textarea:focus{border-color:var(--focus);box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 14%,transparent)}
 .journal-limit-status{margin:8px 2px 0;color:#c43d3d;font-size:.78rem;font-weight:700;text-align:right}
 .journal-limit-status[hidden]{display:none}
-.journal-save{width:100%;min-height:50px;border:0;border-radius:13px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));color:#fff;font-weight:750;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 8px 22px color-mix(in srgb,var(--focus) 18%,transparent)}
-.journal-save svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.journal-save:disabled{opacity:.58;cursor:default}
+.journal-save{width:100%;min-height:50px;border:0;border-radius:13px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));color:#fff;font-weight:750;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 8px 22px color-mix(in srgb,var(--focus) 18%,transparent);transition:transform .11s ease,box-shadow .14s ease,filter .14s ease,opacity .14s ease;-webkit-tap-highlight-color:transparent}
+.journal-save svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.journal-save:disabled{opacity:.72;cursor:progress}.journal-save:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 10px 24px color-mix(in srgb,var(--focus) 24%,transparent)}.journal-save:not(:disabled):active{transform:translateY(1px) scale(.985);filter:brightness(.95)}
+.backend-action-busy,.journal-save.is-busy,.pin-footer button.is-busy{animation:savePulse .62s ease-in-out infinite alternate!important;cursor:progress!important;transform-origin:center;pointer-events:none}.backend-action-busy:disabled,.journal-save.is-busy:disabled,.pin-footer button.is-busy:disabled{opacity:1}.sync-refresh.backend-action-busy .sync-icon-refresh{animation:none!important}.sync-refresh.backend-action-busy::after{content:attr(data-busy-label);position:absolute;right:0;top:calc(100% + 7px);z-index:90;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);box-shadow:var(--shadow);font:700 .70rem/1 var(--sans);white-space:nowrap;pointer-events:none}
 .journal-save-status{min-height:1.35em;margin:10px 2px 0;text-align:center;color:var(--muted);font-size:.80rem}.journal-save-status.error{color:#d64a4a}.journal-save-status.ok{color:#20a968}
 .journal-privacy{margin:14px 0 4px;padding:14px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--paper) 88%,transparent)}
 .journal-privacy h3{margin:0 0 4px;font-size:.96rem}.journal-privacy p{margin:0 0 12px;color:var(--muted);font-size:.82rem;line-height:1.45}.journal-pin-state{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;padding:9px 10px;border-radius:10px;background:var(--bg);font-size:.82rem}.journal-pin-state strong{font-size:.78rem;color:var(--focus)}
-.journal-privacy-actions{display:flex;gap:8px;flex-wrap:wrap}.journal-privacy-actions button{border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);padding:8px 10px;font-weight:700;font-size:.80rem}.journal-privacy-actions button.primary{color:var(--focus);border-color:color-mix(in srgb,var(--focus) 38%,var(--line))}.journal-privacy-actions button.danger{color:#b42318;border-color:color-mix(in srgb,#b42318 28%,var(--line))}
-.pin-box{width:min(92vw,410px)}.pin-box .pin-note{margin:0 0 13px;color:var(--muted);font-size:.83rem;line-height:1.45}.pin-fields{display:grid;gap:10px}.pin-fields label{display:grid;gap:6px;color:var(--muted);font-size:.80rem;font-weight:700}.pin-fields input{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:11px 12px;font:inherit;letter-spacing:.22em;text-align:center}.pin-status{min-height:1.3em;margin:10px 0 0;color:#b42318;font-size:.80rem}.pin-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}.pin-footer button{border:1px solid var(--line);border-radius:9px;padding:9px 13px;background:var(--paper);color:var(--ink);font-weight:750}.pin-footer .primary{border-color:transparent;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));color:#fff}.pin-footer .danger{border-color:color-mix(in srgb,#b42318 35%,var(--line));color:#b42318}
+.journal-privacy-actions{display:flex;gap:8px;flex-wrap:wrap}.journal-privacy-actions button{border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);padding:8px 10px;font-weight:700;font-size:.80rem;transition:transform .11s ease,background .14s ease,border-color .14s ease,filter .14s ease;-webkit-tap-highlight-color:transparent}.journal-privacy-actions button:not(:disabled):hover{background:color-mix(in srgb,var(--focus) 7%,var(--paper))}.journal-privacy-actions button:not(:disabled):active{transform:translateY(1px) scale(.975);filter:brightness(.96)}.journal-privacy-actions button.primary{color:var(--focus);border-color:color-mix(in srgb,var(--focus) 38%,var(--line))}.journal-privacy-actions button.danger{color:#b42318;border-color:color-mix(in srgb,#b42318 28%,var(--line))}
+.pin-box{width:min(92vw,410px)}.pin-box .pin-note{margin:0 0 13px;color:var(--muted);font-size:.83rem;line-height:1.45}.pin-fields{display:grid;gap:10px}.pin-fields label{display:grid;gap:6px;color:var(--muted);font-size:.80rem;font-weight:700}.pin-fields input{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:11px 12px;font:inherit;letter-spacing:.22em;text-align:center}.pin-status{min-height:1.3em;margin:10px 0 0;color:#b42318;font-size:.80rem}.pin-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}.pin-footer button{border:1px solid var(--line);border-radius:9px;padding:9px 13px;background:var(--paper);color:var(--ink);font-weight:750;transition:transform .11s ease,background .14s ease,filter .14s ease,opacity .14s ease;-webkit-tap-highlight-color:transparent}.pin-footer button:not(:disabled):hover{background:color-mix(in srgb,var(--focus) 7%,var(--paper))}.pin-footer button:not(:disabled):active{transform:translateY(1px) scale(.975);filter:brightness(.96)}.pin-footer button:disabled{opacity:.72;cursor:progress}.pin-footer .primary{border-color:transparent;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));color:#fff}.pin-footer .primary:not(:disabled):hover{background:linear-gradient(135deg,var(--accent-start),var(--accent-end));filter:brightness(1.05)}.pin-footer .danger{border-color:color-mix(in srgb,#b42318 35%,var(--line));color:#b42318}
 @media(max-width:430px){
   .day-head{grid-template-columns:36px minmax(48px,1fr) auto 36px;gap:5px}
   .day-head .nav{width:36px;height:36px}
@@ -692,7 +693,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v64-cetele-blue-return-arrow", CENTIK_EXPECTED_SERVER_BUILD="v25-cetele-calendar";
+const CENTIK_CLIENT_BUILD="v67-unified-backend-button-pulse", CENTIK_EXPECTED_SERVER_BUILD="v25-cetele-calendar";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -753,9 +754,9 @@ function renderDiagnostics(message=""){
   if($("diagBuild"))$("diagBuild").textContent=CENTIK_CLIENT_BUILD;
 }
 async function runDiagnostics(){
-  const b=$("runDiagnostics");if(!b||currentUser?.role!=="admin")return;const old=b.textContent;b.disabled=true;b.textContent="Test çalışıyor…";renderDiagnostics("Sunucu testi başlatıldı…");
+  const b=$("runDiagnostics");if(!b||currentUser?.role!=="admin"||!setBackendActionBusy(b,true,"Test çalışıyor…"))return;renderDiagnostics("Sunucu testi başlatıldı…");
   try{const j=await api("diagnostics",{token:getToken()},{timeout:30000});if(!j.ok)throw new Error(j.error||"hata");diagnosticsResult=j;renderDiagnostics(j.healthOk?"Regresyon kontrolleri geçti.":"En az bir regresyon kontrolü başarısız.")}
-  catch(e){renderDiagnostics(`Tanılama testi başarısız: ${e.message||e}`)}finally{b.disabled=false;b.textContent=old}
+  catch(e){renderDiagnostics(`Tanılama testi başarısız: ${e.message||e}`)}finally{setBackendActionBusy(b,false)}
 }
 async function copyDiagnostics(){
   const report={clientBuild:CENTIK_CLIENT_BUILD,expectedServerBuild:CENTIK_EXPECTED_SERVER_BUILD,generatedAt:new Date().toISOString(),health:diagnosticsResult,recent:readDiagLog().slice(-10)};
@@ -819,7 +820,7 @@ async function api(action,data={},options={}){
 }
 
 function authMessage(code){
-  const map={giris:"E-posta veya parola hatalı.",kilitli:"Çok fazla hatalı deneme yapıldı. Hesap geçici olarak kilitlendi.",pasif:"Bu hesap aktif değil.",bekliyor:"Hesabınız yönetici onayı bekliyor.",reddedildi:"Hesap başvurunuz onaylanmadı.",eposta:"Geçerli bir e-posta yazın.",parola:"Parola en az 10 karakter olmalı.",ad:"Adınızı yazın.",hesap_var:"Bu e-posta ile zaten bir hesap var.",kayit_limiti:"Yeni hesap başvurusu şu anda alınamıyor.",basvuru_limiti:"Çok sayıda bekleyen başvuru var. Yönetici onayından sonra tekrar deneyin.",admin_ayarsiz:"Süper yönetici e-posta adresi henüz yapılandırılmamış.",yetki:"Bu işlem için yönetici yetkisi gerekli.",oturum:"Oturum süresi doldu. Yeniden giriş yapın.",eposta_gonderilemedi:"Sıfırlama e-postası gönderilemedi.",sifirlama:"Kod geçersiz veya süresi dolmuş.",tema:"Geçersiz tema seçimi.",sunucu:"Sunucu hatası oluştu.",zaman_asimi:"Sunucu yanıtı gecikti. Yeniden deneyin.",cetele_pin:"PIN hatalı.",cetele_pin_gerekli:"Bu Çetele PIN ile korunuyor.",cetele_pin_kilitli:"Çok sayıda hatalı PIN denemesi yapıldı. Çetele geçici olarak kilitlendi.",cetele_pin_bicim:"PIN 4 veya 6 rakamdan oluşmalı.",cetele_uzun:"Çetele sınıra ulaştı.",cetele_bos:"Çetele boş, kaydedilemedi."};
+  const map={giris:"E-posta veya parola hatalı.",kilitli:"Çok fazla hatalı deneme yapıldı. Hesap geçici olarak kilitlendi.",pasif:"Bu hesap aktif değil.",bekliyor:"Hesabınız yönetici onayı bekliyor.",reddedildi:"Hesap başvurunuz onaylanmadı.",eposta:"Geçerli bir e-posta yazın.",parola:"Parola en az 10 karakter olmalı.",ad:"Adınızı yazın.",hesap_var:"Bu e-posta ile zaten bir hesap var.",kayit_limiti:"Yeni hesap başvurusu şu anda alınamıyor.",basvuru_limiti:"Çok sayıda bekleyen başvuru var. Yönetici onayından sonra tekrar deneyin.",admin_ayarsiz:"Süper yönetici e-posta adresi henüz yapılandırılmamış.",yetki:"Bu işlem için yönetici yetkisi gerekli.",oturum:"Oturum süresi doldu. Yeniden giriş yapın.",eposta_gonderilemedi:"Sıfırlama e-postası gönderilemedi.",sifirlama:"Kod geçersiz veya süresi dolmuş.",tema:"Geçersiz tema seçimi.",sunucu:"Sunucu hatası oluştu.",zaman_asimi:"Sunucu yanıtı gecikti. Yeniden deneyin.",cetele_pin:"PIN hatalı.",cetele_pin_gerekli:"Bu Çetele PIN ile korunuyor.",cetele_pin_kilitli:"Çok sayıda hatalı PIN denemesi yapıldı. Çetele geçici olarak kilitlendi.",cetele_pin_bicim:"PIN 4 veya 6 rakamdan oluşmalı.",cetele_uzun:"Çetele sınıra ulaştı.",cetele_bos:"Çetele boş"};
   return map[code]||"İşlem tamamlanamadı.";
 }
 function setAuthStatus(text,error=false){$("authStatus").textContent=text||"";$("authStatus").classList.toggle("error",!!error)}
@@ -1178,12 +1179,42 @@ function pinErrorText(j){
 }
 function digitsOnly(el){if(!el)return;el.value=el.value.replace(/\D/g,"").slice(0,6)}
 ["journalUnlockPin","journalCurrentPin","journalNewPin","journalConfirmPin"].forEach(id=>$(id)?.addEventListener("input",e=>digitsOnly(e.target)));
+function backendActionLabelTarget(btn){
+  if(!btn)return null;
+  const spans=[...btn.querySelectorAll("span")].filter(el=>!el.classList.contains("journal-launch-state")&&!el.classList.contains("sync-error-mark")&&!el.classList.contains("soon"));
+  if(spans.length)return spans[0];
+  return btn.children.length?null:btn;
+}
+function setBackendActionBusy(btn,busy,label=""){
+  if(!btn)return false;const target=backendActionLabelTarget(btn);
+  if(busy){
+    if(btn.dataset.backendBusy==="1")return false;
+    btn.dataset.backendBusy="1";btn.dataset.backendWasDisabled=btn.disabled?"1":"0";
+    if(target)btn.dataset.backendIdleLabel=target.textContent;
+    if(btn.hasAttribute("title"))btn.dataset.backendIdleTitle=btn.getAttribute("title")||"";
+    btn.disabled=true;btn.classList.add("backend-action-busy","is-busy");btn.setAttribute("aria-busy","true");
+    if(label){if(target)target.textContent=label;else{btn.setAttribute("data-busy-label",label);btn.title=label}}
+    return true;
+  }
+  if(btn.dataset.backendBusy!=="1"){btn.classList.remove("backend-action-busy","is-busy");btn.removeAttribute("aria-busy");btn.removeAttribute("data-busy-label");return true}
+  if(target&&btn.dataset.backendIdleLabel!==undefined)target.textContent=btn.dataset.backendIdleLabel;
+  if(btn.dataset.backendIdleTitle!==undefined)btn.setAttribute("title",btn.dataset.backendIdleTitle);else if(btn.hasAttribute("data-busy-label"))btn.removeAttribute("title");
+  const wasDisabled=btn.dataset.backendWasDisabled==="1";
+  delete btn.dataset.backendBusy;delete btn.dataset.backendWasDisabled;delete btn.dataset.backendIdleLabel;delete btn.dataset.backendIdleTitle;
+  btn.classList.remove("backend-action-busy","is-busy");btn.removeAttribute("aria-busy");btn.removeAttribute("data-busy-label");btn.disabled=wasDisabled;
+  return true;
+}
+const setCeteleActionBusy=setBackendActionBusy;
+async function withBackendAction(btn,label,fn){
+  if(!setBackendActionBusy(btn,true,label))return false;
+  try{return await fn()}finally{setBackendActionBusy(btn,false)}
+}
 
 let journalUnlockResolver=null,journalPanelHideTimer=null,journalOpenSeq=0;
 function setJournalPanelMode(mode,date=current,message=""){
   const unlock=$("journalUnlockView"),loading=$("journalLoadingView"),editor=$("journalEditorView");
   if(unlock)unlock.hidden=mode!=="pin";if(loading)loading.hidden=mode!=="loading";if(editor)editor.hidden=mode!=="editor";
-  if(mode==="pin"){$("journalUnlockStatus").textContent=message||"";requestAnimationFrame(()=>$('journalUnlockPin')?.focus({preventScroll:true}))}
+  if(mode==="pin"){setCeteleActionBusy($("confirmJournalUnlock"),false);$("journalUnlockStatus").textContent=message||"";requestAnimationFrame(()=>$('journalUnlockPin')?.focus({preventScroll:true}))}
   if(mode==="loading"&&$("journalLoadingText"))$("journalLoadingText").textContent=message||"Çetele açılıyor…";
   if(date&&$("journalDate"))$("journalDate").value=journalDateLabel(date);
 }
@@ -1200,7 +1231,7 @@ function requestJournalPin(message=""){
   openJournalShell("pin",current,message);
   return new Promise(resolve=>{journalUnlockResolver=resolve;$("journalUnlockPin").value="";$("journalUnlockStatus").textContent=message||"";requestAnimationFrame(()=>$('journalUnlockPin')?.focus({preventScroll:true}))});
 }
-$("confirmJournalUnlock").onclick=()=>{const pin=$("journalUnlockPin").value;if(!/^(?:\d{4}|\d{6})$/.test(pin)){$("journalUnlockStatus").textContent="PIN 4 veya 6 rakamdan oluşmalı.";return}finishJournalUnlock(pin)};
+$("confirmJournalUnlock").onclick=()=>{const btn=$("confirmJournalUnlock"),pin=$("journalUnlockPin").value;if(!/^(?:\d{4}|\d{6})$/.test(pin)){$("journalUnlockStatus").textContent="PIN 4 veya 6 rakamdan oluşmalı.";return}setCeteleActionBusy(btn,true,"Açılıyor…");finishJournalUnlock(pin)};
 $("journalUnlockPin").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("confirmJournalUnlock").click()}});
 
 async function fetchJournalForOpen(date,pin=""){
@@ -1208,7 +1239,7 @@ async function fetchJournalForOpen(date,pin=""){
 }
 async function openJournalForCurrent(){
   if(!requireLocalSession()||journalContext||document.body.classList.contains("journal-open"))return;
-  const date=current,b=$("journalButton"),seq=++journalOpenSeq;b.disabled=true;b.classList.add("is-loading");
+  const date=current,b=$("journalButton"),seq=++journalOpenSeq;if(!setBackendActionBusy(b,true,"Açılıyor…"))return;
   let pin="",j=null,needsPin=!!currentUser?.journalPinEnabled;
   const knownFreshEmpty=!needsPin&&journalStatusFresh(date)&&journalStatusCache.get(date)===false;
   openJournalShell(needsPin?"pin":(knownFreshEmpty?"editor":"loading"),date);
@@ -1237,7 +1268,7 @@ async function openJournalForCurrent(){
     if(typeof j.pinEnabled==="boolean")setCurrentUserPinEnabled(j.pinEnabled);
     setJournalStatus(date,!!j.exists);journalActivePin=pin;journalContext={date,exists:!!j.exists,original:String(j.content||"")};journalDirty=false;
     $("journalDate").value=journalDateLabel(date);$("journalText").value=String(j.content||"");clearJournalLimitWarning();$("journalSaveStatus").textContent="";$("journalSaveStatus").className="journal-save-status";setJournalPanelMode("editor",date);
-  }catch(e){if(seq===journalOpenSeq)setJournalPanelMode("loading",date,"Çetele açılamadı. Bağlantınızı kontrol edip geri dönün.")}finally{b.disabled=false;b.classList.remove("is-loading");renderJournalButton()}
+  }catch(e){if(seq===journalOpenSeq)setJournalPanelMode("loading",date,"Çetele açılamadı. Bağlantınızı kontrol edip geri dönün.")}finally{setBackendActionBusy(b,false);renderJournalButton()}
 }
 function closeJournalView(force=false){
   if(!force&&journalContext&&journalDirty&&!confirm("Çetele’de kaydedilmemiş değişiklikler var. Kapatılsın mı?"))return false;
@@ -1257,17 +1288,17 @@ $("journalText").addEventListener("input",enforceJournalLimit);
 $("journalButton").onclick=openJournalForCurrent;$("closeJournal").onclick=()=>closeJournalView(false);
 async function saveJournal(){
   if(!journalContext||!requireLocalSession())return;const btn=$("saveJournal"),date=journalContext.date,content=$("journalText").value;
-  if(!content.trim()){setJournalPanelMode("editor",date);$("journalSaveStatus").className="journal-save-status error";$("journalSaveStatus").textContent="Çetele boş, kaydedilemedi.";return}
-  btn.disabled=true;$("journalSaveStatus").className="journal-save-status";$("journalSaveStatus").textContent="Kaydediliyor…";
+  if(!content.trim()){setJournalPanelMode("editor",date);$("journalSaveStatus").className="journal-save-status error";$("journalSaveStatus").textContent="Çetele boş";return}
+  setCeteleActionBusy(btn,true,"Tutuluyor…");$("journalSaveStatus").className="journal-save-status";$("journalSaveStatus").textContent="Kaydediliyor…";
   try{
     let j=await api("journalSave",{token:getToken(),date,content,pin:journalActivePin},{timeout:30000});
     if(!j.ok&&(j.error==="cetele_pin_gerekli"||j.error==="cetele_pin")){
       setCurrentUserPinEnabled(true);const pin=await requestJournalPin(j.error==="cetele_pin"?"PIN hatalı. Yeniden deneyin.":"");if(pin===null)return;journalActivePin=pin;j=await api("journalSave",{token:getToken(),date,content,pin},{timeout:30000});
       if(j.ok)setJournalPanelMode("editor",date);
     }
-    if(!j.ok){if(j.error==="oturum"){expireSession();return}if(j.error==="cetele_pin"||j.error==="cetele_pin_gerekli"||j.error==="cetele_pin_kilitli"){setJournalPanelMode("pin",date,pinErrorText(j));return}setJournalPanelMode("editor",date);$("journalSaveStatus").className="journal-save-status error";$("journalSaveStatus").textContent=j.error==="cetele_uzun"?"Çetele sınıra ulaştı":j.error==="cetele_bos"?"Çetele boş, kaydedilemedi.":pinErrorText(j);return}
+    if(!j.ok){if(j.error==="oturum"){expireSession();return}if(j.error==="cetele_pin"||j.error==="cetele_pin_gerekli"||j.error==="cetele_pin_kilitli"){setJournalPanelMode("pin",date,pinErrorText(j));return}setJournalPanelMode("editor",date);$("journalSaveStatus").className="journal-save-status error";$("journalSaveStatus").textContent=j.error==="cetele_uzun"?"Çetele sınıra ulaştı":j.error==="cetele_bos"?"Çetele boş":pinErrorText(j);return}
     if(typeof j.pinEnabled==="boolean")setCurrentUserPinEnabled(j.pinEnabled);setJournalStatus(date,!!j.exists);journalContext.exists=!!j.exists;journalContext.original=content;journalDirty=false;setJournalPanelMode("editor",date);$("journalSaveStatus").className="journal-save-status ok";$("journalSaveStatus").textContent=j.exists?"Çetele tutuldu.":"Çetele kaydı kaldırıldı.";closeJournalView(false);
-  }catch(e){setJournalPanelMode("editor",date);$("journalSaveStatus").className="journal-save-status error";$("journalSaveStatus").textContent="Çetele kaydedilemedi. Bağlantınızı kontrol edin."}finally{btn.disabled=false}
+  }catch(e){setJournalPanelMode("editor",date);$("journalSaveStatus").className="journal-save-status error";$("journalSaveStatus").textContent="Çetele kaydedilemedi. Bağlantınızı kontrol edin."}finally{setCeteleActionBusy(btn,false)}
 }
 $("saveJournal").onclick=saveJournal;
 
@@ -1276,7 +1307,7 @@ function renderJournalPrivacyUI(){
 }
 function closeJournalPinDialog(){const d=$("journalPinDialog");if(d?.open)d.close();["journalCurrentPin","journalNewPin","journalConfirmPin"].forEach(id=>$(id).value="");$("journalPinStatus").textContent=""}
 function openJournalPinDialog(mode){
-  journalPinMode=mode;const changing=mode==="change",disabling=mode==="disable";$("journalPinDialogTitle").textContent=disabling?"PIN korumasını kapat":changing?"Çetele PIN'ini değiştir":"Çetele PIN'i belirle";$("journalPinDialogNote").textContent=disabling?"PIN korumasını kaldırmak için mevcut PIN'inizi girin.":"4 veya 6 haneli rakamlardan oluşan bir PIN kullanın. PIN her Çetele açılışında yeniden sorulur.";$("journalCurrentPinWrap").hidden=mode==="set";$("journalNewPinWrap").hidden=disabling;$("journalConfirmPinWrap").hidden=disabling;$("confirmJournalPin").textContent=disabling?"Devre dışı bırak":"Kaydet";$("confirmJournalPin").classList.toggle("danger",disabling);$("confirmJournalPin").classList.toggle("primary",!disabling);$("journalPinStatus").textContent="";$("journalPinDialog").showModal();requestAnimationFrame(()=>$(mode==="set"?"journalNewPin":"journalCurrentPin").focus())
+  journalPinMode=mode;const changing=mode==="change",disabling=mode==="disable",confirmBtn=$("confirmJournalPin");setCeteleActionBusy(confirmBtn,false);$("journalPinDialogTitle").textContent=disabling?"PIN korumasını kapat":changing?"Çetele PIN'ini değiştir":"Çetele PIN'i belirle";$("journalPinDialogNote").textContent=disabling?"PIN korumasını kaldırmak için mevcut PIN'inizi girin.":"4 veya 6 haneli rakamlardan oluşan bir PIN kullanın. PIN her Çetele açılışında yeniden sorulur.";$("journalCurrentPinWrap").hidden=mode==="set";$("journalNewPinWrap").hidden=disabling;$("journalConfirmPinWrap").hidden=disabling;confirmBtn.textContent=disabling?"Devre dışı bırak":"Kaydet";confirmBtn.classList.toggle("danger",disabling);confirmBtn.classList.toggle("primary",!disabling);$("journalPinStatus").textContent="";$("journalPinDialog").showModal();requestAnimationFrame(()=>$(mode==="set"?"journalNewPin":"journalCurrentPin").focus())
 }
 $("setJournalPinBtn").onclick=()=>openJournalPinDialog("set");$("changeJournalPinBtn").onclick=()=>openJournalPinDialog("change");$("disableJournalPinBtn").onclick=()=>openJournalPinDialog("disable");$("cancelJournalPin").onclick=closeJournalPinDialog;$("closeJournalPinX").onclick=closeJournalPinDialog;$("journalPinDialog").addEventListener("cancel",e=>{e.preventDefault();closeJournalPinDialog()});
 $("confirmJournalPin").onclick=async()=>{
@@ -1286,12 +1317,12 @@ $("confirmJournalPin").onclick=async()=>{
     if(!/^(?:\d{4}|\d{6})$/.test(newPin)){status.textContent="Yeni PIN 4 veya 6 rakam olmalı.";return}
     if(newPin!==confirmPin){status.textContent="Yeni PIN'ler eşleşmiyor.";return}
   }
-  btn.disabled=true;
+  setCeteleActionBusy(btn,true,journalPinMode==="disable"?"Kapatılıyor…":"Kaydediliyor…");
   try{
     const action=journalPinMode==="disable"?"journalPinDisable":"journalPinSet",data=journalPinMode==="disable"?{token:getToken(),currentPin}:{token:getToken(),currentPin:journalPinMode==="set"?"":currentPin,newPin};const j=await api(action,data,{timeout:30000});
     if(!j.ok){if(j.error==="oturum"){expireSession();return}status.textContent=pinErrorText(j);return}
     setCurrentUserPinEnabled(!!j.pinEnabled);closeJournalPinDialog();
-  }catch(e){status.textContent="PIN ayarı kaydedilemedi. Bağlantınızı kontrol edin."}finally{btn.disabled=false}
+  }catch(e){status.textContent="PIN ayarı kaydedilemedi. Bağlantınızı kontrol edin."}finally{setCeteleActionBusy(btn,false)}
 };
 
 function cacheAdminApprovals(data){
@@ -1391,17 +1422,21 @@ async function loadRegisteredUsers({force=false}={}){
 }
 
 async function setUserApproval(userId,status,button){
-  const card=button.closest(".admin-user");card?.querySelectorAll("button").forEach(b=>b.disabled=true);
+  const card=button.closest(".admin-user"),label=status==="aktif"?"Onaylanıyor…":"Reddediliyor…";
+  if(!setBackendActionBusy(button,true,label))return;
+  card?.querySelectorAll("button").forEach(b=>{if(b!==button)b.disabled=true});
+  let ok=false;
   try{
     const j=await api("adminSetStatus",{token:getToken(),userId,status},{timeout:30000});
-    if(!j.ok)throw new Error(j.error||"hata");
+    if(!j.ok)throw new Error(j.error||"hata");ok=true;
     if(adminApprovals){
       adminApprovals.users=adminApprovals.users.filter(u=>u.id!==userId);
       adminApprovals.count=adminApprovals.users.length;
       adminApprovalsAt=Date.now();renderAdminPending(adminApprovals,{message:"Liste güncelleniyor…"});
     }
     await Promise.all([loadAdminPending({force:true}),loadRegisteredUsers({force:true})]);
-  }catch(e){if(card)card.querySelectorAll("button").forEach(b=>b.disabled=false);alert(authMessage(e.message))}
+  }catch(e){alert(authMessage(e.message))}
+  finally{if(document.body.contains(button))setBackendActionBusy(button,false);if(!ok&&card)card.querySelectorAll("button").forEach(b=>b.disabled=false)}
 }
 
 function showPane(id){["loginPane","registerPane","resetPane"].forEach(x=>$(x).hidden=x!==id);$("authTabs").hidden=id==="resetPane";document.querySelectorAll("#authTabs button").forEach(b=>b.classList.toggle("active",b.dataset.pane===id));setAuthStatus("")}
@@ -1437,21 +1472,18 @@ function enterAppAfterLogin(j){
   Promise.resolve(connect({reason:"login"})).catch(()=>{});
 }
 $("loginPane").addEventListener("submit",async e=>{
-  e.preventDefault();
+  e.preventDefault();const btn=e.submitter||e.currentTarget.querySelector('button[type="submit"]');if(!setBackendActionBusy(btn,true,"Giriş yapılıyor…"))return;
   setAuthStatus("Giriş yapılıyor…");
-  let j;
   try{
-    j=await api("login",{email:$("loginEmail").value,password:$("loginPassword").value},{timeout:30000});
-  }catch(err){
-    const msg=String(err?.message||"");
-    setAuthStatus(msg==="zaman_asimi"?"Sunucu yanıtı gecikti. Yeniden deneyin.":"Sunucu yanıtı alınamadı. Bağlantınızı kontrol edip yeniden deneyin.",true);
-    return;
-  }
-  if(!j?.ok){setAuthStatus(authMessage(j?.error||"sunucu"),true);return}
-  enterAppAfterLogin(j);
+    let j;
+    try{j=await api("login",{email:$("loginEmail").value,password:$("loginPassword").value},{timeout:30000})}
+    catch(err){const msg=String(err?.message||"");setAuthStatus(msg==="zaman_asimi"?"Sunucu yanıtı gecikti. Yeniden deneyin.":"Sunucu yanıtı alınamadı. Bağlantınızı kontrol edip yeniden deneyin.",true);return}
+    if(!j?.ok){setAuthStatus(authMessage(j?.error||"sunucu"),true);return}
+    enterAppAfterLogin(j);
+  }finally{setBackendActionBusy(btn,false)}
 });
-$("registerPane").addEventListener("submit",async e=>{e.preventDefault();setAuthStatus("Başvuru gönderiliyor…");try{const email=$("registerEmail").value;const j=await api("register",{name:$("registerName").value,email,password:$("registerPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}if(j.pending){showPane("loginPane");$("loginEmail").value=email;$("registerPassword").value="";setAuthStatus("Başvurunuz alındı. Yönetici onayından sonra giriş yapabilirsiniz.");return}if(j.admin&&j.approved){showPane("loginPane");$("loginEmail").value=email;$("registerPassword").value="";setAuthStatus("Süper yönetici hesabınız oluşturuldu ve etkinleştirildi. Parolanızla giriş yapabilirsiniz.");return}setAuthStatus("Hesap oluşturuldu. Giriş yapabilirsiniz.")}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
-$("resetPane").addEventListener("submit",async e=>{e.preventDefault();try{if(resetStage===1){setAuthStatus("Kod gönderiliyor…");const j=await api("resetRequest",{email:$("resetEmail").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}resetStage=2;$("resetCodeFields").hidden=false;$("resetSubmit").textContent="Parolayı değiştir";setAuthStatus("Hesap varsa sıfırlama kodu e-posta adresine gönderildi.")}else{setAuthStatus("Parola değiştiriliyor…");const j=await api("resetConfirm",{email:$("resetEmail").value,code:$("resetCode").value,password:$("resetPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}showPane("loginPane");$("loginEmail").value=$("resetEmail").value;setAuthStatus("Parola değiştirildi. Yeni parolanızla giriş yapın.")}}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}});
+$("registerPane").addEventListener("submit",async e=>{e.preventDefault();const btn=e.submitter||e.currentTarget.querySelector('button[type="submit"]');if(!setBackendActionBusy(btn,true,"Gönderiliyor…"))return;setAuthStatus("Başvuru gönderiliyor…");try{const email=$("registerEmail").value;const j=await api("register",{name:$("registerName").value,email,password:$("registerPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}if(j.pending){showPane("loginPane");$("loginEmail").value=email;$("registerPassword").value="";setAuthStatus("Başvurunuz alındı. Yönetici onayından sonra giriş yapabilirsiniz.");return}if(j.admin&&j.approved){showPane("loginPane");$("loginEmail").value=email;$("registerPassword").value="";setAuthStatus("Süper yönetici hesabınız oluşturuldu ve etkinleştirildi. Parolanızla giriş yapabilirsiniz.");return}setAuthStatus("Hesap oluşturuldu. Giriş yapabilirsiniz.")}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}finally{setBackendActionBusy(btn,false)}});
+$("resetPane").addEventListener("submit",async e=>{e.preventDefault();const btn=e.submitter||$("resetSubmit"),stage=resetStage,label=stage===1?"Gönderiliyor…":"Değiştiriliyor…";if(!setBackendActionBusy(btn,true,label))return;let nextLabel="";try{if(stage===1){setAuthStatus("Kod gönderiliyor…");const j=await api("resetRequest",{email:$("resetEmail").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}resetStage=2;$("resetCodeFields").hidden=false;nextLabel="Parolayı değiştir";setAuthStatus("Hesap varsa sıfırlama kodu e-posta adresine gönderildi.")}else{setAuthStatus("Parola değiştiriliyor…");const j=await api("resetConfirm",{email:$("resetEmail").value,code:$("resetCode").value,password:$("resetPassword").value});if(!j.ok){setAuthStatus(authMessage(j.error),true);return}showPane("loginPane");$("loginEmail").value=$("resetEmail").value;setAuthStatus("Parola değiştirildi. Yeni parolanızla giriş yapın.")}}catch(err){setAuthStatus("Sunucuya ulaşılamadı.",true)}finally{setBackendActionBusy(btn,false);if(nextLabel)btn.textContent=nextLabel}});
 
 $("addForm").addEventListener("submit",e=>{e.preventDefault();const i=$("newTask");addTask(i.value);i.value="";i.focus()});
 let dayAnimating=false,dayGesture=null;
@@ -1719,7 +1751,7 @@ taskList.addEventListener("touchend",()=>{if(taskReorder?.mode==="touch")finishT
 taskList.addEventListener("touchcancel",()=>{if(taskReorder?.mode==="touch")finishTaskReorder(false)});
 taskList.addEventListener("contextmenu",e=>{if(taskReorder?.active&&taskReorderRow(e.target))e.preventDefault()});
 
-$("refresh").onclick=()=>connect({force:true,silent:false,reason:"manual"});
+$("refresh").onclick=()=>withBackendAction($("refresh"),"Yenileniyor…",()=>connect({force:true,silent:false,reason:"manual"}));
 
 let calendarOpen=false,calendarAnimating=false,drawerGesture=null,suppressCalendarClickUntil=0;
 const prefersReducedMotion=()=>window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1843,24 +1875,24 @@ async function openManagementDialog(){
   if(!registeredUsers||Date.now()-registeredUsersAt>60000)await loadRegisteredUsers();
 }
 async function saveSettings(){
-  const b=$("saveSettings");if(b.disabled)return;b.disabled=true;b.classList.add("is-saving");$("settingsSaveStatus").textContent="";
+  const b=$("saveSettings");if(!setBackendActionBusy(b,true,"Kaydediliyor…"))return;$("settingsSaveStatus").textContent="";
   try{
     const [ok]=await Promise.all([syncThemePreference(),wait(350)]);
     if(ok!==false){settingsOriginalTheme=null;$("accountDialog").close()}
     else $("settingsSaveStatus").textContent="Ayar kaydedilemedi. Yeniden deneyin.";
   }catch(e){$("settingsSaveStatus").textContent="Ayar kaydedilemedi. Yeniden deneyin."}
-  finally{b.disabled=false;b.classList.remove("is-saving")}
+  finally{setBackendActionBusy(b,false)}
 }
 $("settings").onclick=e=>{e.stopPropagation();if(document.body.classList.contains("journal-open")&&!closeJournalView(false))return;toggleAccountMenu()};
 $("menuSettings").onclick=openSettingsDialog;$("menuAdmin").onclick=openManagementDialog;
 $("closeSettingsX").onclick=discardSettingsAndClose;$("saveSettings").onclick=saveSettings;
 $("closeManagementX").onclick=()=>$("managementDialog").close();
-$("refreshAdmin").onclick=()=>loadAdminPending({force:true});$("refreshRegistered").onclick=()=>loadRegisteredUsers({force:true});$("runDiagnostics").onclick=runDiagnostics;$("copyDiagnostics").onclick=copyDiagnostics;
+$("refreshAdmin").onclick=()=>withBackendAction($("refreshAdmin"),"Yenileniyor…",()=>loadAdminPending({force:true}));$("refreshRegistered").onclick=()=>withBackendAction($("refreshRegistered"),"Yenileniyor…",()=>loadRegisteredUsers({force:true}));$("runDiagnostics").onclick=runDiagnostics;$("copyDiagnostics").onclick=copyDiagnostics;
 $("accountDialog").addEventListener("cancel",e=>{e.preventDefault();discardSettingsAndClose()});
 $("managementDialog").addEventListener("cancel",e=>{e.preventDefault();$("managementDialog").close()});
 document.addEventListener("click",e=>{if(!e.target.closest(".account-menu-wrap"))closeAccountMenu()});
 document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(document.querySelector("dialog[open]"))return;if(document.body.classList.contains("journal-open")){closeJournalView(false);return}closeAccountMenu()});
-$("logoutBtn").onclick=async()=>{closeAccountMenu();const token=getToken();try{if(token)await api("logout",{token})}catch(e){}clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();closeJournalView(true);journalStatusCache.clear();journalStatusSeenAt.clear();journalStatusPending.clear();journalMonthCache.clear();journalMonthPending.clear();if($("accountDialog").open)$("accountDialog").close();if($("managementDialog").open)$("managementDialog").close();setSession("",null);applyTheme("lacivert");days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);showPane("loginPane")};
+$("logoutBtn").onclick=async()=>{const b=$("logoutBtn");if(!setBackendActionBusy(b,true,"Kapatılıyor…"))return;const token=getToken();try{if(token)await api("logout",{token})}catch(e){}finally{setBackendActionBusy(b,false)}closeAccountMenu();clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();closeJournalView(true);journalStatusCache.clear();journalStatusSeenAt.clear();journalStatusPending.clear();journalMonthCache.clear();journalMonthPending.clear();if($("accountDialog").open)$("accountDialog").close();if($("managementDialog").open)$("managementDialog").close();setSession("",null);applyTheme("lacivert");days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);showPane("loginPane")};
 const brandEl=$("brand");brandEl.onclick=()=>{if(document.body.classList.contains("journal-open")&&!closeJournalView(false))return;go(todayKey());window.scrollTo({top:0,behavior:"smooth"})};brandEl.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();brandEl.onclick()}};
 
 function requestForegroundSync(reason,{minAge=15000}={}){
