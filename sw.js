@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v46 yaması: hiyerarşik silme, v48 taşıma simgesi ve mobil ilk-görev sıralama düzeltmesi.
-const SURUM = "centik-v55-v48-arrow-mobile-reorder";
+// v52: Çetele terminolojisi tamamen temizlendi; evrensel kayan kart davranışı korunur.
+const SURUM = "centik-v52-cetele-clean";
 const KABUK = [
   "./",
   "./index.html",
