@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v53: Çetele üst başlık düzeni, açık tema kontrastı ve daha hızlı boş Çetele açılışı.
-const SURUM = "centik-v53-cetele-ui-speed";
+// v54: Dün/Bugün/Yarın başlığı geri alındı; Bugün üst satırda, Çetele tarih satırında; trackpad yatay gün geçişi eklendi.
+const SURUM = "centik-v54-cetele-title-trackpad";
 const KABUK = [
   "./",
   "./index.html",

@@ -149,7 +149,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 .day-head-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;min-width:0}
 .nav{width:40px;height:40px;border-radius:50%;border:1px solid color-mix(in srgb,var(--focus) 34%,var(--line));background:color-mix(in srgb,var(--focus) 7%,var(--paper));color:var(--focus);font-size:1.1rem;box-shadow:0 2px 8px color-mix(in srgb,var(--focus) 8%,transparent);transition:background .14s,border-color .14s,transform .14s}.nav:hover{background:color-mix(in srgb,var(--focus) 13%,var(--paper));border-color:color-mix(in srgb,var(--focus) 50%,var(--line));transform:translateY(-1px)}
 .sub{color:var(--muted);margin:0;min-height:1.5em;min-width:0;display:flex;align-items:center}
-.sub-row{display:block;margin:8px 0 0;min-height:1.5em}
+.sub-row{display:flex;align-items:center;gap:10px;margin:8px 0 0;min-height:44px;min-width:0}
+.sub-actions{margin-left:auto;display:flex;align-items:center;justify-content:flex-end;gap:8px;flex:none}
 
 .jump-notice{
   width:100%;padding:11px 14px;border-radius:12px;color:var(--ink);
@@ -479,14 +480,18 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
         </svg>
         <span>Bugün</span>
       </button>
+    </div>
+    <button class="nav" id="next" aria-label="Sonraki gün">›</button>
+  </div>
+  <div class="sub-row">
+    <p class="sub" id="daySub"></p>
+    <div class="sub-actions">
       <button class="journal-launch" id="journalButton" type="button" aria-label="Çeteleyi aç">
         <svg class="journal-book" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.2 4.1c2.6-.65 4.8-.2 6.8 1.35v10.1c-2-1.55-4.2-2-6.8-1.35V4.1Z"></path><path d="M16.8 4.1c-2.6-.65-4.8-.2-6.8 1.35v10.1c2-1.55 4.2-2 6.8-1.35V4.1Z"></path></svg>
         <span>Çetele</span><span class="journal-launch-state" id="journalButtonState" aria-hidden="true">+</span>
       </button>
     </div>
-    <button class="nav" id="next" aria-label="Sonraki gün">›</button>
   </div>
-  <div class="sub-row"><p class="sub" id="daySub"></p></div>
 
   <div class="tally" aria-live="polite">
     <div class="tally-side tally-day">
@@ -684,7 +689,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v53-cetele-ui-speed", CENTIK_EXPECTED_SERVER_BUILD="v23-cetele";
+const CENTIK_CLIENT_BUILD="v54-cetele-title-trackpad", CENTIK_EXPECTED_SERVER_BUILD="v23-cetele";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -1081,9 +1086,8 @@ function renderTomorrowNotice(){
   }
 }
 function render(){
-  const d=fromKey(current),tk=todayKey(),shortDate=`${d.getDate()} ${AYLAR[d.getMonth()]}`;
-  const title=current===tk?"Bugün":current===addDays(tk,-1)?`Dün ${shortDate}`:current===addDays(tk,1)?`Yarın ${shortDate}`:shortDate;
-  $("dayTitle").textContent=title;const sub=$("daySub");sub.textContent=`${d.getDate()} ${AYLAR[d.getMonth()]} ${d.getFullYear()}, ${DAYNAMES[d.getDay()]}`;
+  const d=fromKey(current),tk=todayKey(),rel=current===tk?"Bugün":current===addDays(tk,-1)?"Dün":current===addDays(tk,1)?"Yarın":null;
+  $("dayTitle").textContent=rel||`${d.getDate()} ${AYLAR[d.getMonth()]}`;const sub=$("daySub");sub.textContent=`${d.getDate()} ${AYLAR[d.getMonth()]} ${d.getFullYear()}, ${DAYNAMES[d.getDay()]}`;
   const todayNotice=$("todayNotice");todayNotice.hidden=current===tk;
   const items=normalizeItems(days[current]||[]),n=doneCount(current),planned=items.filter(x=>!x.done).length,monthPrefix=`${d.getFullYear()}-${pad(d.getMonth()+1)}`,monthDone=Object.keys(days).filter(x=>x.startsWith(monthPrefix)).reduce((a,x)=>a+doneCount(x),0);
   $("count").textContent=n;
@@ -1502,6 +1506,28 @@ globalDaySwipeSurface.addEventListener("pointerup",e=>{
   shiftDay(dx<0?1:-1);
 });
 globalDaySwipeSurface.addEventListener("pointercancel",resetGlobalDayGesture);
+
+// Masaüstü trackpad: belirgin iki-parmak yatay kaydırmayı gün navigasyonuna çevir.
+// Yalnız uygulama yüzeyinde çalışır; form/menü/takvim gibi etkileşimli alanları dışarıda bırakır.
+let trackpadDayAccumX=0,trackpadDayResetTimer=null,trackpadDayCooldownUntil=0;
+const TRACKPAD_DAY_SWIPE_EXCLUDE=[
+  "#calendarDrawer","#calendarBackdrop",".upcoming-chips","dialog",".account-menu-wrap",".journal-panel",
+  "button","input","textarea","select","a","[contenteditable='true']"
+].join(",");
+function resetTrackpadDaySwipe(){trackpadDayAccumX=0;clearTimeout(trackpadDayResetTimer);trackpadDayResetTimer=null}
+globalDaySwipeSurface.addEventListener("wheel",e=>{
+  if(document.body.classList.contains("journal-open")||dayAnimating||Date.now()<trackpadDayCooldownUntil)return;
+  if(e.target?.closest?.(TRACKPAD_DAY_SWIPE_EXCLUDE))return;
+  const dx=Number(e.deltaX)||0,dy=Number(e.deltaY)||0,ax=Math.abs(dx),ay=Math.abs(dy);
+  if(ax<4||ax<=ay*1.45){if(ay>ax)resetTrackpadDaySwipe();return}
+  // Yatay jest uygulama içinde ele alındığında tarayıcı geçmiş jestine dönüşmesini mümkün olduğunca engeller.
+  if(e.cancelable)e.preventDefault();
+  trackpadDayAccumX+=dx;
+  clearTimeout(trackpadDayResetTimer);trackpadDayResetTimer=setTimeout(resetTrackpadDaySwipe,180);
+  if(Math.abs(trackpadDayAccumX)<72)return;
+  const dir=trackpadDayAccumX>0?1:-1;
+  resetTrackpadDaySwipe();trackpadDayCooldownUntil=Date.now()+430;shiftDay(dir);
+},{passive:false});
 
 // Görev sıralama + tek seviyeli alt görev: dikey hareket sıralar, belirgin yatay hareket hiyerarşiyi değiştirir.
 // Checkbox, düzenleme, silme ve input kontrolleri sıralamayı başlatmaz.
