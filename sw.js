@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v57: Çetele boş kayıt doğrulaması eklendi.
-const SURUM = "centik-v60-bold-left-reply-arrow";
+// v61: Takvimde Çetele bulunan günler için mini kitap göstergesi eklendi.
+const SURUM = "centik-v61-cetele-calendar-mark";
 const KABUK = [
   "./",
   "./index.html",

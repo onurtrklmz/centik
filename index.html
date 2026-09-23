@@ -354,6 +354,8 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
 .wd{font-size:.75rem;color:var(--muted);text-align:center;padding:2px 0 4px}
 .cell{aspect-ratio:1;border-radius:8px;border:1px solid var(--line);background:var(--paper);font-size:.8rem;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0;line-height:1.05;transition:background .15s,border-color .15s,color .15s,box-shadow .15s,transform .15s}
 .cell small{margin-top:3px;font-size:.68rem;font-weight:650;color:var(--muted);font-variant-numeric:tabular-nums}
+.cell .cal-cetele-mark{width:11px;height:9px;margin-top:2px;flex:0 0 auto;fill:none;stroke:#25a865;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.94}
+.cell.sel .cal-cetele-mark{stroke:#dcffe8;opacity:1}
 .cell.all-done small{color:#149554;font-weight:800}
 .cell.no-task small{opacity:.48;font-weight:500}
 .cell.future{color:var(--muted)}
@@ -369,6 +371,7 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
   .grid{gap:5px}
   .cell{font-size:.76rem}
   .cell small{font-size:.64rem}
+  .cell .cal-cetele-mark{width:10px;height:8px;margin-top:2px}
 }
 @media (prefers-reduced-motion:reduce){
   .cal-body-wrap{transition:none}
@@ -689,14 +692,14 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v60-bold-left-reply-arrow", CENTIK_EXPECTED_SERVER_BUILD="v24-cetele";
+const CENTIK_CLIENT_BUILD="v61-cetele-calendar-mark", CENTIK_EXPECTED_SERVER_BUILD="v25-cetele-calendar";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
 let queuedForceSync=false, queuedForceSilent=true, foregroundSyncTimer=null, settingsOriginalTheme=null, hiddenSince=0;
 let pendingDelete=null, pendingDeleteTimer=null;
-let journalStatusCache=new Map(),journalStatusSeenAt=new Map(),journalStatusPending=new Map(),journalContext=null,journalActivePin="",journalDirty=false,journalPinMode="set";
-const JOURNAL_STATUS_FRESH_MS=45000, JOURNAL_CHAR_LIMIT=12000;
+let journalStatusCache=new Map(),journalStatusSeenAt=new Map(),journalStatusPending=new Map(),journalMonthCache=new Map(),journalMonthPending=new Map(),journalContext=null,journalActivePin="",journalDirty=false,journalPinMode="set";
+const JOURNAL_STATUS_FRESH_MS=45000, JOURNAL_MONTH_FRESH_MS=300000, JOURNAL_CHAR_LIMIT=12000;
 let pushQueue=[], pushQueued=new Set(), pushWorker=null;
 const DELETE_UNDO_MS=2000;
 // Sürekli kısa aralıklı polling kullanılmaz; focus/visibility olayları esas alınır.
@@ -1003,7 +1006,7 @@ async function connectNow({silent=false,force=false,reason=""}={}){
   }
 }
 
-function expireSession(){clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();closeJournalView(true);journalStatusCache.clear();journalStatusSeenAt.clear();journalStatusPending.clear();setSession("",null);days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);setAuthStatus("Oturum süresi doldu. Yeniden giriş yapın.",true)}
+function expireSession(){clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();closeJournalView(true);journalStatusCache.clear();journalStatusSeenAt.clear();journalStatusPending.clear();journalMonthCache.clear();journalMonthPending.clear();setSession("",null);days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);setAuthStatus("Oturum süresi doldu. Yeniden giriş yapın.",true)}
 
 function addTask(t){t=t.trim();if(!t||!requireLocalSession())return;(days[current]=normalizeItems(days[current]||[])).push({id:uniqueTaskId(),t:t.slice(0,1000),done:false,parentId:""});persist(current);render()}
 function pendingDeleteHas(date,id){
@@ -1130,8 +1133,10 @@ function renderCal(){
     if(k===current)b.classList.add("sel");
     if(total>0&&n===total)b.classList.add("all-done");
     if(total===0)b.classList.add("no-task");
-    b.innerHTML=`<span>${dd}</span><small>${total?`${n}/${total}`:"·"}</small>`;
-    b.setAttribute("aria-label",`${dd} ${AYLAR[m]}: ${n}/${total} görev tamamlandı`);
+    const monthKey=`${y}-${pad(m+1)}`,monthMeta=journalMonthCache.get(monthKey),hasCetele=!!monthMeta?.dates?.has(k);
+    const ceteleMark=hasCetele?'<svg class="cal-cetele-mark" viewBox="0 0 20 16" aria-hidden="true"><path d="M2.5 2.4c2.7-.7 5-.25 7.5 1.25v9.7c-2.5-1.5-4.8-1.95-7.5-1.25V2.4Z"></path><path d="M17.5 2.4c-2.7-.7-5-.25-7.5 1.25v9.7c2.5-1.5 4.8-1.95 7.5-1.25V2.4Z"></path><path d="M10 3.65v9.7"></path></svg>':"";
+    b.innerHTML=`<span>${dd}</span><small>${total?`${n}/${total}`:"·"}</small>${ceteleMark}`;
+    b.setAttribute("aria-label",`${dd} ${AYLAR[m]}: ${n}/${total} görev tamamlandı${hasCetele?", Çetele var":""}`);
     b.onclick=()=>go(k);
     g.append(b);
   }
@@ -1154,7 +1159,19 @@ async function queueJournalStatus(date){
   const p=(async()=>{try{const j=await api("journalStatus",{token:getToken(),date},{timeout:30000});if(!j.ok){if(j.error==="oturum")expireSession();return}journalStatusCache.set(date,!!j.exists);journalStatusSeenAt.set(date,Date.now());if(typeof j.pinEnabled==="boolean"&&j.pinEnabled!==!!currentUser?.journalPinEnabled)setCurrentUserPinEnabled(j.pinEnabled)}catch(e){}finally{journalStatusPending.delete(date);if(current===date)renderJournalButton()}})();
   journalStatusPending.set(date,p);renderJournalButton();return p;
 }
-function setJournalStatus(date,exists){journalStatusCache.set(date,!!exists);journalStatusSeenAt.set(date,Date.now());if(current===date)renderJournalButton()}
+function journalMonthKey(date){return /^\d{4}-\d{2}/.test(String(date||""))?String(date).slice(0,7):""}
+function journalViewMonthKey(){return `${viewMonth.getFullYear()}-${pad(viewMonth.getMonth()+1)}`}
+function journalMonthFresh(month){const x=journalMonthCache.get(month);return !!x&&(Date.now()-Number(x.seenAt||0))<JOURNAL_MONTH_FRESH_MS}
+async function queueJournalMonthStatus(month=journalViewMonthKey()){
+  if(!currentUser?.id||!getToken()||!/^\d{4}-\d{2}$/.test(month)||journalMonthFresh(month)||journalMonthPending.has(month))return;
+  const p=(async()=>{try{const j=await api("journalMonthStatus",{token:getToken(),month},{timeout:30000});if(!j.ok){if(j.error==="oturum")expireSession();return}const dates=new Set((Array.isArray(j.dates)?j.dates:[]).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(String(x))));journalMonthCache.set(month,{dates,seenAt:Date.now()});dates.forEach(d=>{journalStatusCache.set(d,true);journalStatusSeenAt.set(d,Date.now())});if(calendarOpen&&journalViewMonthKey()===month)renderCal()}catch(e){}finally{journalMonthPending.delete(month)}})();
+  journalMonthPending.set(month,p);return p;
+}
+function setJournalStatus(date,exists){
+  journalStatusCache.set(date,!!exists);journalStatusSeenAt.set(date,Date.now());
+  const month=journalMonthKey(date),meta=journalMonthCache.get(month);if(meta?.dates){if(exists)meta.dates.add(date);else meta.dates.delete(date)}
+  if(current===date)renderJournalButton();if(calendarOpen&&journalViewMonthKey()===month)renderCal();
+}
 function pinErrorText(j){
   if(j?.error==="cetele_pin_kilitli"&&j.until){try{return `Çetele geçici olarak kilitli. ${new Date(j.until).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"})} sonrasında yeniden deneyin.`}catch(e){}}
   return authMessage(j?.error||"sunucu");
@@ -1723,12 +1740,13 @@ function setCalendarOpen(open){
   backdrop?.classList.toggle("open",calendarOpen);
   toggle.setAttribute("aria-expanded",String(calendarOpen));
   refreshCalendarHead();
+  if(calendarOpen)queueJournalMonthStatus(journalViewMonthKey());
 }
 function toggleCalendar(){if(Date.now()<suppressCalendarClickUntil)return;setCalendarOpen(!calendarOpen)}
 function shiftMonth(dir,{animate=true}={}){
   if(calendarAnimating||!dir)return;
   const body=$("calendarBody"),title=$("monthToggle");
-  const commit=()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+dir,1);renderCal()};
+  const commit=()=>{viewMonth=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+dir,1);renderCal();if(calendarOpen)queueJournalMonthStatus(journalViewMonthKey())};
   if(!animate||prefersReducedMotion()){commit();return}
   calendarAnimating=true;
   const outX=dir>0?-42:42,inX=-outX;
@@ -1842,7 +1860,7 @@ $("accountDialog").addEventListener("cancel",e=>{e.preventDefault();discardSetti
 $("managementDialog").addEventListener("cancel",e=>{e.preventDefault();$("managementDialog").close()});
 document.addEventListener("click",e=>{if(!e.target.closest(".account-menu-wrap"))closeAccountMenu()});
 document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(document.querySelector("dialog[open]"))return;if(document.body.classList.contains("journal-open")){closeJournalView(false);return}closeAccountMenu()});
-$("logoutBtn").onclick=async()=>{closeAccountMenu();const token=getToken();try{if(token)await api("logout",{token})}catch(e){}clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();closeJournalView(true);journalStatusCache.clear();journalStatusSeenAt.clear();journalStatusPending.clear();if($("accountDialog").open)$("accountDialog").close();if($("managementDialog").open)$("managementDialog").close();setSession("",null);applyTheme("lacivert");days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);showPane("loginPane")};
+$("logoutBtn").onclick=async()=>{closeAccountMenu();const token=getToken();try{if(token)await api("logout",{token})}catch(e){}clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();closeJournalView(true);journalStatusCache.clear();journalStatusSeenAt.clear();journalStatusPending.clear();journalMonthCache.clear();journalMonthPending.clear();if($("accountDialog").open)$("accountDialog").close();if($("managementDialog").open)$("managementDialog").close();setSession("",null);applyTheme("lacivert");days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);showPane("loginPane")};
 const brandEl=$("brand");brandEl.onclick=()=>{if(document.body.classList.contains("journal-open")&&!closeJournalView(false))return;go(todayKey());window.scrollTo({top:0,behavior:"smooth"})};brandEl.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();brandEl.onclick()}};
 
 function requestForegroundSync(reason,{minAge=15000}={}){
@@ -1928,7 +1946,7 @@ async function boot(){
   }
   // Yarım kalmış/eski local kimlik bilgisini temizle.
   if(cachedUser||token)setSession("",null);
-  currentUser=null;days={};pending=new Set();serverRevision=null;journalStatusCache.clear();journalStatusSeenAt.clear();journalStatusPending.clear();
+  currentUser=null;days={};pending=new Set();serverRevision=null;journalStatusCache.clear();journalStatusSeenAt.clear();journalStatusPending.clear();journalMonthCache.clear();journalMonthPending.clear();
   applyTheme("lacivert");setSyncStatus("idle");showGate(true);showPane("loginPane");
 }
 boot();
