@@ -2854,13 +2854,12 @@ window.addEventListener("blur",()=>{if(drawerGesture){drawerGesture=null;resetDr
 //   Takvim: yatay iki-parmak = ay değiştir, aşağı çekiş = kapat.
 //   Çakılı/Çetele: aşağı çekiş = kapat.
 // Scroll edilmiş utility içerikte önce native scroll tepeye gelir; tepedeyken jest çekmeceye devredilir.
-const DRAWER_TRACKPAD_RESET_MS=180;
+const DRAWER_TRACKPAD_RESET_MS=220;
 const DRAWER_TRACKPAD_COOLDOWN_MS=430;
 const DRAWER_TRACKPAD_X_THRESHOLD=72;
-const DRAWER_TRACKPAD_Y_THRESHOLD=92;
-const DRAWER_TRACKPAD_UTILITY_TOP_GUARD=34;
+const DRAWER_TRACKPAD_Y_THRESHOLD=108;
 const DRAWER_TRACKPAD_AXIS_MIN=4;
-let drawerTrackpad={x:0,y:0,axis:"",timer:null,cooldownUntil:0,utilityGuard:0,utilityWasScrolled:false};
+let drawerTrackpad={x:0,y:0,axis:"",timer:null,cooldownUntil:0,utilityAwaitFreshGesture:false};
 
 function activeDrawerTrackpadKind(){
   if(calendarOpen)return "calendar";
@@ -2884,7 +2883,7 @@ function drawerTrackpadAxis(dx,dy){
 }
 function resetDrawerTrackpad({visual=true}={}){
   drawerTrackpad.x=0;drawerTrackpad.y=0;drawerTrackpad.axis="";
-  drawerTrackpad.utilityGuard=0;drawerTrackpad.utilityWasScrolled=false;
+  drawerTrackpad.utilityAwaitFreshGesture=false;
   clearTimeout(drawerTrackpad.timer);drawerTrackpad.timer=null;
   if(visual)resetDrawerDragVisual();
 }
@@ -2924,16 +2923,24 @@ function handleDrawerTrackpadWheel(e){
   }
 
   // macOS doğal kaydırmada iki parmağı aşağı çekmek deltaY<0 üretir.
-  // Utility çekmecelerde önce iç scroll tepeye gelir. Tepeye ulaşıldığı anda
-  // momentumu çekmeceye devretmeyiz; ek bir aşağı çekme payı tüketildikten sonra
-  // gerçek kapanma birikimi başlar.
+  // Utility çekmecelerde iç scroll tepeye ulaştıktan sonra AYNI wheel serisi
+  // çekmeceyi asla kapatmaz. Trackpad hareketi tamamen durmalı; reset süresinden
+  // sonra başlayan yeni aşağı çekiş kapanış jesti olarak kabul edilir.
   if(dy>=0){resetDrawerTrackpad();return}
   const scroller=drawerTrackpadScroller(kind,e.target);
   const utilityKind=kind!=="calendar";
 
   if(utilityKind&&scroller&&Number(scroller.scrollTop)>2){
-    drawerTrackpad.utilityWasScrolled=true;
-    drawerTrackpad.utilityGuard=0;
+    drawerTrackpad.utilityAwaitFreshGesture=true;
+    drawerTrackpad.y=0;
+    resetDrawerDragVisual();
+    scheduleDrawerTrackpadReset();
+    return;
+  }
+
+  if(utilityKind&&drawerTrackpad.utilityAwaitFreshGesture){
+    // Scroll'u tepeye getiren hareketin momentumunu tüket; kapanışa aktarma.
+    if(e.cancelable)e.preventDefault();
     drawerTrackpad.y=0;
     resetDrawerDragVisual();
     scheduleDrawerTrackpadReset();
@@ -2942,22 +2949,12 @@ function handleDrawerTrackpadWheel(e){
 
   if(e.cancelable)e.preventDefault();
   drawerTrackpad.axis="y";drawerTrackpad.x=0;
-
-  if(utilityKind&&drawerTrackpad.utilityWasScrolled&&drawerTrackpad.utilityGuard<DRAWER_TRACKPAD_UTILITY_TOP_GUARD){
-    drawerTrackpad.utilityGuard+=-dy;
-    scheduleDrawerTrackpadReset();
-    if(drawerTrackpad.utilityGuard<DRAWER_TRACKPAD_UTILITY_TOP_GUARD)return;
-    // Koruma payı aşıldı; fazlalığı ilk gerçek kapanma hareketine aktar.
-    drawerTrackpad.y=Math.max(0,drawerTrackpad.utilityGuard-DRAWER_TRACKPAD_UTILITY_TOP_GUARD);
-  }else{
-    drawerTrackpad.y+=-dy;
-  }
-
+  drawerTrackpad.y+=-dy;
   scheduleDrawerTrackpadReset();
 
   const drawer=$("calendarDrawer");
   drawer.classList.add("drawer-dragging");
-  drawer.style.setProperty("--drawer-drag-y",`${Math.min(150,drawerTrackpad.y*.62)}px`);
+  drawer.style.setProperty("--drawer-drag-y",`${Math.min(150,drawerTrackpad.y*.56)}px`);
 
   if(drawerTrackpad.y<DRAWER_TRACKPAD_Y_THRESHOLD)return;
   closeActiveDrawerFromTrackpad(kind);

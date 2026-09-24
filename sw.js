@@ -1,8 +1,8 @@
-// v94-ui-r18: Utility trackpad kapanışında tepeye ulaştıktan sonra ek pull guard + daha yüksek kapanış eşiği kullanılır.
+// v94-ui-r19: Utility scroll tepeye ulaştıktan sonra aynı trackpad momentumuyla kapanmaz; yeni jest zorunludur.
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v94-ideal-shared-drawer-r18";
+const SURUM = "centik-v94-ideal-shared-drawer-r19";
 const KABUK = [
   "./",
   "./index.html",
