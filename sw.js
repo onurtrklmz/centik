@@ -1,9 +1,9 @@
-// v94-ui-r4: Çakılı/Çetele fade ve translate kaldırıldı; yalnız Takvim tipi mekanik 0fr↔1fr çekmece animasyonu kullanılır.
+// v94-ui-r5: Mekanik Çakılı/Çetele çekmecelerinin px/ms hızı Takvim çekmecesine eşitlendi; fade/translate yok.
 // v94-ui-r1: Çakılı ve Çetele, takvim alt barının arkasından açılıp kapanır; frontend cache yenilendi.
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v94-mechanical-drawer-r4";
+const SURUM = "centik-v94-mechanical-speed-r5";
 const KABUK = [
   "./",
   "./index.html",
