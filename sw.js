@@ -1,9 +1,9 @@
-// v94-ui-r2: Takvim, Çakılı ve Çetele aynı alt çekmece kabuğu ve animasyon motorunu kullanır.
+// v94-ui-r3: ortak çekmece motorunda Çakılı/Çetele animasyon hızı Takvim'in görsel hızına normalize edildi.
 // v94-ui-r1: Çakılı ve Çetele, takvim alt barının arkasından açılıp kapanır; frontend cache yenilendi.
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v94-unified-drawer-r2";
+const SURUM = "centik-v94-unified-drawer-speed-r3";
 const KABUK = [
   "./",
   "./index.html",

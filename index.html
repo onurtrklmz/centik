@@ -636,6 +636,9 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-r
 }
 
 
+/* ——— V94 çekmece hız eşitleme ———
+   Takvim .32s temel hızdır. Çakılı/Çetele daha yüksek yüzeyler olduğu için süre,
+   açılan yüksekliğe göre JS ile normalize edilir; easing aynı kalır. ——— */
 /* ——— V94 ortak çekmece motoru: Takvim + Çakılı + Çetele aynı kabuk/animasyon ——— */
 :root{--centik-drawer-ease:cubic-bezier(.22,.8,.24,1);--centik-drawer-open:.32s;--centik-drawer-fade:.24s}
 .drawer-body-wrap{
@@ -654,7 +657,7 @@ body.journal-open .cal>.drawer-body-wrap#journalPanel{grid-template-rows:1fr;opa
   backdrop-filter:none!important;-webkit-backdrop-filter:none!important;overflow:hidden!important;overscroll-behavior:contain;
   z-index:auto!important;visibility:visible!important;pointer-events:none;
   display:grid!important;grid-template-rows:0fr;opacity:0;transform:translateY(22px)!important;
-  transition:grid-template-rows var(--centik-drawer-open) var(--centik-drawer-ease),opacity var(--centik-drawer-fade) ease,transform var(--centik-drawer-open) var(--centik-drawer-ease)!important;
+  transition:grid-template-rows var(--centik-utility-duration,var(--centik-drawer-open)) var(--centik-drawer-ease),opacity var(--centik-utility-fade,var(--centik-drawer-fade)) ease,transform var(--centik-utility-duration,var(--centik-drawer-open)) var(--centik-drawer-ease)!important;
 }
 .cal>.pinned-panel[hidden],.cal>.journal-panel[hidden]{display:none!important}
 body.pinned-open .cal>.pinned-panel,body.journal-open .cal>.journal-panel{
@@ -1044,6 +1047,38 @@ function mountUtilityPanelsIntoCalendar(){
   });
 }
 mountUtilityPanelsIntoCalendar();
+
+/* V94: Çakılı/Çetele gövdeleri Takvim'den daha yüksek olduğu için aynı .32s süre
+   görsel olarak daha hızlı görünüyordu. Açılacak gerçek yüksekliğe göre süreyi
+   Takvim'in yaklaşık piksel hızına normalize ediyoruz; easing birebir aynıdır. */
+function syncUtilityDrawerTiming(panel){
+  if(!panel)return 500;
+  const calendarClip=$("calendarBodyWrap")?.querySelector(".cal-body-clip");
+  const utilityClip=panel.querySelector(":scope > .utility-panel-clip");
+  let calendarHeight=360,utilityHeight=560;
+  try{
+    if(calendarClip){
+      const cs=getComputedStyle(calendarClip);
+      const maxH=parseFloat(cs.maxHeight)||560;
+      calendarHeight=Math.max(280,Math.min(maxH,calendarClip.scrollHeight||maxH));
+    }
+    if(utilityClip){
+      const us=getComputedStyle(utilityClip);
+      utilityHeight=Math.max(calendarHeight,parseFloat(us.height)||utilityClip.scrollHeight||calendarHeight);
+    }
+  }catch(_){}
+  const ratio=Math.max(1,utilityHeight/Math.max(1,calendarHeight));
+  const duration=Math.round(Math.max(400,Math.min(620,320*ratio)));
+  const fade=Math.round(duration*.75);
+  panel.style.setProperty("--centik-utility-duration",`${duration}ms`);
+  panel.style.setProperty("--centik-utility-fade",`${fade}ms`);
+  panel.dataset.drawerDuration=String(duration);
+  return duration;
+}
+function utilityDrawerHideDelay(panel){
+  const n=Number(panel?.dataset?.drawerDuration||0);
+  return Math.max(440,(Number.isFinite(n)&&n>0?n:500)+45);
+}
 
 const getToken=()=>{try{return localStorage.getItem(AUTH_TOKEN)||""}catch(e){return ""}};
 const getCachedUser=()=>{try{return JSON.parse(localStorage.getItem(AUTH_USER)||"null")}catch(e){return null}};
@@ -1571,13 +1606,13 @@ function openPinnedPanel(){
   if(!requireLocalSession()||document.body.classList.contains("pinned-open"))return;
   if(document.body.classList.contains("journal-open")&&!closeJournalView(false))return;
   setCalendarOpen(false);clearTimeout(pinnedPanelHideTimer);pinnedPanelHideTimer=null;
-  const panel=$("pinnedPanel");if(!panel)return;panel.hidden=false;pinnedShowOverview();
-  // Çetele ile aynı açılma davranışı: panel önce kapalı konumda çizilir, ardından açık sınıfı bir sonraki karede eklenir.
+  const panel=$("pinnedPanel");if(!panel)return;panel.hidden=false;pinnedShowOverview();syncUtilityDrawerTiming(panel);
+  // Panel önce kapalı konumda çizilir; sonra Takvim ile aynı easing ve normalize edilmiş görsel hızla açılır.
   requestAnimationFrame(()=>{if(!panel.hidden)document.body.classList.add("pinned-open")});
   loadPinnedLists();startPinnedListsRefresh();
 }
 function closePinnedPanel(force=false){
-  if($("pinnedShareDialog")?.open)$("pinnedShareDialog").close();stopPinnedLive();stopPinnedListsRefresh();clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;const panel=$("pinnedPanel");resetFullPanelDrag($("calendarDrawer"));document.body.classList.remove("pinned-open");pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;clearTimeout(pinnedPanelHideTimer);if(force){if(panel)panel.hidden=true}else pinnedPanelHideTimer=setTimeout(()=>{if(panel&&!document.body.classList.contains("pinned-open"))panel.hidden=true},340);if(!force)setTimeout(()=>refreshPinnedUnread({force:true}),350);return true
+  if($("pinnedShareDialog")?.open)$("pinnedShareDialog").close();stopPinnedLive();stopPinnedListsRefresh();clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;const panel=$("pinnedPanel");resetFullPanelDrag($("calendarDrawer"));document.body.classList.remove("pinned-open");pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;clearTimeout(pinnedPanelHideTimer);if(force){if(panel)panel.hidden=true}else pinnedPanelHideTimer=setTimeout(()=>{if(panel&&!document.body.classList.contains("pinned-open"))panel.hidden=true},utilityDrawerHideDelay(panel));if(!force)setTimeout(()=>refreshPinnedUnread({force:true}),350);return true
 }
 function startPinnedListsRefresh(){stopPinnedListsRefresh();pinnedListsTimer=setInterval(()=>{if(document.visibilityState==="visible"&&document.body.classList.contains("pinned-open")&&!pinnedActiveList)loadPinnedLists({silent:true})},12000)}
 function stopPinnedListsRefresh(){if(pinnedListsTimer){clearInterval(pinnedListsTimer);pinnedListsTimer=null}}
@@ -1781,7 +1816,7 @@ function setJournalPanelMode(mode,date=current,message=""){
 }
 function openJournalShell(mode,date=current,message=""){
   clearTimeout(journalPanelHideTimer);journalPanelHideTimer=null;
-  const panel=$("journalPanel");if(!panel)return;panel.hidden=false;setJournalPanelMode(mode,date,message);
+  const panel=$("journalPanel");if(!panel)return;panel.hidden=false;setJournalPanelMode(mode,date,message);syncUtilityDrawerTiming(panel);
   requestAnimationFrame(()=>document.body.classList.add("journal-open"));
 }
 function finishJournalUnlock(value){
@@ -1837,7 +1872,7 @@ function closeJournalView(force=false){
   if(!force&&journalContext&&journalDirty&&!confirm("Çetele’de kaydedilmemiş değişiklikler var. Kapatılsın mı?"))return false;
   journalOpenSeq++;if(journalUnlockResolver)finishJournalUnlock(null);
   const panel=$("journalPanel");resetFullPanelDrag($("calendarDrawer"));journalContext=null;journalActivePin="";journalDirty=false;journalClearEditor();clearJournalLimitWarning();$("journalSaveStatus").textContent="";document.body.classList.remove("journal-open");renderJournalButton();
-  clearTimeout(journalPanelHideTimer);if(force){if(panel)panel.hidden=true}else journalPanelHideTimer=setTimeout(()=>{if(panel&&!document.body.classList.contains("journal-open"))panel.hidden=true},340);
+  clearTimeout(journalPanelHideTimer);if(force){if(panel)panel.hidden=true}else journalPanelHideTimer=setTimeout(()=>{if(panel&&!document.body.classList.contains("journal-open"))panel.hidden=true},utilityDrawerHideDelay(panel));
   return true;
 }
 function clearJournalLimitWarning(){const el=$("journalLimitStatus");if(el){el.hidden=true;el.textContent="Çetele sınıra ulaştı"}}
