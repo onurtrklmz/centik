@@ -354,7 +354,7 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
 .cal-body-wrap{display:grid;grid-template-rows:0fr;opacity:0;transform:translateY(22px);transition:grid-template-rows .32s cubic-bezier(.22,.8,.24,1),opacity .24s ease,transform .32s cubic-bezier(.22,.8,.24,1)}
 .cal.open .cal-body-wrap{grid-template-rows:1fr;opacity:1;transform:translateY(0)}
 .cal-body-clip{overflow:auto;min-height:0;max-height:min(62dvh,560px);overscroll-behavior:contain}
-.cal-body{padding:0 10px 12px;touch-action:pan-y;will-change:transform,opacity}
+.cal-body{padding:0 10px 12px;touch-action:none;will-change:transform,opacity}
 .drawer-hint{height:4px;width:42px;border-radius:999px;background:color-mix(in srgb,var(--muted) 30%,transparent);margin:0 auto 7px;opacity:.65}
 .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
 .wd{font-size:.75rem;color:var(--muted);text-align:center;padding:2px 0 4px}
@@ -889,7 +889,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v80-pinned-unified-status", CENTIK_EXPECTED_SERVER_BUILD="v29-cakili-list-unread";
+const CENTIK_CLIENT_BUILD="v81-calendar-grid-pull-close", CENTIK_EXPECTED_SERVER_BUILD="v29-cakili-list-unread";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -1312,7 +1312,7 @@ function renderCal(){
     const ceteleMark=hasCetele?'<svg class="cal-cetele-mark" viewBox="0 0 20 16" aria-hidden="true"><path d="M2.5 2.4c2.7-.7 5-.25 7.5 1.25v9.7c-2.5-1.5-4.8-1.95-7.5-1.25V2.4Z"></path><path d="M17.5 2.4c-2.7-.7-5-.25-7.5 1.25v9.7c2.5-1.5 4.8-1.95 7.5-1.25V2.4Z"></path><path d="M10 3.65v9.7"></path></svg>':"";
     b.innerHTML=`<span>${dd}</span><small>${total?`${n}/${total}`:"·"}</small>${ceteleMark}`;
     b.setAttribute("aria-label",`${dd} ${AYLAR[m]}: ${n}/${total} görev tamamlandı${hasCetele?", Çetele var":""}`);
-    b.onclick=()=>{setCalendarOpen(false);go(k)};
+    b.onclick=()=>{if(Date.now()<suppressCalendarClickUntil)return;setCalendarOpen(false);go(k)};
     g.append(b);
   }
 }
@@ -1622,8 +1622,8 @@ function finishFullPanelDrag(e,{cancel=false}={}){
 [["pinnedPullHandle","pinned"],["journalPullHandle","journal"]].forEach(([id,kind])=>{const h=$(id);h.addEventListener("pointerdown",e=>beginFullPanelDrag(e,kind));h.addEventListener("pointermove",moveFullPanelDrag);h.addEventListener("pointerup",e=>finishFullPanelDrag(e));h.addEventListener("pointercancel",e=>finishFullPanelDrag(e,{cancel:true}))});
 window.addEventListener("blur",()=>{if(fullPanelDrag){const p=fullPanelDrag.panel;fullPanelDrag=null;resetFullPanelDrag(p)}});
 
-// V78: Takvim, Çakılı ve Çetele boş yüzeylerinde aşağı çekme ile kapatma.
-// Etkileşimli alanlardan başlayan dokunuşlar ve içerik aşağı kaydırılmışken yapılan hareketler bu jesti başlatmaz.
+// V81: Çakılı ve Çetele boş yüzeylerinde aşağı çekme ile kapatma.
+// Takvimde ise ayrı boş-yüzey araması yoktur; tarih ızgarasının tamamı yatay ay değiştirme ve aşağı çekerek kapatma jestini doğrudan yönetir.
 let utilitySurfacePull=null;
 const utilityInteractiveSelector='button,input,textarea,select,a,label,[contenteditable="true"],[role="button"],dialog,.task-row,.pinned-list-card,.sheet,.journal-card,.pinned-create,.tally,.panel-pull-handle,#calendarHandle';
 function utilityPullKindOpen(kind){
@@ -1671,7 +1671,7 @@ function finishUtilitySurfacePull(e,{cancel=false}={}){
   if(!(dy>=82||(dy>=46&&velocity>=.50)))return;
   if(g.kind==="calendar")setCalendarOpen(false);else if(g.kind==="pinned")closePinnedPanel(false);else closeJournalView(false);
 }
-[["calendarDrawer","calendar"],["pinnedPanel","pinned"],["journalPanel","journal"]].forEach(([id,kind])=>{
+[["pinnedPanel","pinned"],["journalPanel","journal"]].forEach(([id,kind])=>{
   const el=$(id);if(!el)return;
   el.addEventListener("touchstart",e=>beginUtilitySurfacePull(e,kind),{passive:true});
   el.addEventListener("touchmove",moveUtilitySurfacePull,{passive:false});
@@ -2265,8 +2265,17 @@ function beginDrawerGesture(e,zone){
   if(e.pointerType!=="mouse"){try{e.currentTarget.setPointerCapture?.(e.pointerId)}catch(_){}}
 }
 function moveDrawerGesture(e){
-  if(!drawerGesture||drawerGesture.id!==e.pointerId||drawerGesture.zone!=="handle")return;
+  if(!drawerGesture||drawerGesture.id!==e.pointerId)return;
   const dx=e.clientX-drawerGesture.x,dy=e.clientY-drawerGesture.y,ax=Math.abs(dx),ay=Math.abs(dy);
+  if(drawerGesture.zone==="body"){
+    // Tarihler alanında yatay hareket ay değiştirir; belirgin aşağı hareket çekmeceyi doğrudan aşağı taşır.
+    if(!calendarOpen||dy<=0||ay<5||ay<=ax*1.05)return;
+    if(!drawerGesture.dragging){drawerGesture.dragging=true;$("calendarDrawer").classList.add("drawer-dragging")}
+    $("calendarDrawer").style.setProperty("--drawer-drag-y",`${Math.min(180,dy)}px`);
+    if(e.cancelable)e.preventDefault();
+    return;
+  }
+  if(drawerGesture.zone!=="handle")return;
   if(ay<3||ay<=ax)return;
   const dragY=calendarOpen?Math.max(0,Math.min(76,dy)):Math.min(0,Math.max(-76,dy));
   $("calendarDrawer").style.setProperty("--drawer-drag-y",`${dragY}px`);
@@ -2279,7 +2288,11 @@ function endDrawerGesture(e){
   resetDrawerDragVisual();
   if(Math.max(ax,ay)<34)return;
   suppressCalendarClickUntil=Date.now()+320;
-  if(g.zone==="body"&&ax>ay*1.15){shiftMonth(dx<0?1:-1);return}
+  if(g.zone==="body"){
+    if(calendarOpen&&dy>0&&ay>ax*1.05){setCalendarOpen(false);return}
+    if(ax>ay*1.15){shiftMonth(dx<0?1:-1);return}
+    return;
+  }
   if(g.zone==="handle"&&ay>ax*1.05){
     if(g.section==="pinned"&&dy<0){openPinnedPanel();return}
     if(g.section==="journal"&&dy<0){openJournalForCurrent();return}

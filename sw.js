@@ -1,6 +1,7 @@
+// v81: Takvim tarih ızgarasında yatay kaydırma ay değiştirir; aşağı kaydırma çekmeceyi kapatır.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v80-pinned-unified-status";
+const SURUM = "centik-v81-calendar-grid-pull-close";
 const KABUK = [
   "./",
   "./index.html",
