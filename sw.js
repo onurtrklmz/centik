@@ -1,7 +1,7 @@
-// v93: Takvim, Çakılı ve Çetele tek evrensel hafif blur/perde katmanına alındı; loading pulse kontrastı artırıldı.
+// v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v93-universal-blur-overlay";
+const SURUM = "centik-v94-beni-durt";
 const KABUK = [
   "./",
   "./index.html",
@@ -65,4 +65,36 @@ self.addEventListener("fetch", e => {
       })
     );
   }
+});
+
+
+// V94 — Beni Dürt: FCM veri mesajlarını mevcut service worker üzerinden göster.
+self.addEventListener("push", event => {
+  let payload = {};
+  try { payload = event.data ? event.data.json() : {}; } catch (e) { try { payload = { data: { body: event.data ? event.data.text() : "" } }; } catch (_) {} }
+  const data = payload && payload.data && typeof payload.data === "object" ? payload.data : {};
+  const notification = payload && payload.notification && typeof payload.notification === "object" ? payload.notification : {};
+  const title = data.title || notification.title || "Çentik — Beni Dürt";
+  const body = data.body || notification.body || "";
+  const url = data.url || "./";
+  event.waitUntil(self.registration.showNotification(title, {
+    body,
+    icon: "./icon-192.png",
+    badge: "./favicon-32.png",
+    tag: data.tag || "centik-beni-durt",
+    renotify: false,
+    data: { url }
+  }));
+});
+
+self.addEventListener("notificationclick", event => {
+  event.notification.close();
+  const target = new URL((event.notification.data && event.notification.data.url) || "./", self.registration.scope).href;
+  event.waitUntil((async()=>{
+    const clientsList = await self.clients.matchAll({ type:"window", includeUncontrolled:true });
+    for (const client of clientsList) {
+      try { await client.navigate(target); await client.focus(); return; } catch (e) { try { await client.focus(); return; } catch (_) {} }
+    }
+    if (self.clients.openWindow) await self.clients.openWindow(target);
+  })());
 });

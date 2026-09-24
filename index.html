@@ -444,6 +444,9 @@ body.auth-locked{overflow:hidden!important}body.auth-locked .ust-cubuk,body.auth
 .theme-settings h3{margin:0 0 4px;font-size:.96rem}.theme-settings p{margin:0 0 12px;color:var(--muted);font-size:.82rem}
 .theme-mode-note{margin:-5px 0 12px!important;font-size:.78rem!important;color:var(--marka)!important;font-weight:600}.theme-options{display:grid;grid-template-columns:1fr 1fr;gap:9px}.theme-choice{border:1px solid var(--line);border-radius:11px;padding:10px 11px;background:var(--bg);color:var(--ink);display:flex;align-items:center;gap:9px;text-align:left;font-weight:600}
 .theme-choice[aria-pressed="true"]{border-color:var(--focus);box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 20%,transparent);background:color-mix(in srgb,var(--focus) 9%,var(--paper))}.theme-swatch{width:18px;height:18px;border-radius:50%;flex:0 0 18px;border:1px solid var(--swatch-ring);box-shadow:inset 0 0 0 4px var(--swatch-inner)}.theme-swatch.navy{background:#5B7CFF}.theme-swatch.purple{background:#A66BFF}
+.beni-durt-settings{margin:12px 0 4px;padding:14px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--paper) 88%,transparent)}
+.beni-durt-settings h3{margin:0 0 4px;font-size:.96rem}.beni-durt-settings>p{margin:0 0 12px;color:var(--muted);font-size:.82rem}.beni-durt-row{display:flex;align-items:center;justify-content:space-between;gap:14px}.beni-durt-row+.beni-durt-row{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.beni-durt-label{display:flex;flex-direction:column;gap:2px;min-width:0}.beni-durt-label strong{font-size:.86rem}.beni-durt-label span{font-size:.76rem;color:var(--muted)}.beni-durt-time{width:112px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);padding:8px 9px;font:600 .84rem/1 var(--sans);color-scheme:inherit}.beni-durt-time:disabled{opacity:.5}.switch{position:relative;display:inline-flex;width:46px;height:26px;flex:0 0 auto}.switch input{position:absolute;opacity:0;pointer-events:none}.switch span{position:absolute;inset:0;border-radius:999px;background:color-mix(in srgb,var(--muted) 28%,var(--bg));border:1px solid var(--line);transition:.18s}.switch span::after{content:"";position:absolute;width:20px;height:20px;left:2px;top:2px;border-radius:50%;background:var(--paper);box-shadow:0 1px 5px rgba(0,0,0,.22);transition:.18s}.switch input:checked+span{background:var(--accent-start);border-color:transparent}.switch input:checked+span::after{transform:translateX(20px);background:#fff}.switch input:focus-visible+span{outline:2px solid var(--focus);outline-offset:2px}.beni-durt-state{margin:10px 0 0!important;font-size:.76rem!important;color:var(--marka)!important;font-weight:600}.beni-durt-state.error{color:#c63232!important}
+
 .admin-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.admin-head h3{margin:0;font-size:1rem}.admin-badge{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:color-mix(in srgb,var(--focus) 16%,transparent);color:var(--focus);font-size:.76rem;font-weight:700}
 .admin-list{display:grid;gap:10px;max-height:320px;overflow:auto}.admin-user{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg)}.admin-user strong,.admin-user small{display:block}.admin-user small{margin-top:3px;color:var(--muted);overflow-wrap:anywhere}.admin-actions{display:flex;gap:8px;margin-top:10px}.admin-actions button{flex:1;border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--paper);color:var(--ink);font-weight:600}.admin-actions .approve{background:linear-gradient(135deg,var(--accent-start),var(--accent-end));border-color:transparent;color:#fff}.admin-actions .reject{color:#b42318;border-color:rgba(180,35,24,.25)}.admin-empty{color:var(--muted);font-size:.88rem;padding:8px 0}.admin-meta{color:var(--muted);font-size:.78rem;margin:8px 0 0}.admin-refresh{margin-top:10px;border:0;background:transparent;color:var(--marka);padding:4px 0;font-weight:600}
 .registered-users-block{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}.registered-role{display:inline-flex;align-items:center;width:max-content;margin-top:7px;padding:3px 8px;border-radius:999px;background:color-mix(in srgb,var(--focus) 12%,transparent);color:var(--focus);font-size:.72rem;font-weight:700}.registered-role.admin{background:color-mix(in srgb,var(--accent-end) 16%,transparent);color:var(--accent-end)}
@@ -712,6 +715,19 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-r
           <button class="theme-choice" id="themePurple" type="button" data-theme-choice="mor" aria-pressed="false"><span class="theme-swatch purple" aria-hidden="true"></span><span>Mor</span></button>
         </div>
       </section>
+      <section class="beni-durt-settings" aria-labelledby="beniDurtTitle">
+        <h3 id="beniDurtTitle">Beni Dürt</h3>
+        <p>Belirlediğiniz saatte bugün işaretlenmemiş çentiklerinizi bildirim olarak hatırlatır. Açık çentik yoksa sessiz kalır.</p>
+        <div class="beni-durt-row">
+          <div class="beni-durt-label"><strong>Günlük dürtme</strong><span>Bildirim bu cihazda izin verildiğinde çalışır.</span></div>
+          <label class="switch" aria-label="Beni Dürt özelliğini aç"><input id="beniDurtEnabled" type="checkbox"><span aria-hidden="true"></span></label>
+        </div>
+        <div class="beni-durt-row">
+          <div class="beni-durt-label"><strong>Saat</strong><span>Telefonunuzun yerel saatine göre</span></div>
+          <input class="beni-durt-time" id="beniDurtTime" type="time" value="20:00" step="60">
+        </div>
+        <p class="beni-durt-state" id="beniDurtState" aria-live="polite"></p>
+      </section>
       <section class="journal-privacy" aria-labelledby="journalPrivacyTitle">
         <h3 id="journalPrivacyTitle">Çetele Gizliliği</h3>
         <p>PIN isteğe bağlıdır. Belirlemediğiniz sürece Çeteleler normal şekilde açılır. PIN etkinse her Çetele açılışında yeniden sorulur.</p>
@@ -945,11 +961,11 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v93-universal-blur-overlay", CENTIK_EXPECTED_SERVER_BUILD="v32-cetele-wysiwyg";
+const CENTIK_CLIENT_BUILD="v94-beni-durt", CENTIK_EXPECTED_SERVER_BUILD="v33-beni-durt";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
-let queuedForceSync=false, queuedForceSilent=true, foregroundSyncTimer=null, settingsOriginalTheme=null, hiddenSince=0;
+let queuedForceSync=false, queuedForceSilent=true, foregroundSyncTimer=null, settingsOriginalTheme=null, settingsOriginalNudge=null, hiddenSince=0;
 let syncBaseStatus="idle",globalLoadingCount=0,sessionVerifyPromise=null,sessionVerifyToken="";
 let pendingDelete=null, pendingDeleteTimer=null;
 let journalStatusCache=new Map(),journalStatusSeenAt=new Map(),journalStatusPending=new Map(),journalMonthCache=new Map(),journalMonthPending=new Map(),journalContext=null,journalActivePin="",journalDirty=false,journalPinMode="set";
@@ -1120,7 +1136,7 @@ async function api(action,data={},options={}){
 }
 
 function authMessage(code){
-  const map={giris:"E-posta veya parola hatalı.",kilitli:"Çok fazla hatalı deneme yapıldı. Hesap geçici olarak kilitlendi.",pasif:"Bu hesap aktif değil.",bekliyor:"Hesabınız yönetici onayı bekliyor.",reddedildi:"Hesap başvurunuz onaylanmadı.",eposta:"Geçerli bir e-posta yazın.",parola:"Parola en az 10 karakter olmalı.",ad:"Adınızı yazın.",hesap_var:"Bu e-posta ile zaten bir hesap var.",kayit_limiti:"Yeni hesap başvurusu şu anda alınamıyor.",basvuru_limiti:"Çok sayıda bekleyen başvuru var. Yönetici onayından sonra tekrar deneyin.",admin_ayarsiz:"Süper yönetici e-posta adresi henüz yapılandırılmamış.",yetki:"Bu işlem için yönetici yetkisi gerekli.",oturum:"Oturum süresi doldu. Yeniden giriş yapın.",eposta_gonderilemedi:"Sıfırlama e-postası gönderilemedi.",sifirlama:"Kod geçersiz veya süresi dolmuş.",tema:"Geçersiz tema seçimi.",sunucu:"Sunucu hatası oluştu.",zaman_asimi:"Sunucu yanıtı gecikti. Yeniden deneyin.",cetele_pin:"PIN hatalı.",cetele_pin_gerekli:"Bu Çetele PIN ile korunuyor.",cetele_pin_kilitli:"Çok sayıda hatalı PIN denemesi yapıldı. Çetele geçici olarak kilitlendi.",cetele_pin_bicim:"PIN 4 veya 6 rakamdan oluşmalı.",cetele_uzun:"Çetele sınıra ulaştı.",cetele_bos:"Çetele boş",cakili_baslik:"Liste adı boş olamaz.",cakili_yetki:"Bu Çakılı listeye erişiminiz yok.",cakili_sahip:"Bu işlemi yalnız listenin sahibi yapabilir.",cakili_kullanici:"Bu e-posta ile aktif bir Çentik kullanıcısı bulunamadı.",cakili_kendin:"Listeyi kendinizle paylaşamazsınız.",cakili_liste:"Çakılı listesi bulunamadı.",cakili_gorev:"Görev boş olamaz.",cakili_gorev_yok:"Görev artık mevcut değil."};
+  const map={giris:"E-posta veya parola hatalı.",kilitli:"Çok fazla hatalı deneme yapıldı. Hesap geçici olarak kilitlendi.",pasif:"Bu hesap aktif değil.",bekliyor:"Hesabınız yönetici onayı bekliyor.",reddedildi:"Hesap başvurunuz onaylanmadı.",eposta:"Geçerli bir e-posta yazın.",parola:"Parola en az 10 karakter olmalı.",ad:"Adınızı yazın.",hesap_var:"Bu e-posta ile zaten bir hesap var.",kayit_limiti:"Yeni hesap başvurusu şu anda alınamıyor.",basvuru_limiti:"Çok sayıda bekleyen başvuru var. Yönetici onayından sonra tekrar deneyin.",admin_ayarsiz:"Süper yönetici e-posta adresi henüz yapılandırılmamış.",yetki:"Bu işlem için yönetici yetkisi gerekli.",oturum:"Oturum süresi doldu. Yeniden giriş yapın.",eposta_gonderilemedi:"Sıfırlama e-postası gönderilemedi.",sifirlama:"Kod geçersiz veya süresi dolmuş.",tema:"Geçersiz tema seçimi.",sunucu:"Sunucu hatası oluştu.",zaman_asimi:"Sunucu yanıtı gecikti. Yeniden deneyin.",cetele_pin:"PIN hatalı.",cetele_pin_gerekli:"Bu Çetele PIN ile korunuyor.",cetele_pin_kilitli:"Çok sayıda hatalı PIN denemesi yapıldı. Çetele geçici olarak kilitlendi.",cetele_pin_bicim:"PIN 4 veya 6 rakamdan oluşmalı.",cetele_uzun:"Çetele sınıra ulaştı.",cetele_bos:"Çetele boş",cakili_baslik:"Liste adı boş olamaz.",cakili_yetki:"Bu Çakılı listeye erişiminiz yok.",cakili_sahip:"Bu işlemi yalnız listenin sahibi yapabilir.",cakili_kullanici:"Bu e-posta ile aktif bir Çentik kullanıcısı bulunamadı.",cakili_kendin:"Listeyi kendinizle paylaşamazsınız.",cakili_liste:"Çakılı listesi bulunamadı.",cakili_gorev:"Görev boş olamaz.",cakili_gorev_yok:"Görev artık mevcut değil.",firebase_ayarsiz:"Beni Dürt bildirim altyapısı henüz yapılandırılmadı.",durt_saat:"Geçerli bir Beni Dürt saati seçin.",durt_izin:"Bu cihazda bildirim izni alınamadı."};
   return map[code]||"İşlem tamamlanamadı.";
 }
 function setAuthStatus(text,error=false){$("authStatus").textContent=text||"";$("authStatus").classList.toggle("error",!!error)}
@@ -2497,14 +2513,65 @@ document.addEventListener("keydown",e=>{
 });
 setCalendarOpen(false);
 
+const FIREBASE_COMPAT_VERSION="12.19.0";
+let firebaseCompatPromise=null,beniDurtMessaging=null,beniDurtForegroundBound=false;
+function beniDurtDeviceId(){
+  const k="centik-beni-durt-device-v1";try{let v=localStorage.getItem(k);if(!v){v=(crypto.randomUUID?crypto.randomUUID():`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`);localStorage.setItem(k,v)}return v}catch(e){return `device-${Date.now()}`}
+}
+function beniDurtTimeZone(){try{return Intl.DateTimeFormat().resolvedOptions().timeZone||"Europe/Istanbul"}catch(e){return "Europe/Istanbul"}}
+function setBeniDurtState(text,error=false){const el=$("beniDurtState");if(!el)return;el.textContent=text||"";el.classList.toggle("error",!!error)}
+function renderBeniDurtUI(){
+  const cfg=currentUser?.beniDurt||{};const active=!!cfg.active,time=/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(String(cfg.time||""))?cfg.time:"20:00";
+  $("beniDurtEnabled").checked=active;$("beniDurtTime").value=time;$("beniDurtTime").disabled=!active;
+  if(!("Notification" in window))setBeniDurtState("Bu tarayıcı bildirimleri desteklemiyor.",true);
+  else if(Notification.permission==="denied")setBeniDurtState("Tarayıcı bildirim izni kapalı. Sistem/tarayıcı ayarlarından izin vermelisiniz.",true);
+  else if(active&&Notification.permission==="granted")setBeniDurtState("Beni Dürt açık · bu cihaz bildirim alabilir.");
+  else if(active)setBeniDurtState("Kaydederken bu cihaz için bildirim izni istenecek.");
+  else setBeniDurtState("Kapalı");
+}
+function loadScriptOnce(src){return new Promise((resolve,reject)=>{const old=[...document.scripts].find(s=>s.src===src);if(old){if(window.firebase)resolve();else old.addEventListener("load",resolve,{once:true});return}const s=document.createElement("script");s.src=src;s.async=true;s.onload=resolve;s.onerror=()=>reject(new Error("firebase_sdk"));document.head.appendChild(s)})}
+async function loadFirebaseCompat(){
+  if(window.firebase?.messaging)return window.firebase;if(firebaseCompatPromise)return firebaseCompatPromise;
+  firebaseCompatPromise=(async()=>{await loadScriptOnce(`https://www.gstatic.com/firebasejs/${FIREBASE_COMPAT_VERSION}/firebase-app-compat.js`);await loadScriptOnce(`https://www.gstatic.com/firebasejs/${FIREBASE_COMPAT_VERSION}/firebase-messaging-compat.js`);if(!window.firebase?.messaging)throw new Error("firebase_sdk");return window.firebase})();
+  return firebaseCompatPromise;
+}
+async function ensureBeniDurtMessaging(){
+  if(beniDurtMessaging)return beniDurtMessaging;
+  const [cfg,fb]=await Promise.all([api("pushConfig",{token:getToken()},{timeout:30000}),loadFirebaseCompat()]);
+  if(!cfg.ok)throw new Error(cfg.error||"firebase_ayarsiz");
+  if(!fb.apps.length)fb.initializeApp(cfg.firebase);
+  const messaging=fb.messaging();const reg=await navigator.serviceWorker.ready;
+  beniDurtMessaging={messaging,reg,vapidKey:cfg.vapidKey};
+  if(!beniDurtForegroundBound){
+    beniDurtForegroundBound=true;messaging.onMessage(payload=>{const d=payload?.data||{},n=payload?.notification||{};reg.showNotification(d.title||n.title||"Çentik — Beni Dürt",{body:d.body||n.body||"",icon:"icon-192.png",badge:"favicon-32.png",tag:d.tag||"centik-beni-durt",data:{url:d.url||"./"}}).catch(()=>{})});
+  }
+  return beniDurtMessaging;
+}
+async function prepareBeniDurtSubscription(){
+  if(!("Notification" in window)||!("serviceWorker" in navigator))throw new Error("durt_izin");
+  let permission=Notification.permission;if(permission!=="granted")permission=await Notification.requestPermission();
+  if(permission!=="granted")throw new Error("durt_izin");
+  const x=await ensureBeniDurtMessaging();const token=await x.messaging.getToken({vapidKey:x.vapidKey,serviceWorkerRegistration:x.reg});
+  if(!token)throw new Error("durt_izin");return token;
+}
+async function saveBeniDurtPreference(){
+  if(!currentUser?.id)return false;const active=$("beniDurtEnabled").checked,time=$("beniDurtTime").value;
+  if(active&&!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time)){setBeniDurtState("Geçerli bir saat seçin.",true);return false}
+  let fcmToken="";if(active){setBeniDurtState("Bildirim izni hazırlanıyor…");try{fcmToken=await prepareBeniDurtSubscription()}catch(e){setBeniDurtState(authMessage(e.message||"durt_izin"),true);return false}}
+  const j=await api("beniDurtSave",{token:getToken(),active,time:time||"20:00",timeZone:beniDurtTimeZone(),deviceId:beniDurtDeviceId(),fcmToken},{timeout:30000});
+  if(!j.ok){setBeniDurtState(authMessage(j.error),true);return false}
+  currentUser=j.user||{...currentUser,beniDurt:{active,time:time||"20:00",timeZone:beniDurtTimeZone()}};setSession(getToken(),currentUser);renderBeniDurtUI();return true;
+}
+
 function closeAccountMenu(){const m=$("accountMenu");if(!m)return;m.hidden=true;$("settings").setAttribute("aria-expanded","false")}
 function toggleAccountMenu(){const m=$("accountMenu");if(!m)return;const willOpen=m.hidden;closeAccountMenu();if(willOpen){m.hidden=false;$("settings").setAttribute("aria-expanded","true")}}
 function openSettingsDialog(){
-  closeJournalView(true);closeAccountMenu();updateUserUI();refreshThemeButtons();renderJournalPrivacyUI();settingsOriginalTheme=theme;$("settingsSaveStatus").textContent="";$("accountDialog").showModal();
+  closeJournalView(true);closeAccountMenu();updateUserUI();refreshThemeButtons();renderJournalPrivacyUI();settingsOriginalTheme=theme;settingsOriginalNudge=currentUser?.beniDurt?{...currentUser.beniDurt}:{active:false,time:"20:00",timeZone:beniDurtTimeZone()};renderBeniDurtUI();$("settingsSaveStatus").textContent="";$("accountDialog").showModal();
 }
 function discardSettingsAndClose(){
   if(settingsOriginalTheme){currentUser={...currentUser,theme:settingsOriginalTheme};setSession(getToken(),currentUser);rememberTheme(settingsOriginalTheme,currentUser,false);applyTheme(settingsOriginalTheme)}
-  settingsOriginalTheme=null;$("settingsSaveStatus").textContent="";$("accountDialog").close();
+  if(settingsOriginalNudge&&currentUser){currentUser={...currentUser,beniDurt:{...settingsOriginalNudge}};setSession(getToken(),currentUser)}
+  settingsOriginalTheme=null;settingsOriginalNudge=null;$("settingsSaveStatus").textContent="";$("accountDialog").close();
 }
 async function openManagementDialog(){
   closeAccountMenu();if(currentUser?.role!=="admin")return;$("managementDialog").showModal();renderDiagnostics();
@@ -2519,12 +2586,15 @@ async function openManagementDialog(){
 async function saveSettings(){
   const b=$("saveSettings");if(!setBackendActionBusy(b,true,"Kaydediliyor…"))return;$("settingsSaveStatus").textContent="";
   try{
-    const [ok]=await Promise.all([syncThemePreference(),wait(350)]);
-    if(ok!==false){settingsOriginalTheme=null;$("accountDialog").close()}
+    // Notification.requestPermission kullanıcı tıklaması bağlamında başlatılabilsin diye Beni Dürt önce kaydedilir.
+    const nudgeOk=await saveBeniDurtPreference();if(nudgeOk===false){$("settingsSaveStatus").textContent="Beni Dürt ayarı kaydedilemedi.";return}
+    const [themeOk]=await Promise.all([syncThemePreference(),wait(250)]);
+    if(themeOk!==false){settingsOriginalTheme=null;settingsOriginalNudge=null;$("accountDialog").close()}
     else $("settingsSaveStatus").textContent="Ayar kaydedilemedi. Yeniden deneyin.";
   }catch(e){$("settingsSaveStatus").textContent="Ayar kaydedilemedi. Yeniden deneyin."}
   finally{setBackendActionBusy(b,false)}
 }
+$("beniDurtEnabled").addEventListener("change",()=>{const on=$("beniDurtEnabled").checked;$("beniDurtTime").disabled=!on;if(!on){setBeniDurtState("Kapalı");return}if(!("Notification" in window)){setBeniDurtState("Bu tarayıcı bildirimleri desteklemiyor.",true);return}setBeniDurtState(Notification.permission==="granted"?"Beni Dürt açık · Kaydet ile etkinleştirilecek.":"Kaydederken bu cihaz için bildirim izni istenecek.")});
 $("settings").onclick=e=>{e.stopPropagation();if(document.body.classList.contains("pinned-open"))closePinnedPanel(true);if(document.body.classList.contains("journal-open")&&!closeJournalView(false))return;toggleAccountMenu()};
 $("menuSettings").onclick=openSettingsDialog;$("menuAdmin").onclick=openManagementDialog;
 $("closeSettingsX").onclick=discardSettingsAndClose;$("saveSettings").onclick=saveSettings;
