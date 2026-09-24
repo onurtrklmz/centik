@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v76: Çakılı/Çetele ortak alt çekmece yüzeyi, Çakılı alt görev taşıma ve ana ekran yerleşimi güncellendi.
-const SURUM = "centik-v76-drawer-hierarchy-layout";
+// v77: Üst bar senkron oku dönen loading animasyonuna döndü; Çakılı okunmamış sayıları liste bazında gösteriliyor.
+const SURUM = "centik-v77-sync-spinner-list-badges";
 const KABUK = [
   "./",
   "./index.html",

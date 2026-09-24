@@ -227,7 +227,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 .journal-limit-status[hidden]{display:none}
 .journal-save{width:100%;min-height:50px;border:0;border-radius:13px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));color:#fff;font-weight:750;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 8px 22px color-mix(in srgb,var(--focus) 18%,transparent);transition:transform .11s ease,box-shadow .14s ease,filter .14s ease,opacity .14s ease;-webkit-tap-highlight-color:transparent}
 .journal-save svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.journal-save:disabled{opacity:.72;cursor:progress}.journal-save:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 10px 24px color-mix(in srgb,var(--focus) 24%,transparent)}.journal-save:not(:disabled):active{transform:translateY(1px) scale(.985);filter:brightness(.95)}
-.backend-action-busy,.journal-save.is-busy,.pin-footer button.is-busy{animation:savePulse .62s ease-in-out infinite alternate!important;cursor:progress!important;transform-origin:center;pointer-events:none}.backend-action-busy:disabled,.journal-save.is-busy:disabled,.pin-footer button.is-busy:disabled{opacity:1}.sync-refresh.backend-action-busy .sync-icon-refresh{animation:none!important}.sync-refresh.backend-action-busy::after{content:attr(data-busy-label);position:absolute;right:0;top:calc(100% + 7px);z-index:90;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);box-shadow:var(--shadow);font:700 .70rem/1 var(--sans);white-space:nowrap;pointer-events:none}
+.backend-action-busy,.journal-save.is-busy,.pin-footer button.is-busy{animation:savePulse .62s ease-in-out infinite alternate!important;cursor:progress!important;transform-origin:center;pointer-events:none}.backend-action-busy:disabled,.journal-save.is-busy:disabled,.pin-footer button.is-busy:disabled{opacity:1}.sync-refresh.backend-action-busy{animation:none!important;transform:none!important}.sync-refresh.backend-action-busy .sync-icon-refresh{animation:syncRotate .9s linear infinite!important}.sync-refresh.backend-action-busy::after{content:attr(data-busy-label);position:absolute;right:0;top:calc(100% + 7px);z-index:90;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);box-shadow:var(--shadow);font:700 .70rem/1 var(--sans);white-space:nowrap;pointer-events:none}
 .journal-save-status{min-height:1.35em;margin:10px 2px 0;text-align:center;color:var(--muted);font-size:.80rem}.journal-save-status.error{color:#d64a4a}.journal-save-status.ok{color:#20a968}
 .journal-privacy{margin:14px 0 4px;padding:14px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--paper) 88%,transparent)}
 .journal-privacy h3{margin:0 0 4px;font-size:.96rem}.journal-privacy p{margin:0 0 12px;color:var(--muted);font-size:.82rem;line-height:1.45}.journal-pin-state{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;padding:9px 10px;border-radius:10px;background:var(--bg);font-size:.82rem}.journal-pin-state strong{font-size:.78rem;color:var(--focus)}
@@ -475,11 +475,11 @@ body.journal-open{overflow:hidden}
 .pinned-head-actions{display:flex;gap:6px;flex:none}
 .pinned-create{display:flex;gap:8px;margin:0 0 16px}.pinned-create input{min-width:0;flex:1;border:1px solid var(--line);border-radius:11px;background:var(--paper);color:var(--ink);padding:11px 12px}.pinned-create button{border:0;border-radius:11px;background:var(--focus);color:#fff;font-weight:800;padding:0 14px}
 .pinned-lists{display:grid;gap:10px}
-.pinned-list-card{width:100%;border:1px solid var(--line);border-radius:14px;background:var(--paper);color:var(--ink);padding:14px;display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:11px;text-align:left;box-shadow:var(--shadow);transition:transform .14s,border-color .14s,background .14s}
+.pinned-list-card{position:relative;overflow:visible;width:100%;border:1px solid var(--line);border-radius:14px;background:var(--paper);color:var(--ink);padding:14px;display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:11px;text-align:left;box-shadow:var(--shadow);transition:transform .14s,border-color .14s,background .14s}
 .pinned-list-card:hover{transform:translateY(-1px);border-color:color-mix(in srgb,var(--focus) 42%,var(--line));background:color-mix(in srgb,var(--focus) 4%,var(--paper))}
 .pinned-list-pin{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--focus) 10%,var(--paper));color:var(--focus)}
 .pinned-list-pin svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.pinned-list-pin .pushpin-icon{color:currentColor}
-.pinned-list-copy{min-width:0}.pinned-list-copy strong{display:block;font-size:.96rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pinned-list-copy small{display:block;margin-top:4px;color:var(--muted);font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pinned-list-arrow{font-size:1.2rem;color:var(--muted)}
+.pinned-list-copy{min-width:0}.pinned-list-copy strong{display:block;font-size:.96rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pinned-list-copy small{display:block;margin-top:4px;color:var(--muted);font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pinned-list-arrow{font-size:1.2rem;color:var(--muted)}.pinned-list-card .pinned-unread-badge{top:-7px;right:-7px;border-color:var(--paper)}
 .pinned-empty{padding:22px 12px;color:var(--muted);text-align:center;border:1px dashed var(--line);border-radius:14px}
 .pinned-editor-meta{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:-5px 0 13px;color:var(--muted);font-size:.78rem}.pinned-live{display:inline-flex;align-items:center;gap:6px}.pinned-live::before{content:"";width:7px;height:7px;border-radius:50%;background:#21b66c;box-shadow:0 0 0 3px color-mix(in srgb,#21b66c 15%,transparent)}
 .pinned-panel .sheet{margin-top:0}.pinned-panel .tally{margin-bottom:12px}
@@ -870,7 +870,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v76-drawer-hierarchy-layout", CENTIK_EXPECTED_SERVER_BUILD="v28-cakili-unread";
+const CENTIK_CLIENT_BUILD="v77-sync-spinner-list-badges", CENTIK_EXPECTED_SERVER_BUILD="v29-cakili-list-unread";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -1327,7 +1327,7 @@ async function refreshPinnedUnread({force=false}={}){
 async function markPinnedUnreadRead(listId=""){
   if(!currentUser?.id||!getToken()||!navigator.onLine)return false;
   const userId=currentUser.id,seq=++pinnedUnreadSeq;pinnedUnreadPromise=null;
-  try{const j=await api("pinnedUnreadRead",{token:getToken(),listId:String(listId||"")},{timeout:30000});if(!j.ok){if(j.error==="oturum")expireSession();return false}if(seq!==pinnedUnreadSeq||currentUser?.id!==userId)return true;setPinnedUnreadCount(j.count);lastPinnedUnreadCheckAt=Date.now();return true}catch(e){return false}
+  try{const cleanListId=String(listId||""),j=await api("pinnedUnreadRead",{token:getToken(),listId:cleanListId},{timeout:30000});if(!j.ok){if(j.error==="oturum")expireSession();return false}if(seq!==pinnedUnreadSeq||currentUser?.id!==userId)return true;if(cleanListId){const list=pinnedListById(cleanListId);if(list)list.unreadCount=0}else pinnedLists.forEach(list=>list.unreadCount=0);setPinnedUnreadCount(j.count);lastPinnedUnreadCheckAt=Date.now();if(document.body.classList.contains("pinned-open")&&$("pinnedOverview")&&!$("pinnedOverview").hidden)renderPinnedOverview();return true}catch(e){return false}
 }
 function startPinnedUnreadWatch(){
   stopPinnedUnreadWatch();if(!currentUser?.id||!getToken())return;
@@ -1340,14 +1340,15 @@ function renderPinnedOverview(){
   pinnedLists.forEach(list=>{
     const b=document.createElement("button");b.type="button";b.className="pinned-list-card";b.dataset.listId=list.id;
     const shared=list.sharedUser?(list.isOwner?`${list.sharedUser.name||list.sharedUser.email} ile paylaşılıyor`:`${list.owner?.name||list.owner?.email||"Liste sahibi"} ile ortak`):"Yalnızca sen";
+    const unread=Math.max(0,Math.floor(Number(list.unreadCount)||0)),unreadLabel=unread>99?"+99":`+${unread}`;
     b.innerHTML='<span class="pinned-list-pin"><svg class="pushpin-icon" viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(18 12 12)"><ellipse class="pin-cap" cx="12" cy="4.4" rx="4.7" ry="2.2"></ellipse><path class="pin-body" d="M9.2 5.1h5.6l-.8 5.7c2.5.75 4.15 2.25 4.15 4.05 0 2.45-2.8 4.2-6.15 4.2s-6.15-1.75-6.15-4.2c0-1.8 1.65-3.3 4.15-4.05l-.8-5.7Z"></path><ellipse class="pin-cap" cx="12" cy="4.15" rx="4.25" ry="1.72" opacity=".72"></ellipse><path class="pin-highlight" d="M7.75 13.55c.38-1.12 1.15-1.9 2.05-2.25-.5.75-.8 1.55-.9 2.35-.08.58-.44.98-.83.86-.36-.11-.44-.44-.32-.96Z"></path><path class="pin-needle" d="M10.9 18.4h2.2L12 24Z"></path></g></svg></span>'+
-      `<span class="pinned-list-copy"><strong>${escapeHtml(list.title)}</strong><small>${escapeHtml(shared)}</small></span><span class="pinned-list-arrow">›</span>`;
+      `<span class="pinned-list-copy"><strong>${escapeHtml(list.title)}</strong><small>${escapeHtml(shared)}</small></span>${unread?`<span class="pinned-unread-badge" title="${unread} yeni görev" aria-label="${unread} yeni görev">${unreadLabel}</span>`:""}<span class="pinned-list-arrow">›</span>`;
     b.onclick=()=>openPinnedList(list.id);box.appendChild(b);
   });
 }
 async function loadPinnedLists({silent=false}={}){
   if(!currentUser?.id||!getToken())return false;if(!silent)pinnedSetStatus("pinnedOverviewStatus","Listeler yükleniyor…");
-  try{const j=await api("pinnedLists",{token:getToken()},{timeout:30000});if(!j.ok){if(j.error==="oturum")expireSession();else if(!silent)pinnedSetStatus("pinnedOverviewStatus",authMessage(j.error));return false}pinnedLists=Array.isArray(j.lists)?j.lists:[];renderPinnedOverview();pinnedSetStatus("pinnedOverviewStatus","");return true}
+  try{const j=await api("pinnedLists",{token:getToken()},{timeout:30000});if(!j.ok){if(j.error==="oturum")expireSession();else if(!silent)pinnedSetStatus("pinnedOverviewStatus",authMessage(j.error));return false}pinnedLists=Array.isArray(j.lists)?j.lists:[];if(Number.isFinite(Number(j.unreadTotal)))setPinnedUnreadCount(j.unreadTotal);renderPinnedOverview();pinnedSetStatus("pinnedOverviewStatus","");return true}
   catch(e){if(!silent)pinnedSetStatus("pinnedOverviewStatus","Çakılı listeler alınamadı. Bağlantınızı kontrol edin.");return false}
 }
 function pinnedShowOverview(){
@@ -1360,7 +1361,7 @@ function openPinnedPanel(){
   const panel=$("pinnedPanel");if(!panel)return;panel.hidden=false;pinnedShowOverview();
   // Çetele ile aynı açılma davranışı: panel önce kapalı konumda çizilir, ardından açık sınıfı bir sonraki karede eklenir.
   requestAnimationFrame(()=>{if(!panel.hidden)document.body.classList.add("pinned-open")});
-  setPinnedUnreadCount(0);markPinnedUnreadRead();loadPinnedLists();startPinnedListsRefresh();
+  loadPinnedLists();startPinnedListsRefresh();
 }
 function closePinnedPanel(force=false){
   if($("pinnedShareDialog")?.open)$("pinnedShareDialog").close();stopPinnedLive();stopPinnedListsRefresh();clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;const panel=$("pinnedPanel");panel?.classList.remove("panel-dragging");panel?.style.removeProperty("transform");document.body.classList.remove("pinned-open");pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;clearTimeout(pinnedPanelHideTimer);if(force){if(panel)panel.hidden=true}else pinnedPanelHideTimer=setTimeout(()=>{if(panel&&!document.body.classList.contains("pinned-open"))panel.hidden=true},340);if(!force)setTimeout(()=>refreshPinnedUnread({force:true}),350);return true
@@ -1374,7 +1375,7 @@ async function openPinnedList(id){
 }
 async function syncPinnedActive({force=false,silent=false}={}){
   if(!pinnedActiveList||!currentUser?.id)return false;const listId=pinnedActiveList.id,known=force?null:pinnedRevision;
-  try{const j=await api("pinnedGet",{token:getToken(),listId,knownRevision:known},{timeout:30000});if(!j.ok){if(j.error==="oturum")expireSession();else if(j.error==="cakili_yetki"){await loadPinnedLists({silent:true});pinnedShowOverview()}else if(!silent)pinnedSetStatus("pinnedEditorStatus",authMessage(j.error));return false}if(!pinnedActiveList||pinnedActiveList.id!==listId)return false;const responseRevision=Number(j.revision);if(Number.isFinite(responseRevision)&&pinnedRevision!==null&&responseRevision<pinnedRevision)return true;pinnedActiveList=j.list||pinnedActiveList;const ix=pinnedLists.findIndex(x=>x.id===listId);if(ix>=0)pinnedLists[ix]=pinnedActiveList;if(!j.unchanged){pinnedTasks=normalizeItems(j.tasks||[]);renderPinnedTasks();markPinnedUnreadRead(listId)}pinnedRevision=Number.isFinite(responseRevision)?responseRevision:pinnedRevision;updatePinnedHeader();if(!silent)pinnedSetStatus("pinnedEditorStatus","");return true}
+  try{const j=await api("pinnedGet",{token:getToken(),listId,knownRevision:known},{timeout:30000});if(!j.ok){if(j.error==="oturum")expireSession();else if(j.error==="cakili_yetki"){await loadPinnedLists({silent:true});pinnedShowOverview()}else if(!silent)pinnedSetStatus("pinnedEditorStatus",authMessage(j.error));return false}if(!pinnedActiveList||pinnedActiveList.id!==listId)return false;const responseRevision=Number(j.revision);if(Number.isFinite(responseRevision)&&pinnedRevision!==null&&responseRevision<pinnedRevision)return true;pinnedActiveList=j.list||pinnedActiveList;const ix=pinnedLists.findIndex(x=>x.id===listId);if(ix>=0)pinnedLists[ix]=pinnedActiveList;if(!j.unchanged){pinnedTasks=normalizeItems(j.tasks||[]);renderPinnedTasks()}if(force||!j.unchanged)markPinnedUnreadRead(listId);pinnedRevision=Number.isFinite(responseRevision)?responseRevision:pinnedRevision;updatePinnedHeader();if(!silent)pinnedSetStatus("pinnedEditorStatus","");return true}
   catch(e){if(!silent)pinnedSetStatus("pinnedEditorStatus","Liste güncellenemedi. Bağlantınızı kontrol edin.");return false}
 }
 function updatePinnedHeader(){
