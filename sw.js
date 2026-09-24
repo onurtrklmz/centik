@@ -1,8 +1,8 @@
-// v94-ui-r22: Mobil iki kademeli pull'da 104px sonrası tam sayfa reload göstergesi görünür.
+// v94-ui-r23: Tüm hover stilleri gerçek hover/fine-pointer cihazlarla sınırlandı; mobil sticky-hover izi kaldırıldı.
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v94-ideal-shared-drawer-r22";
+const SURUM = "centik-v94-ideal-shared-drawer-r23";
 const KABUK = [
   "./",
   "./index.html",
