@@ -506,7 +506,7 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
 .cal-head .journal-launch.has-journal .journal-launch-state{background:#19bf72;color:#fff}
 .drawer-hint{margin-top:1px}
 
-.pinned-panel,.journal-panel{position:fixed;left:50%;top:0;bottom:0;z-index:70;width:min(520px,100%);max-width:520px;min-height:100dvh;height:100dvh;margin:0;padding:max(18px,env(safe-area-inset-top)) 16px max(26px,env(safe-area-inset-bottom));background:var(--bg);overflow-y:auto;overscroll-behavior:contain;transform:translate(-50%,104%);opacity:.98;visibility:hidden;pointer-events:none;transition:transform .30s cubic-bezier(.22,.8,.24,1),opacity .2s ease,visibility 0s linear .30s;box-shadow:0 -18px 52px rgba(0,0,0,.20)}
+.pinned-panel,.journal-panel{position:fixed;left:50%;top:0;bottom:0;z-index:70;width:min(520px,100%);max-width:520px;min-height:100dvh;height:100dvh;margin:0;padding:max(18px,env(safe-area-inset-top)) 16px max(26px,env(safe-area-inset-bottom));background:var(--bg);overflow-y:auto;overscroll-behavior:contain;transform:translate(-50%,calc(100% - 70px - max(12px,env(safe-area-inset-bottom))));transform-origin:center bottom;opacity:.98;visibility:hidden;pointer-events:none;transition:transform .32s cubic-bezier(.22,.8,.24,1),opacity .24s ease,visibility 0s linear .32s;box-shadow:0 -18px 52px rgba(0,0,0,.20)}
 body.journal-open main,body.pinned-open main{transform:none;opacity:1;pointer-events:none}
 body.journal-open .journal-panel,body.pinned-open .pinned-panel{transform:translate(-50%,0);opacity:1;visibility:visible;pointer-events:auto;transition-delay:0s}
 body.journal-open .cal,body.journal-open .calendar-backdrop,body.pinned-open .cal,body.pinned-open .calendar-backdrop{visibility:hidden!important;pointer-events:none!important}
