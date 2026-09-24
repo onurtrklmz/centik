@@ -1299,12 +1299,18 @@ async function connect(options={}){
 }
 async function connectNow({silent=false,force=false,reason=""}={}){
   const token=getToken();if(!token||!currentUser)return false;
+  const nudgeVersionAtStart=beniDurtPreferenceVersion;
   lastSyncAttemptAt=Date.now();setSyncStatus("loading");recordSyncControl("start",reason,{force});
   try{
     // Revision her zaman gönderilir. "Force" yalnız HTTP kontrolünü zorlar; Sheet'i gereksiz yere tam taratmaz.
     const j=await reliableApi("sync",{token,knownRevision:serverRevision},{timeout:30000,retries:0});
     if(!j.ok){if(j.error==="oturum"){expireSession();return false}throw new Error(j.error||"hata")}
-    currentUser=j.user||currentUser;setSession(token,currentUser);applyUserTheme(true);updateUserUI();
+    const localNudge=currentUser?.beniDurt?{...currentUser.beniDurt}:null;
+    currentUser=j.user||currentUser;
+    // Bu sync çağrısı sürerken kullanıcı Beni Dürt ayarını kaydettiyse,
+    // eski sync yanıtı yeni yerel ayarı geri ezemez.
+    if(j.user&&localNudge&&beniDurtPreferenceVersion!==nudgeVersionAtStart)currentUser={...j.user,beniDurt:localNudge};
+    setSession(token,currentUser);applyUserTheme(true);updateUserUI();
     if(!j.unchanged){
       if(!j.days||typeof j.days!=="object"||Array.isArray(j.days))throw new Error("veri");
       const serverNorm=normalizeDays(j.days),fresh=serverNorm.days;
@@ -2514,7 +2520,7 @@ document.addEventListener("keydown",e=>{
 setCalendarOpen(false);
 
 const FIREBASE_COMPAT_VERSION="12.19.0";
-let firebaseCompatPromise=null,beniDurtMessaging=null,beniDurtForegroundBound=false;
+let firebaseCompatPromise=null,beniDurtMessaging=null,beniDurtForegroundBound=false,beniDurtPreferenceVersion=0;
 function beniDurtDeviceId(){
   const k="centik-beni-durt-device-v1";try{let v=localStorage.getItem(k);if(!v){v=(crypto.randomUUID?crypto.randomUUID():`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`);localStorage.setItem(k,v)}return v}catch(e){return `device-${Date.now()}`}
 }
@@ -2565,7 +2571,9 @@ async function saveBeniDurtPreference(permissionPromise=null){
   }
   const j=await api("beniDurtSave",{token:getToken(),active,time:time||"20:00",timeZone:beniDurtTimeZone(),deviceId:beniDurtDeviceId(),fcmToken},{timeout:30000});
   if(!j.ok){setBeniDurtState(authMessage(j.error),true);return false}
-  currentUser=j.user||{...currentUser,beniDurt:{active,time:time||"20:00",timeZone:beniDurtTimeZone()}};setSession(getToken(),currentUser);renderBeniDurtUI();
+  currentUser=j.user||{...currentUser,beniDurt:{active,time:time||"20:00",timeZone:beniDurtTimeZone()}};
+  beniDurtPreferenceVersion++;
+  setSession(getToken(),currentUser);renderBeniDurtUI();
   if(active&&!deviceReady){
     const msg=Notification.permission==="denied"?"Saat kaydedildi · bu cihazda bildirim izni kapalı. Tarayıcı/sistem ayarlarından izin verin.":"Saat kaydedildi · bu cihaz henüz bildirim almaya hazır değil.";
     setBeniDurtState(msg,permissionError);
