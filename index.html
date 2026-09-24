@@ -395,7 +395,7 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
 .sync-refresh .sync-error-mark{display:none;position:absolute;right:-2px;bottom:-2px;width:16px;height:16px;border-radius:50%;background:#c63232;color:#fff;border:2px solid var(--bar);font:800 11px/12px var(--sans);align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.24)}
 .sync-refresh.is-error .sync-error-mark{display:flex}
 @keyframes syncRotate{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){.sync-refresh.is-loading .sync-icon-refresh,.pinned-live.is-loading::before{animation:none}}
+@media (prefers-reduced-motion:reduce){.sync-refresh.is-loading .sync-icon-refresh{animation:none}}
 /* ——— Kimlik doğrulama kapısı: fail-closed ——— */
 .auth-gate{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:22px;overflow:auto;background:var(--body-base,var(--bg));background-color:var(--bg)}
 .auth-gate::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(52% 42% at 12% -6%,var(--glow-a),transparent 62%),radial-gradient(46% 38% at 88% -2%,var(--glow-b),transparent 60%),radial-gradient(40% 34% at 62% 8%,var(--glow-c),transparent 65%)}
@@ -485,7 +485,7 @@ body.journal-open{overflow:hidden}
 .pinned-list-pin svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.pinned-list-pin .pushpin-icon{color:currentColor}
 .pinned-list-copy{min-width:0}.pinned-list-copy strong{display:block;font-size:.96rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pinned-list-copy small{display:block;margin-top:4px;color:var(--muted);font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pinned-list-arrow{font-size:1.2rem;color:var(--muted)}.pinned-list-card .pinned-unread-badge{top:-7px;right:-7px;border-color:var(--paper)}
 .pinned-empty{padding:22px 12px;color:var(--muted);text-align:center;border:1px dashed var(--line);border-radius:14px}
-.pinned-editor-meta{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:-5px 0 13px;color:var(--muted);font-size:.78rem}.pinned-live{display:inline-flex;align-items:center;gap:6px;max-width:52%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:750;color:#168a50}.pinned-live::before{content:"";width:7px;height:7px;border-radius:50%;background:#21b66c;box-shadow:0 0 0 3px color-mix(in srgb,#21b66c 15%,transparent);flex:none}.pinned-live.is-loading{color:var(--muted)}.pinned-live.is-loading::before{width:10px;height:10px;border:2px solid color-mix(in srgb,var(--focus) 24%,transparent);border-top-color:var(--focus);background:transparent;box-shadow:none;animation:syncRotate .7s linear infinite}.pinned-live.is-error{color:#c63232}.pinned-live.is-error::before{background:#c63232;box-shadow:0 0 0 3px color-mix(in srgb,#c63232 14%,transparent)}
+.pinned-editor-meta{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:-5px 0 13px;color:var(--muted);font-size:.78rem}.pinned-live{display:inline-flex;align-items:center;gap:6px;max-width:52%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:750;color:#168a50}.pinned-live::before{content:"";width:7px;height:7px;border-radius:50%;background:#21b66c;box-shadow:0 0 0 3px color-mix(in srgb,#21b66c 15%,transparent);flex:none}.pinned-live.is-error{color:#c63232}.pinned-live.is-error::before{background:#c63232;box-shadow:0 0 0 3px color-mix(in srgb,#c63232 14%,transparent)}
 .pinned-panel .sheet{margin-top:0}.pinned-panel .tally{margin-bottom:12px}
 .pinned-owner-tools{display:flex;gap:6px}.pinned-owner-tools[hidden]{display:none}
 .pinned-share-note{margin:8px 0 0;color:var(--muted);font-size:.78rem}
@@ -889,11 +889,12 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v81-calendar-grid-pull-close", CENTIK_EXPECTED_SERVER_BUILD="v29-cakili-list-unread";
+const CENTIK_CLIENT_BUILD="v82-global-loading", CENTIK_EXPECTED_SERVER_BUILD="v29-cakili-list-unread";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
 let queuedForceSync=false, queuedForceSilent=true, foregroundSyncTimer=null, settingsOriginalTheme=null, hiddenSince=0;
+let syncBaseStatus="idle",globalLoadingCount=0;
 let pendingDelete=null, pendingDeleteTimer=null;
 let journalStatusCache=new Map(),journalStatusSeenAt=new Map(),journalStatusPending=new Map(),journalMonthCache=new Map(),journalMonthPending=new Map(),journalContext=null,journalActivePin="",journalDirty=false,journalPinMode="set";
 let pinnedLists=[],pinnedActiveList=null,pinnedTasks=[],pinnedRevision=null,pinnedLiveTimer=null,pinnedListsTimer=null,pinnedPendingDelete=null,pinnedPendingDeleteTimer=null,pinnedPanelHideTimer=null,pinnedUnreadCount=0,pinnedUnreadTimer=null,pinnedUnreadPromise=null,lastPinnedUnreadCheckAt=0,pinnedUnreadSeq=0;
@@ -959,20 +960,30 @@ async function copyDiagnostics(){
   const report={clientBuild:CENTIK_CLIENT_BUILD,expectedServerBuild:CENTIK_EXPECTED_SERVER_BUILD,generatedAt:new Date().toISOString(),health:diagnosticsResult,recent:readDiagLog().slice(-10)};
   const text=JSON.stringify(report,null,2);try{await navigator.clipboard.writeText(text);renderDiagnostics("Tanılama raporu panoya kopyalandı.")}catch(e){renderDiagnostics("Rapor kopyalanamadı; tarayıcı pano izni vermedi.")}
 }
-function setSyncStatus(type){
+function renderSyncStatus(){
   const b=$("refresh");if(!b)return;
-  const valid=["idle","loading","success","error"];type=valid.includes(type)?type:"idle";
+  const valid=["idle","loading","success","error"],base=valid.includes(syncBaseStatus)?syncBaseStatus:"idle";
+  const type=globalLoadingCount>0?"loading":base;
   b.classList.remove("is-loading","is-success","is-error");
   if(type!=="idle")b.classList.add(`is-${type}`);
   const labels={idle:"Verileri yenile",loading:"Yükleniyor",success:"Senkronizasyon başarılı — yenilemek için tıklayın",error:"Sunucuya ulaşılamıyor — yeniden dene"};
   b.setAttribute("aria-label",labels[type]);b.title=labels[type];
+}
+function setSyncStatus(type){
+  const valid=["idle","loading","success","error"];syncBaseStatus=valid.includes(type)?type:"idle";renderSyncStatus();
+}
+function beginGlobalLoading(){
+  globalLoadingCount++;renderSyncStatus();
+}
+function endGlobalLoading(){
+  globalLoadingCount=Math.max(0,globalLoadingCount-1);renderSyncStatus();
 }
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 async function reliableApi(action,data={},options={}){
   const retries=Math.max(0,Number(options.retries??0)),timeout=Math.max(4000,Number(options.timeout)||15000);let lastErr=null;
   for(let attempt=0;attempt<=retries;attempt++){
     try{
-      const j=await api(action,data,{timeout,signal:options.signal});
+      const j=await api(action,data,{timeout,signal:options.signal,globalLoading:options.globalLoading});
       if(j&&j.ok===false&&j.error==="mesgul"&&attempt<retries){await wait(500*(attempt+1));continue}
       return j;
     }catch(e){
@@ -984,8 +995,12 @@ async function reliableApi(action,data={},options={}){
   throw lastErr||new Error("sunucu");
 }
 
+// V82: Tüm kullanıcı kaynaklı sunucu işlemleri tepe bardaki tek merkezî loading sayacını kullanır.
+// Arka plan polling/rozet/status kontrolleri globalLoading:false ile sessiz kalır.
 async function api(action,data={},options={}){
   if(!SCRIPT_URL||SCRIPT_URL.startsWith("BURAYA")) throw new Error("adres");
+  const useGlobalLoading=options.globalLoading!==false;
+  if(useGlobalLoading)beginGlobalLoading();
   // Apps Script'in HTTP/yönlendirme katmanı zaman zaman 10-15 sn gecikebiliyor.
   // Kısa timeout ile başarılı olacak isteği istemci tarafında kesmemek için sert sınır 30 sn.
   const timeout=Math.max(8000,Number(options.timeout)||30000),ctrl=new AbortController();
@@ -1013,6 +1028,7 @@ async function api(action,data={},options={}){
   }finally{
     clearTimeout(timer);
     if(options.signal&&externalAbort)options.signal.removeEventListener("abort",externalAbort);
+    if(useGlobalLoading)endGlobalLoading();
   }
 }
 
@@ -1331,10 +1347,10 @@ function pinnedTaskId(){return `p${Date.now().toString(36)}${Math.random().toStr
 function pinnedSetStatus(id,text=""){
   const el=$(id);if(!el)return;
   if(id==="pinnedEditorStatus"){
-    const raw=String(text||"").trim(),loading=/yükleniyor/i.test(raw);
-    el.classList.toggle("is-loading",!!raw&&loading);el.classList.toggle("is-error",!!raw&&!loading);
-    el.textContent=!raw?"Canlı":loading?"Yükleniyor…":raw;
-    el.title=!raw?"Canlı senkronizasyon aktif":raw;
+    const raw=String(text||"").trim(),loading=/yükleniyor/i.test(raw),status=loading?"":raw;
+    el.classList.remove("is-loading");el.classList.toggle("is-error",!!status);
+    el.textContent=!status?"Canlı":status;
+    el.title=!status?"Canlı senkronizasyon aktif":status;
     return;
   }
   el.textContent=text||"";
@@ -1350,13 +1366,13 @@ async function refreshPinnedUnread({force=false}={}){
   if(!force&&Date.now()-lastPinnedUnreadCheckAt<10000)return true;
   if(pinnedUnreadPromise)return pinnedUnreadPromise;
   const userId=currentUser.id,seq=++pinnedUnreadSeq;
-  let p;p=(async()=>{try{const j=await api("pinnedUnreadStatus",{token:getToken()},{timeout:30000});if(!j.ok){if(j.error==="oturum")expireSession();return false}if(seq!==pinnedUnreadSeq||currentUser?.id!==userId||document.body.classList.contains("pinned-open"))return false;lastPinnedUnreadCheckAt=Date.now();setPinnedUnreadCount(j.count);return true}catch(e){return false}})().finally(()=>{if(pinnedUnreadPromise===p)pinnedUnreadPromise=null});
+  let p;p=(async()=>{try{const j=await api("pinnedUnreadStatus",{token:getToken()},{timeout:30000,globalLoading:false});if(!j.ok){if(j.error==="oturum")expireSession();return false}if(seq!==pinnedUnreadSeq||currentUser?.id!==userId||document.body.classList.contains("pinned-open"))return false;lastPinnedUnreadCheckAt=Date.now();setPinnedUnreadCount(j.count);return true}catch(e){return false}})().finally(()=>{if(pinnedUnreadPromise===p)pinnedUnreadPromise=null});
   pinnedUnreadPromise=p;return p;
 }
 async function markPinnedUnreadRead(listId=""){
   if(!currentUser?.id||!getToken()||!navigator.onLine)return false;
   const userId=currentUser.id,seq=++pinnedUnreadSeq;pinnedUnreadPromise=null;
-  try{const cleanListId=String(listId||""),j=await api("pinnedUnreadRead",{token:getToken(),listId:cleanListId},{timeout:30000});if(!j.ok){if(j.error==="oturum")expireSession();return false}if(seq!==pinnedUnreadSeq||currentUser?.id!==userId)return true;if(cleanListId){const list=pinnedListById(cleanListId);if(list)list.unreadCount=0}else pinnedLists.forEach(list=>list.unreadCount=0);setPinnedUnreadCount(j.count);lastPinnedUnreadCheckAt=Date.now();if(document.body.classList.contains("pinned-open")&&$("pinnedOverview")&&!$("pinnedOverview").hidden)renderPinnedOverview();return true}catch(e){return false}
+  try{const cleanListId=String(listId||""),j=await api("pinnedUnreadRead",{token:getToken(),listId:cleanListId},{timeout:30000,globalLoading:false});if(!j.ok){if(j.error==="oturum")expireSession();return false}if(seq!==pinnedUnreadSeq||currentUser?.id!==userId)return true;if(cleanListId){const list=pinnedListById(cleanListId);if(list)list.unreadCount=0}else pinnedLists.forEach(list=>list.unreadCount=0);setPinnedUnreadCount(j.count);lastPinnedUnreadCheckAt=Date.now();if(document.body.classList.contains("pinned-open")&&$("pinnedOverview")&&!$("pinnedOverview").hidden)renderPinnedOverview();return true}catch(e){return false}
 }
 function startPinnedUnreadWatch(){
   stopPinnedUnreadWatch();if(!currentUser?.id||!getToken())return;
@@ -1377,7 +1393,7 @@ function renderPinnedOverview(){
 }
 async function loadPinnedLists({silent=false}={}){
   if(!currentUser?.id||!getToken())return false;if(!silent)pinnedSetStatus("pinnedOverviewStatus","Listeler yükleniyor…");
-  try{const j=await api("pinnedLists",{token:getToken()},{timeout:30000});if(!j.ok){if(j.error==="oturum")expireSession();else if(!silent)pinnedSetStatus("pinnedOverviewStatus",authMessage(j.error));return false}pinnedLists=Array.isArray(j.lists)?j.lists:[];if(Number.isFinite(Number(j.unreadTotal)))setPinnedUnreadCount(j.unreadTotal);renderPinnedOverview();pinnedSetStatus("pinnedOverviewStatus","");return true}
+  try{const j=await api("pinnedLists",{token:getToken()},{timeout:30000,globalLoading:!silent});if(!j.ok){if(j.error==="oturum")expireSession();else if(!silent)pinnedSetStatus("pinnedOverviewStatus",authMessage(j.error));return false}pinnedLists=Array.isArray(j.lists)?j.lists:[];if(Number.isFinite(Number(j.unreadTotal)))setPinnedUnreadCount(j.unreadTotal);renderPinnedOverview();pinnedSetStatus("pinnedOverviewStatus","");return true}
   catch(e){if(!silent)pinnedSetStatus("pinnedOverviewStatus","Çakılı listeler alınamadı. Bağlantınızı kontrol edin.");return false}
 }
 function pinnedShowOverview(){
@@ -1404,7 +1420,7 @@ async function openPinnedList(id){
 }
 async function syncPinnedActive({force=false,silent=false}={}){
   if(!pinnedActiveList||!currentUser?.id)return false;const listId=pinnedActiveList.id,known=force?null:pinnedRevision;
-  try{const j=await api("pinnedGet",{token:getToken(),listId,knownRevision:known},{timeout:30000});if(!j.ok){if(j.error==="oturum")expireSession();else if(j.error==="cakili_yetki"){await loadPinnedLists({silent:true});pinnedShowOverview()}else pinnedSetStatus("pinnedEditorStatus",authMessage(j.error));return false}if(!pinnedActiveList||pinnedActiveList.id!==listId)return false;const responseRevision=Number(j.revision);if(Number.isFinite(responseRevision)&&pinnedRevision!==null&&responseRevision<pinnedRevision)return true;pinnedActiveList=j.list||pinnedActiveList;const ix=pinnedLists.findIndex(x=>x.id===listId);if(ix>=0)pinnedLists[ix]=pinnedActiveList;if(!j.unchanged){pinnedTasks=normalizeItems(j.tasks||[]);renderPinnedTasks()}if(force||!j.unchanged)markPinnedUnreadRead(listId);pinnedRevision=Number.isFinite(responseRevision)?responseRevision:pinnedRevision;updatePinnedHeader();pinnedSetStatus("pinnedEditorStatus","");return true}
+  try{const j=await api("pinnedGet",{token:getToken(),listId,knownRevision:known},{timeout:30000,globalLoading:!silent});if(!j.ok){if(j.error==="oturum")expireSession();else if(j.error==="cakili_yetki"){await loadPinnedLists({silent:true});pinnedShowOverview()}else pinnedSetStatus("pinnedEditorStatus",authMessage(j.error));return false}if(!pinnedActiveList||pinnedActiveList.id!==listId)return false;const responseRevision=Number(j.revision);if(Number.isFinite(responseRevision)&&pinnedRevision!==null&&responseRevision<pinnedRevision)return true;pinnedActiveList=j.list||pinnedActiveList;const ix=pinnedLists.findIndex(x=>x.id===listId);if(ix>=0)pinnedLists[ix]=pinnedActiveList;if(!j.unchanged){pinnedTasks=normalizeItems(j.tasks||[]);renderPinnedTasks()}if(force||!j.unchanged)markPinnedUnreadRead(listId);pinnedRevision=Number.isFinite(responseRevision)?responseRevision:pinnedRevision;updatePinnedHeader();pinnedSetStatus("pinnedEditorStatus","");return true}
   catch(e){pinnedSetStatus("pinnedEditorStatus","Bağlantı hatası");return false}
 }
 function updatePinnedHeader(){
@@ -1423,7 +1439,7 @@ function renderPinnedTasks(){
     const x=document.createElement("button");x.type="button";if(isRoot){x.className="undo-inline";x.textContent="Geri al";x.onclick=undoPinnedDelete}else{x.className="del";x.textContent="×";x.disabled=isDeleting;if(!isDeleting)x.onclick=()=>queuePinnedDelete(it.id)}actions.append(edit,x);li.append(slot,span,hint,actions);ul.append(li)});
 }
 async function pinnedMutate(kind,data,{silent=false}={}){
-  if(!pinnedActiveList)return false;const listId=pinnedActiveList.id;if(!silent)pinnedSetStatus("pinnedEditorStatus","Yükleniyor…");try{const j=await api("pinnedTaskMutate",{token:getToken(),listId,kind,...data},{timeout:30000});if(!j.ok){if(j.error==="oturum")expireSession();else if(!silent)pinnedSetStatus("pinnedEditorStatus",authMessage(j.error));await syncPinnedActive({force:true,silent:true});return false}if(!pinnedActiveList||pinnedActiveList.id!==listId)return false;const responseRevision=Number(j.revision);if(Number.isFinite(responseRevision)&&pinnedRevision!==null&&responseRevision<pinnedRevision)return true;pinnedRevision=Number.isFinite(responseRevision)?responseRevision:pinnedRevision;if(j.list){pinnedActiveList=j.list;const ix=pinnedLists.findIndex(x=>x.id===listId);if(ix>=0)pinnedLists[ix]=j.list}if(Array.isArray(j.tasks))pinnedTasks=normalizeItems(j.tasks);renderPinnedTasks();pinnedSetStatus("pinnedEditorStatus","");return true}catch(e){if(!silent)pinnedSetStatus("pinnedEditorStatus","Değişiklik kaydedilemedi. Yeniden deneyin.");await syncPinnedActive({force:true,silent:true});return false}
+  if(!pinnedActiveList)return false;const listId=pinnedActiveList.id;if(!silent)pinnedSetStatus("pinnedEditorStatus","Yükleniyor…");try{const j=await api("pinnedTaskMutate",{token:getToken(),listId,kind,...data},{timeout:30000,globalLoading:!silent});if(!j.ok){if(j.error==="oturum")expireSession();else if(!silent)pinnedSetStatus("pinnedEditorStatus",authMessage(j.error));await syncPinnedActive({force:true,silent:true});return false}if(!pinnedActiveList||pinnedActiveList.id!==listId)return false;const responseRevision=Number(j.revision);if(Number.isFinite(responseRevision)&&pinnedRevision!==null&&responseRevision<pinnedRevision)return true;pinnedRevision=Number.isFinite(responseRevision)?responseRevision:pinnedRevision;if(j.list){pinnedActiveList=j.list;const ix=pinnedLists.findIndex(x=>x.id===listId);if(ix>=0)pinnedLists[ix]=j.list}if(Array.isArray(j.tasks))pinnedTasks=normalizeItems(j.tasks);renderPinnedTasks();pinnedSetStatus("pinnedEditorStatus","");return true}catch(e){if(!silent)pinnedSetStatus("pinnedEditorStatus","Değişiklik kaydedilemedi. Yeniden deneyin.");await syncPinnedActive({force:true,silent:true});return false}
 }
 async function addPinnedTask(text){text=String(text||"").trim();if(!text||!pinnedActiveList)return;const item={id:pinnedTaskId(),t:text.slice(0,1000),done:false,parentId:""};pinnedTasks.push(item);renderPinnedTasks();await pinnedMutate("add",{taskId:item.id,text:item.t})}
 async function pinnedToggleTask(id){const it=pinnedTasks.find(x=>x.id===id);if(!it||pinnedDeleteHas(id))return;it.done=!it.done;renderPinnedTasks();await pinnedMutate("toggle",{taskId:id,done:it.done})}
@@ -1461,7 +1477,7 @@ function renderJournalButton(){
 function journalStatusFresh(date){return journalStatusCache.has(date)&&(Date.now()-(journalStatusSeenAt.get(date)||0))<JOURNAL_STATUS_FRESH_MS}
 async function queueJournalStatus(date){
   if(!currentUser?.id||!getToken()||journalStatusFresh(date)||journalStatusPending.has(date))return;
-  const p=(async()=>{try{const j=await api("journalStatus",{token:getToken(),date},{timeout:30000});if(!j.ok){if(j.error==="oturum")expireSession();return}journalStatusCache.set(date,!!j.exists);journalStatusSeenAt.set(date,Date.now());if(typeof j.pinEnabled==="boolean"&&j.pinEnabled!==!!currentUser?.journalPinEnabled)setCurrentUserPinEnabled(j.pinEnabled)}catch(e){}finally{journalStatusPending.delete(date);if(current===date)renderJournalButton()}})();
+  const p=(async()=>{try{const j=await api("journalStatus",{token:getToken(),date},{timeout:30000,globalLoading:false});if(!j.ok){if(j.error==="oturum")expireSession();return}journalStatusCache.set(date,!!j.exists);journalStatusSeenAt.set(date,Date.now());if(typeof j.pinEnabled==="boolean"&&j.pinEnabled!==!!currentUser?.journalPinEnabled)setCurrentUserPinEnabled(j.pinEnabled)}catch(e){}finally{journalStatusPending.delete(date);if(current===date)renderJournalButton()}})();
   journalStatusPending.set(date,p);renderJournalButton();return p;
 }
 function journalMonthKey(date){return /^\d{4}-\d{2}/.test(String(date||""))?String(date).slice(0,7):""}
@@ -1469,7 +1485,7 @@ function journalViewMonthKey(){return `${viewMonth.getFullYear()}-${pad(viewMont
 function journalMonthFresh(month){const x=journalMonthCache.get(month);return !!x&&(Date.now()-Number(x.seenAt||0))<JOURNAL_MONTH_FRESH_MS}
 async function queueJournalMonthStatus(month=journalViewMonthKey()){
   if(!currentUser?.id||!getToken()||!/^\d{4}-\d{2}$/.test(month)||journalMonthFresh(month)||journalMonthPending.has(month))return;
-  const p=(async()=>{try{const j=await api("journalMonthStatus",{token:getToken(),month},{timeout:30000});if(!j.ok){if(j.error==="oturum")expireSession();return}const dates=new Set((Array.isArray(j.dates)?j.dates:[]).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(String(x))));journalMonthCache.set(month,{dates,seenAt:Date.now()});dates.forEach(d=>{journalStatusCache.set(d,true);journalStatusSeenAt.set(d,Date.now())});if(calendarOpen&&journalViewMonthKey()===month)renderCal()}catch(e){}finally{journalMonthPending.delete(month)}})();
+  const p=(async()=>{try{const j=await api("journalMonthStatus",{token:getToken(),month},{timeout:30000,globalLoading:false});if(!j.ok){if(j.error==="oturum")expireSession();return}const dates=new Set((Array.isArray(j.dates)?j.dates:[]).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(String(x))));journalMonthCache.set(month,{dates,seenAt:Date.now()});dates.forEach(d=>{journalStatusCache.set(d,true);journalStatusSeenAt.set(d,Date.now())});if(calendarOpen&&journalViewMonthKey()===month)renderCal()}catch(e){}finally{journalMonthPending.delete(month)}})();
   journalMonthPending.set(month,p);return p;
 }
 function setJournalStatus(date,exists){
