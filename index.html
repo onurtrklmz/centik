@@ -636,46 +636,62 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-r
 }
 
 
-/* ——— V94 r5 mekanik ortak çekmece ———
-   Çakılı/Çetele: opacity/fade/translate yok. Yalnız 0fr ↔ 1fr grid hareketi.
-   Süre JS tarafından açılacak yüksekliğe göre Takvim'in piksel hızına eşitlenir. ——— */
-/* ——— V94 ortak çekmece motoru: Takvim + Çakılı + Çetele aynı kabuk/animasyon ——— */
-:root{--centik-drawer-ease:cubic-bezier(.22,.8,.24,1);--centik-drawer-open:.32s;--centik-drawer-fade:.24s}
-.drawer-body-wrap{
-  display:grid;grid-template-rows:0fr;opacity:0;transform:translateY(22px);
-  transition:grid-template-rows var(--centik-drawer-open) var(--centik-drawer-ease),opacity var(--centik-drawer-fade) ease,transform var(--centik-drawer-open) var(--centik-drawer-ease);
-}
-.cal.open>.drawer-body-wrap#calendarBodyWrap,
-body.pinned-open .cal>.drawer-body-wrap#pinnedPanel,
-body.journal-open .cal>.drawer-body-wrap#journalPanel{grid-template-rows:1fr;opacity:1;transform:translateY(0);pointer-events:auto}
 
-/* Çakılı ve Çetele artık ayrı fixed yüzeyler değil; doğrudan takvim kabuğunun gövdeleridir. */
-.cal>.pinned-panel,.cal>.journal-panel{
+/* ——— V94 r6 temiz ortak çekmece motoru ———
+   Takvim, Çakılı ve Çetele aynı alt kabukta çalışır.
+   Utility gövdeleri hidden/display:none yapılmaz; DOM'da sürekli kapalı durumda kalır.
+   Üçü de aynı 0fr↔1fr + opacity + translate Takvim animasyonunu kullanır. */
+.cal > #pinnedPanel.shared-drawer-body,
+.cal > #journalPanel.shared-drawer-body{
   position:static!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
-  width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;
-  border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;
-  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;overflow:hidden!important;overscroll-behavior:contain;
-  z-index:auto!important;visibility:visible!important;pointer-events:none;
-  display:grid!important;grid-template-rows:0fr;opacity:1!important;transform:none!important;
-  transition:grid-template-rows var(--centik-utility-drawer-open,var(--centik-drawer-open)) var(--centik-drawer-ease)!important;
+  width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;
+  margin:0!important;padding:0!important;border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  overflow:hidden!important;overscroll-behavior:contain;
+  z-index:auto!important;visibility:visible!important;
+  display:grid!important;grid-template-rows:0fr!important;
+  opacity:0!important;transform:translateY(22px)!important;
+  pointer-events:none!important;
+  transition:grid-template-rows .32s cubic-bezier(.22,.8,.24,1),
+             opacity .24s ease,
+             transform .32s cubic-bezier(.22,.8,.24,1)!important;
 }
-.cal>.pinned-panel[hidden],.cal>.journal-panel[hidden]{display:none!important}
-body.pinned-open .cal>.pinned-panel,body.journal-open .cal>.journal-panel{
-  grid-template-rows:1fr;opacity:1!important;transform:none!important;visibility:visible!important;pointer-events:auto;transition-delay:0s!important
+body.pinned-open .cal > #pinnedPanel.shared-drawer-body,
+body.journal-open .cal > #journalPanel.shared-drawer-body{
+  grid-template-rows:1fr!important;
+  opacity:1!important;transform:translateY(0)!important;
+  pointer-events:auto!important;
 }
-.utility-panel-clip{
-  min-height:0;height:calc(100dvh - var(--centik-topbar-h) - 94px - max(12px,env(safe-area-inset-bottom)));
+.cal > .shared-drawer-body > .utility-panel-clip{
+  min-height:0;
+  height:calc(100dvh - var(--centik-topbar-h) - 94px - max(12px,env(safe-area-inset-bottom)));
   max-height:calc(100dvh - var(--centik-topbar-h) - 94px - max(12px,env(safe-area-inset-bottom)));
-  overflow-y:auto;overscroll-behavior:contain;padding:12px 16px 14px;display:flex;flex-direction:column;background:transparent
+  overflow-y:auto;overscroll-behavior:contain;
+  padding:12px 16px 14px;
+  display:flex;flex-direction:column;
+  background:transparent;
 }
-body.pinned-open .cal,body.journal-open .cal{visibility:visible!important;pointer-events:auto!important}
-body.pinned-open .cal-head,body.journal-open .cal-head{position:relative;z-index:3;background:color-mix(in srgb,var(--paper) 96%,transparent)}
-body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-rows:0fr!important;opacity:0!important;transform:translateY(22px)!important}
-.cal.drawer-dragging>.drawer-body-wrap{transition:none!important}
+body.pinned-open .cal,body.journal-open .cal{
+  visibility:visible!important;pointer-events:auto!important;
+}
+body.pinned-open .cal-head,body.journal-open .cal-head{
+  position:relative;z-index:3;background:color-mix(in srgb,var(--paper) 96%,transparent)
+}
+body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{
+  grid-template-rows:0fr!important;opacity:0!important;transform:translateY(22px)!important;
+}
 @media(max-width:430px){
-  .utility-panel-clip{height:calc(100dvh - var(--centik-topbar-h) - 86px - max(8px,env(safe-area-inset-bottom)));max-height:calc(100dvh - var(--centik-topbar-h) - 86px - max(8px,env(safe-area-inset-bottom)));padding:10px 14px 12px}
+  .cal > .shared-drawer-body > .utility-panel-clip{
+    height:calc(100dvh - var(--centik-topbar-h) - 86px - max(8px,env(safe-area-inset-bottom)));
+    max-height:calc(100dvh - var(--centik-topbar-h) - 86px - max(8px,env(safe-area-inset-bottom)));
+    padding:10px 14px 12px;
+  }
 }
-@media(prefers-reduced-motion:reduce){.drawer-body-wrap,.cal>.pinned-panel,.cal>.journal-panel{transition:none!important}}
+@media(prefers-reduced-motion:reduce){
+  .cal > #pinnedPanel.shared-drawer-body,
+  .cal > #journalPanel.shared-drawer-body{transition:none!important}
+}
 </style>
 </head>
 <body class="auth-locked">
@@ -820,7 +836,7 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-r
 
   <div class="calendar-backdrop" id="calendarBackdrop" aria-hidden="true"></div>
   <section class="cal" id="calendarDrawer" aria-label="Takvim">
-    <div class="cal-body-wrap drawer-body-wrap" id="calendarBodyWrap">
+    <div class="cal-body-wrap" id="calendarBodyWrap">
       <div class="cal-body-clip">
         <div class="cal-body" id="calendarBody">
           <div class="drawer-hint" aria-hidden="true"></div>
@@ -1031,68 +1047,42 @@ let diagnosticsResult=null;
 const DIAG_LOG_LIMIT=30;
 const $=id=>document.getElementById(id);
 
-// V94: Takvim, Çakılı ve Çetele aynı fiziksel alt çekmece kabuğunu kullanır.
-function mountUtilityPanelsIntoCalendar(){
+/* Çakılı/Çetele gövdeleri Takvim gibi sürekli DOM'da kalır.
+   display:none geçişi olmadığı için kapalı 0fr karesi her açılışta gerçekten vardır. */
+function mountSharedDrawerBodies(){
   const shell=document.getElementById("calendarDrawer"),head=document.getElementById("calendarHandle");
   if(!shell||!head)return;
   [["pinnedPanel","pinned"],["journalPanel","journal"]].forEach(([id,kind])=>{
     const panel=document.getElementById(id);if(!panel)return;
-    panel.classList.add("drawer-body-wrap",`drawer-body-${kind}`);
+    panel.classList.add("shared-drawer-body");
     if(!panel.querySelector(":scope > .utility-panel-clip")){
-      const clip=document.createElement("div");clip.className="utility-panel-clip";clip.dataset.drawerKind=kind;
+      const clip=document.createElement("div");
+      clip.className="utility-panel-clip";
+      clip.dataset.drawerKind=kind;
       while(panel.firstChild)clip.appendChild(panel.firstChild);
       panel.appendChild(clip);
     }
     if(panel.parentElement!==shell)shell.insertBefore(panel,head);
+    panel.removeAttribute("hidden");
+    panel.inert=true;
+    panel.setAttribute("aria-hidden","true");
   });
+  document.getElementById("pinnedButton")?.setAttribute("aria-expanded","false");
+  document.getElementById("journalButton")?.setAttribute("aria-expanded","false");
 }
-mountUtilityPanelsIntoCalendar();
-
-/* V94 r5 — mekanik hız eşitleme
-   Takvim ve utility çekmeceleri aynı easing'i kullanır. Çakılı/Çetele daha yüksek
-   olduğu için süre, Takvim'in gerçek açılma yüksekliği baz alınarak oransal hesaplanır.
-   Fade/opacity/translate YOK; yalnız grid 0fr ↔ 1fr mekanik hareketi vardır. */
-function calendarMechanicalHeight(){
-  const clip=$("calendarBodyWrap")?.querySelector(".cal-body-clip");
-  if(!clip)return 360;
-  try{
-    const cs=getComputedStyle(clip);
-    const maxH=parseFloat(cs.maxHeight);
-    const natural=Math.max(1,Number(clip.scrollHeight)||0);
-    if(Number.isFinite(maxH)&&maxH>0)return Math.max(1,Math.min(natural,maxH));
-    return natural||360;
-  }catch(_){return 360}
+function setSharedDrawerOpen(kind,open){
+  const isPinned=kind==="pinned";
+  const panel=document.getElementById(isPinned?"pinnedPanel":"journalPanel");
+  const button=document.getElementById(isPinned?"pinnedButton":"journalButton");
+  const cls=isPinned?"pinned-open":"journal-open";
+  document.body.classList.toggle(cls,!!open);
+  if(panel){
+    panel.inert=!open;
+    panel.setAttribute("aria-hidden",String(!open));
+  }
+  button?.setAttribute("aria-expanded",String(!!open));
 }
-function utilityMechanicalHeight(panel){
-  const clip=panel?.querySelector(":scope > .utility-panel-clip");
-  if(!clip)return calendarMechanicalHeight();
-  try{
-    const cs=getComputedStyle(clip);
-    const h=parseFloat(cs.height);
-    const maxH=parseFloat(cs.maxHeight);
-    const natural=Math.max(1,Number(clip.scrollHeight)||0);
-    if(Number.isFinite(h)&&h>0)return h;
-    if(Number.isFinite(maxH)&&maxH>0)return Math.min(natural,maxH);
-    return natural||calendarMechanicalHeight();
-  }catch(_){return calendarMechanicalHeight()}
-}
-function syncMechanicalDrawerSpeed(panel){
-  if(!panel)return 320;
-  const calH=calendarMechanicalHeight();
-  const utilH=utilityMechanicalHeight(panel);
-  // Takvim: 320 ms / calH px. Utility aynı px/ms hızla hareket etsin.
-  const duration=Math.round(320*(utilH/Math.max(1,calH)));
-  // Aşırı küçük/büyük ekranlarda makul sınır, fakat oranı bozmamak için geniş aralık.
-  const safe=Math.max(320,Math.min(900,duration));
-  panel.style.setProperty("--centik-utility-drawer-open",`${safe}ms`);
-  panel.dataset.drawerDuration=String(safe);
-  return safe;
-}
-function mechanicalDrawerHideDelay(panel){
-  const ms=Number(panel?.dataset?.drawerDuration||320);
-  return Math.max(340,(Number.isFinite(ms)?ms:320)+24);
-}
-
+mountSharedDrawerBodies();
 const getToken=()=>{try{return localStorage.getItem(AUTH_TOKEN)||""}catch(e){return ""}};
 const getCachedUser=()=>{try{return JSON.parse(localStorage.getItem(AUTH_USER)||"null")}catch(e){return null}};
 function hasLocalSession(){return !!(currentUser?.id&&getToken())}
@@ -1619,13 +1609,20 @@ function openPinnedPanel(){
   if(!requireLocalSession()||document.body.classList.contains("pinned-open"))return;
   if(document.body.classList.contains("journal-open")&&!closeJournalView(false))return;
   setCalendarOpen(false);clearTimeout(pinnedPanelHideTimer);pinnedPanelHideTimer=null;
-  const panel=$("pinnedPanel");if(!panel)return;panel.hidden=false;pinnedShowOverview();syncMechanicalDrawerSpeed(panel);
-  // Panel önce kapalı konumda çizilir; sonra Takvim ile aynı easing ve normalize edilmiş görsel hızla açılır.
-  requestAnimationFrame(()=>{if(!panel.hidden)document.body.classList.add("pinned-open")});
+  const panel=$("pinnedPanel");if(!panel)return;pinnedShowOverview();
+  setSharedDrawerOpen("pinned",true);
   loadPinnedLists();startPinnedListsRefresh();
 }
 function closePinnedPanel(force=false){
-  if($("pinnedShareDialog")?.open)$("pinnedShareDialog").close();stopPinnedLive();stopPinnedListsRefresh();clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;const panel=$("pinnedPanel");resetFullPanelDrag($("calendarDrawer"));document.body.classList.remove("pinned-open");pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;clearTimeout(pinnedPanelHideTimer);if(force){if(panel)panel.hidden=true}else pinnedPanelHideTimer=setTimeout(()=>{if(panel&&!document.body.classList.contains("pinned-open"))panel.hidden=true},mechanicalDrawerHideDelay(panel));if(!force)setTimeout(()=>refreshPinnedUnread({force:true}),350);return true
+  if($("pinnedShareDialog")?.open)$("pinnedShareDialog").close();
+  stopPinnedLive();stopPinnedListsRefresh();clearTimeout(pinnedPendingDeleteTimer);
+  pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;
+  resetFullPanelDrag($("calendarDrawer"));
+  setSharedDrawerOpen("pinned",false);
+  pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;
+  clearTimeout(pinnedPanelHideTimer);pinnedPanelHideTimer=null;
+  if(!force)setTimeout(()=>refreshPinnedUnread({force:true}),350);
+  return true
 }
 function startPinnedListsRefresh(){stopPinnedListsRefresh();pinnedListsTimer=setInterval(()=>{if(document.visibilityState==="visible"&&document.body.classList.contains("pinned-open")&&!pinnedActiveList)loadPinnedLists({silent:true})},12000)}
 function stopPinnedListsRefresh(){if(pinnedListsTimer){clearInterval(pinnedListsTimer);pinnedListsTimer=null}}
@@ -1829,8 +1826,9 @@ function setJournalPanelMode(mode,date=current,message=""){
 }
 function openJournalShell(mode,date=current,message=""){
   clearTimeout(journalPanelHideTimer);journalPanelHideTimer=null;
-  const panel=$("journalPanel");if(!panel)return;panel.hidden=false;setJournalPanelMode(mode,date,message);syncMechanicalDrawerSpeed(panel);
-  requestAnimationFrame(()=>document.body.classList.add("journal-open"));
+  const panel=$("journalPanel");if(!panel)return;
+  setJournalPanelMode(mode,date,message);
+  setSharedDrawerOpen("journal",true);
 }
 function finishJournalUnlock(value){
   $("journalUnlockPin").value="";$("journalUnlockStatus").textContent="";const r=journalUnlockResolver;journalUnlockResolver=null;if(r)r(value);
@@ -1884,8 +1882,8 @@ async function openJournalForCurrent(){
 function closeJournalView(force=false){
   if(!force&&journalContext&&journalDirty&&!confirm("Çetele’de kaydedilmemiş değişiklikler var. Kapatılsın mı?"))return false;
   journalOpenSeq++;if(journalUnlockResolver)finishJournalUnlock(null);
-  const panel=$("journalPanel");resetFullPanelDrag($("calendarDrawer"));journalContext=null;journalActivePin="";journalDirty=false;journalClearEditor();clearJournalLimitWarning();$("journalSaveStatus").textContent="";document.body.classList.remove("journal-open");renderJournalButton();
-  clearTimeout(journalPanelHideTimer);if(force){if(panel)panel.hidden=true}else journalPanelHideTimer=setTimeout(()=>{if(panel&&!document.body.classList.contains("journal-open"))panel.hidden=true},mechanicalDrawerHideDelay(panel));
+  const panel=$("journalPanel");resetFullPanelDrag($("calendarDrawer"));journalContext=null;journalActivePin="";journalDirty=false;journalClearEditor();clearJournalLimitWarning();$("journalSaveStatus").textContent="";setSharedDrawerOpen("journal",false);renderJournalButton();
+  clearTimeout(journalPanelHideTimer);journalPanelHideTimer=null;
   return true;
 }
 function clearJournalLimitWarning(){const el=$("journalLimitStatus");if(el){el.hidden=true;el.textContent="Çetele sınıra ulaştı"}}
@@ -1936,10 +1934,9 @@ function utilityPullKindOpen(kind){
   return document.body.classList.contains(kind==="pinned"?"pinned-open":"journal-open");
 }
 function utilityPullPanel(kind){return $("calendarDrawer")}
-function utilityPanelScroller(kind){return kind==="calendar"?$("calendarBodyWrap")?.querySelector?.(".cal-body-clip")||null:$(kind==="pinned"?"pinnedPanel":"journalPanel")?.querySelector?.(".utility-panel-clip")||null}
 function utilityPullScroller(kind,target){
-  if(kind==="calendar")return target.closest?.(".cal-body-clip")||utilityPanelScroller(kind);
-  return target.closest?.(".utility-panel-clip")||utilityPanelScroller(kind);
+  if(kind==="calendar")return target.closest?.(".cal-body-clip")||$("calendarBodyWrap")?.querySelector?.(".cal-body-clip")||null;
+  return target.closest?.(".utility-panel-clip")||$(kind==="pinned"?"pinnedPanel":"journalPanel")?.querySelector?.(".utility-panel-clip")||null;
 }
 function utilityPullBlankTarget(kind,target){
   if(!(target instanceof Element))return false;
@@ -1948,7 +1945,9 @@ function utilityPullBlankTarget(kind,target){
   return true;
 }
 function resetUtilitySurfacePullVisual(g){
-  if(!g?.panel)return;g.panel.classList.remove("drawer-dragging");g.panel.style.removeProperty("--drawer-drag-y");
+  if(!g?.panel)return;
+  g.panel.classList.remove("drawer-dragging");
+  g.panel.style.removeProperty("--drawer-drag-y");
 }
 function beginUtilitySurfacePull(e,kind){
   if(!utilityPullKindOpen(kind)||!utilityPullBlankTarget(kind,e.target))return;
