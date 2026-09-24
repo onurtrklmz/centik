@@ -506,7 +506,7 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
 .cal-head .journal-launch.has-journal .journal-launch-state{background:#19bf72;color:#fff}
 .drawer-hint{margin-top:1px}
 
-.pinned-panel,.journal-panel{position:fixed;left:50%;top:0;bottom:0;z-index:70;width:min(520px,100%);max-width:520px;min-height:100dvh;height:100dvh;margin:0;padding:max(18px,env(safe-area-inset-top)) 16px max(26px,env(safe-area-inset-bottom));background:var(--bg);overflow-y:auto;overscroll-behavior:contain;transform:translate(-50%,calc(100% - 70px - max(12px,env(safe-area-inset-bottom))));transform-origin:center bottom;opacity:.98;visibility:hidden;pointer-events:none;transition:transform .32s cubic-bezier(.22,.8,.24,1),opacity .24s ease,visibility 0s linear .32s;box-shadow:0 -18px 52px rgba(0,0,0,.20)}
+.pinned-panel,.journal-panel{position:fixed;left:50%;top:0;bottom:0;z-index:70;width:min(520px,100%);max-width:520px;min-height:100dvh;height:100dvh;margin:0;padding:max(18px,env(safe-area-inset-top)) 16px max(26px,env(safe-area-inset-bottom));background:var(--bg);overflow-y:auto;overscroll-behavior:contain;transform:translate(-50%,calc(100% - var(--centik-drawer-bar-h,58px)));transform-origin:center bottom;opacity:.98;visibility:hidden;pointer-events:none;transition:transform .32s cubic-bezier(.22,.8,.24,1),opacity .24s ease,visibility 0s linear .32s;box-shadow:0 -18px 52px rgba(0,0,0,.20)}
 body.journal-open main,body.pinned-open main{transform:none;opacity:1;pointer-events:none}
 body.journal-open .journal-panel,body.pinned-open .pinned-panel{transform:translate(-50%,0);opacity:1;visibility:visible;pointer-events:auto;transition-delay:0s}
 body.journal-open .cal,body.journal-open .calendar-backdrop,body.pinned-open .cal,body.pinned-open .calendar-backdrop{visibility:hidden!important;pointer-events:none!important}
@@ -562,8 +562,12 @@ body.journal-open{overflow:hidden}
 .panel-pull-handle:active{cursor:grabbing}
 @media(prefers-reduced-motion:reduce){.pinned-panel.panel-dragging,.journal-panel.panel-dragging{transition:none!important}}
 
+/* ——— V94: Çakılı/Çetele takvim tipi yuvalanmış çekmece davranışı ———
+   Kapalı panel ekran dışına gitmez; 58px alt takvim çubuğunun arkasına çekilir.
+   .cal her zaman panelin üstündedir; bu yüzden açılış/kapanışta içerik çubuğun içinden
+   çıkar ve tekrar çubuğun içine gömülür. ——— */
 /* ——— V76 ortak alt çekmece yüzeyi + kompakt yaklaşan görevler ——— */
-:root{--centik-topbar-h:60px}
+:root{--centik-topbar-h:60px;--centik-drawer-bar-h:58px}
 .day-head-actions{max-width:min(48vw,230px)}
 .day-head-actions .upcoming-notice{margin:0;height:38px;min-height:38px;width:auto;max-width:100%;padding:3px 6px 3px 8px;border:1px solid var(--notice-tomorrow-border);border-radius:999px;background:var(--notice-tomorrow-bg);box-shadow:var(--shadow);display:flex;align-items:center;gap:6px;overflow:hidden}
 .day-head-actions .upcoming-notice::after{display:none}
@@ -582,11 +586,12 @@ body.journal-open{overflow:hidden}
   background:color-mix(in srgb,var(--paper) 96%,transparent);
   backdrop-filter:blur(16px) saturate(1.25);-webkit-backdrop-filter:blur(16px) saturate(1.25);
   box-shadow:0 14px 42px rgba(0,0,0,.20);
-  transform:translate(-50%,calc(100% + 24px));opacity:.98;z-index:70;overflow-y:auto;overscroll-behavior:contain;
+  transform:translate(-50%,calc(100% - var(--centik-drawer-bar-h)));opacity:.98;z-index:70;overflow-y:auto;overscroll-behavior:contain;
   transition:transform .32s cubic-bezier(.22,.8,.24,1),opacity .2s ease,visibility 0s linear .32s;
 }
 body.journal-open .journal-panel,body.pinned-open .pinned-panel{transform:translate(-50%,0);opacity:1;visibility:visible;pointer-events:auto;transition-delay:0s}
-body.pinned-open .cal,body.journal-open .cal{visibility:visible!important;pointer-events:auto!important;z-index:72}
+.cal{z-index:72}
+body.pinned-open .cal,body.journal-open .cal{visibility:visible!important;pointer-events:auto!important}
 body.pinned-open .calendar-backdrop,body.journal-open .calendar-backdrop{visibility:hidden!important;pointer-events:none!important;opacity:0!important}
 body.pinned-open .ust-cubuk,body.journal-open .ust-cubuk{
   z-index:40;

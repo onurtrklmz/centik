@@ -1,7 +1,8 @@
+// v94-ui-r1: Çakılı ve Çetele, takvim alt barının arkasından açılıp kapanır; frontend cache yenilendi.
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v94-beni-durt";
+const SURUM = "centik-v94-drawer-nested-r1";
 const KABUK = [
   "./",
   "./index.html",
