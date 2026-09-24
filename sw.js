@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v69: Çakılı canlı listeler ve üç bölmeli alt çekmece eklendi.
-const SURUM = "centik-v69-cakili-live";
+// v70: Paylaşılan Çakılı listelerde ortak yeniden adlandırma ve tam silme eklendi.
+const SURUM = "centik-v70-cakili-shared-control";
 const KABUK = [
   "./",
   "./index.html",

@@ -439,7 +439,7 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 
 
-/* ——— V69 Çakılı + üçlü çekmece ——— */
+/* ——— V70 Çakılı ortak liste yönetimi + üçlü çekmece ——— */
 .cal-head{grid-template-columns:minmax(82px,.92fr) minmax(0,2.25fr) minmax(82px,.92fr);gap:6px;min-height:58px;padding:5px 8px}
 .drawer-launch{min-width:0;height:44px;border:1px solid color-mix(in srgb,var(--focus) 36%,var(--line));border-radius:13px;background:color-mix(in srgb,var(--focus) 6%,var(--paper));color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 5px;font-size:.68rem;font-weight:800;line-height:1;white-space:nowrap;box-shadow:0 2px 8px color-mix(in srgb,var(--focus) 7%,transparent);transition:background .14s,border-color .14s,transform .14s,color .14s}
 .drawer-launch:hover,.drawer-launch:focus-visible{background:color-mix(in srgb,var(--focus) 12%,var(--paper));transform:translateY(-1px)}
@@ -658,7 +658,7 @@ body.journal-open{overflow:hidden}
     <div class="pinned-head-copy"><h2 id="pinnedTitle">Çakılı</h2><p id="pinnedSubtitle">Tarihten bağımsız listelerin.</p></div>
     <div class="pinned-head-actions pinned-owner-tools" id="pinnedOwnerTools" hidden>
       <button class="pinned-icon-btn" id="renamePinnedList" type="button" aria-label="Liste adını değiştir" title="Liste adını değiştir"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 14.8 3.3 17l2.2-.7L15.2 6.6 13.4 4.8 4 14.8Z"></path><path d="m12.4 5.8 1.8 1.8"></path></svg></button>
-      <button class="pinned-icon-btn" id="sharePinnedList" type="button" aria-label="Listeyi paylaş" title="Paylaş"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="7" cy="7" r="2.3"></circle><path d="M2.8 15.9c.25-3 1.9-4.6 4.2-4.6s3.95 1.6 4.2 4.6"></path><path d="M14.2 6.2v5.6M11.4 9h5.6"></path></svg></button>
+      <button class="pinned-icon-btn" id="sharePinnedList" type="button" aria-label="Listeyi paylaş" title="Paylaş" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="7" cy="7" r="2.3"></circle><path d="M2.8 15.9c.25-3 1.9-4.6 4.2-4.6s3.95 1.6 4.2 4.6"></path><path d="M14.2 6.2v5.6M11.4 9h5.6"></path></svg></button>
       <button class="pinned-icon-btn" id="deletePinnedList" type="button" aria-label="Listeyi sil" title="Listeyi sil"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 5.8h11M8 5.8V4h4v1.8M6 5.8l.7 10h6.6l.7-10"></path></svg></button>
     </div>
   </div>
@@ -810,7 +810,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v69-cakili-live", CENTIK_EXPECTED_SERVER_BUILD="v26-cakili-live";
+const CENTIK_CLIENT_BUILD="v70-cakili-shared-control", CENTIK_EXPECTED_SERVER_BUILD="v27-cakili-shared-control";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -1302,7 +1302,7 @@ function stopPinnedListsRefresh(){if(pinnedListsTimer){clearInterval(pinnedLists
 function startPinnedLive(){stopPinnedLive();pinnedLiveTimer=setInterval(()=>{if(document.visibilityState==="visible"&&document.body.classList.contains("pinned-open")&&pinnedActiveList&&!$("pinnedTaskList")?.querySelector(".editing")&&!pinnedPendingDelete)syncPinnedActive({silent:true})},3500)}
 function stopPinnedLive(){if(pinnedLiveTimer){clearInterval(pinnedLiveTimer);pinnedLiveTimer=null}}
 async function openPinnedList(id){
-  const list=pinnedListById(id);if(!list)return;pinnedActiveList=list;pinnedTasks=[];pinnedRevision=null;$("pinnedOverview").hidden=true;$("pinnedEditor").hidden=false;$("pinnedTitle").textContent=list.title;$("pinnedSubtitle").textContent=list.sharedUser?"Ortak Çakılı liste":"Çakılı görev listesi";$("pinnedOwnerTools").hidden=!list.isOwner;pinnedSetStatus("pinnedEditorStatus","Liste yükleniyor…");renderPinnedTasks();await syncPinnedActive({force:true});startPinnedLive();
+  const list=pinnedListById(id);if(!list)return;pinnedActiveList=list;pinnedTasks=[];pinnedRevision=null;$("pinnedOverview").hidden=true;$("pinnedEditor").hidden=false;$("pinnedTitle").textContent=list.title;$("pinnedSubtitle").textContent=list.sharedUser?"Ortak Çakılı liste":"Çakılı görev listesi";$("pinnedOwnerTools").hidden=false;$("sharePinnedList").hidden=!list.isOwner;pinnedSetStatus("pinnedEditorStatus","Liste yükleniyor…");renderPinnedTasks();await syncPinnedActive({force:true});startPinnedLive();
 }
 async function syncPinnedActive({force=false,silent=false}={}){
   if(!pinnedActiveList||!currentUser?.id)return false;const listId=pinnedActiveList.id,known=force?null:pinnedRevision;
@@ -1310,7 +1310,7 @@ async function syncPinnedActive({force=false,silent=false}={}){
   catch(e){if(!silent)pinnedSetStatus("pinnedEditorStatus","Liste güncellenemedi. Bağlantınızı kontrol edin.");return false}
 }
 function updatePinnedHeader(){
-  if(!pinnedActiveList)return;$("pinnedTitle").textContent=pinnedActiveList.title;$("pinnedOwnerTools").hidden=!pinnedActiveList.isOwner;
+  if(!pinnedActiveList)return;$("pinnedTitle").textContent=pinnedActiveList.title;$("pinnedOwnerTools").hidden=false;$("sharePinnedList").hidden=!pinnedActiveList.isOwner;
   const meta=$("pinnedListMeta");if(meta){if(pinnedActiveList.sharedUser)meta.textContent=pinnedActiveList.isOwner?`${pinnedActiveList.sharedUser.name||pinnedActiveList.sharedUser.email} ile ortak`:`${pinnedActiveList.owner?.name||pinnedActiveList.owner?.email||"Liste sahibi"} ile ortak`;else meta.textContent="Yalnızca sen"}
 }
 function pinnedDeleteHas(id){if(!pinnedPendingDelete)return false;const ids=pinnedPendingDelete.ids||[pinnedPendingDelete.id];return ids.includes(id)}
@@ -1335,8 +1335,8 @@ function queuePinnedDelete(id){const it=pinnedTasks.find(x=>x.id===id);if(!it)re
 function undoPinnedDelete(){clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;renderPinnedTasks()}
 async function finalizePinnedDelete(){if(!pinnedPendingDelete)return;clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;const id=pinnedPendingDelete.id,ids=new Set(pinnedPendingDelete.ids||[id]);pinnedPendingDelete=null;pinnedTasks=pinnedTasks.filter(x=>!ids.has(x.id));renderPinnedTasks();await pinnedMutate("delete",{taskId:id})}
 async function createPinnedList(title){title=String(title||"").trim();if(!title)return;try{const j=await api("pinnedCreate",{token:getToken(),title},{timeout:30000});if(!j.ok){pinnedSetStatus("pinnedOverviewStatus",authMessage(j.error));return}pinnedLists.unshift(j.list);renderPinnedOverview();pinnedSetStatus("pinnedOverviewStatus","")}catch(e){pinnedSetStatus("pinnedOverviewStatus","Liste oluşturulamadı.")}}
-async function renamePinnedActive(){if(!pinnedActiveList?.isOwner)return;const title=prompt("Liste adı",pinnedActiveList.title);if(title===null||!String(title).trim())return;try{const j=await api("pinnedRename",{token:getToken(),listId:pinnedActiveList.id,title:String(title).trim()},{timeout:30000});if(!j.ok){pinnedSetStatus("pinnedEditorStatus",authMessage(j.error));return}pinnedActiveList=j.list;const ix=pinnedLists.findIndex(x=>x.id===j.list.id);if(ix>=0)pinnedLists[ix]=j.list;updatePinnedHeader()}catch(e){pinnedSetStatus("pinnedEditorStatus","Liste adı değiştirilemedi.")}}
-async function deletePinnedActive(){if(!pinnedActiveList?.isOwner)return;if(!confirm(`“${pinnedActiveList.title}” listesi ve içindeki tüm görevler silinsin mi?`))return;try{const id=pinnedActiveList.id,j=await api("pinnedDelete",{token:getToken(),listId:id},{timeout:30000});if(!j.ok){pinnedSetStatus("pinnedEditorStatus",authMessage(j.error));return}pinnedLists=pinnedLists.filter(x=>x.id!==id);pinnedShowOverview();renderPinnedOverview()}catch(e){pinnedSetStatus("pinnedEditorStatus","Liste silinemedi.")}}
+async function renamePinnedActive(){if(!pinnedActiveList)return;const title=prompt("Liste adı",pinnedActiveList.title);if(title===null||!String(title).trim())return;try{const j=await api("pinnedRename",{token:getToken(),listId:pinnedActiveList.id,title:String(title).trim()},{timeout:30000});if(!j.ok){pinnedSetStatus("pinnedEditorStatus",authMessage(j.error));return}pinnedActiveList=j.list;const ix=pinnedLists.findIndex(x=>x.id===j.list.id);if(ix>=0)pinnedLists[ix]=j.list;updatePinnedHeader()}catch(e){pinnedSetStatus("pinnedEditorStatus","Liste adı değiştirilemedi.")}}
+async function deletePinnedActive(){if(!pinnedActiveList)return;if(!confirm(`“${pinnedActiveList.title}” listesi ve içindeki tüm görevler silinsin mi?`))return;try{const id=pinnedActiveList.id,j=await api("pinnedDelete",{token:getToken(),listId:id},{timeout:30000});if(!j.ok){pinnedSetStatus("pinnedEditorStatus",authMessage(j.error));return}pinnedLists=pinnedLists.filter(x=>x.id!==id);pinnedShowOverview();renderPinnedOverview()}catch(e){pinnedSetStatus("pinnedEditorStatus","Liste silinemedi.")}}
 function openPinnedShareDialog(){if(!pinnedActiveList?.isOwner)return;const u=pinnedActiveList.sharedUser;$("pinnedShareEmail").value=u?.email||"";$("pinnedShareCurrent").textContent=u?`Şu anda ${u.name||u.email} ile paylaşılıyor.`:"Bu liste şu anda paylaşılmıyor.";$("removePinnedShare").hidden=!u;pinnedSetStatus("pinnedShareStatus","");$("pinnedShareDialog").showModal()}
 async function savePinnedShare(email){if(!pinnedActiveList?.isOwner)return;const btn=email?$("savePinnedShare"):$("removePinnedShare");if(!setBackendActionBusy(btn,true,email?"Paylaşılıyor…":"Kaldırılıyor…"))return;try{const j=await api("pinnedShare",{token:getToken(),listId:pinnedActiveList.id,email},{timeout:30000});if(!j.ok){pinnedSetStatus("pinnedShareStatus",authMessage(j.error));return}pinnedActiveList=j.list;const ix=pinnedLists.findIndex(x=>x.id===j.list.id);if(ix>=0)pinnedLists[ix]=j.list;updatePinnedHeader();$("pinnedShareDialog").close()}catch(e){pinnedSetStatus("pinnedShareStatus","Paylaşım ayarı kaydedilemedi.")}finally{setBackendActionBusy(btn,false)}}
 $("pinnedButton").onclick=openPinnedPanel;
