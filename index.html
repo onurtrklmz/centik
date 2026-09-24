@@ -637,60 +637,92 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-r
 
 
 
-/* ——— V94 r6 temiz ortak çekmece motoru ———
-   Takvim, Çakılı ve Çetele aynı alt kabukta çalışır.
-   Utility gövdeleri hidden/display:none yapılmaz; DOM'da sürekli kapalı durumda kalır.
-   Üçü de aynı 0fr↔1fr + opacity + translate Takvim animasyonunu kullanır. */
-.cal > #pinnedPanel.shared-drawer-body,
-.cal > #journalPanel.shared-drawer-body{
-  position:static!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
-  width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;
-  margin:0!important;padding:0!important;border:0!important;border-radius:0!important;
-  background:transparent!important;box-shadow:none!important;
-  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
-  overflow:hidden!important;overscroll-behavior:contain;
-  z-index:auto!important;visibility:visible!important;
-  display:grid!important;grid-template-rows:0fr!important;
-  opacity:0!important;transform:translateY(22px)!important;
-  pointer-events:none!important;
+/* ——— V94 ideal ortak çekmece motoru ———
+   Takvim, Çakılı ve Çetele aynı .cal kabuğunun kalıcı gövdeleridir.
+   Her gövde 0fr↔1fr ile açılır/kapanır; alt bar ortak ve sabittir.
+   Geçici mount/unmount, ayrı fixed panel animasyonu ve hidden timer yoktur. */
+.utility-body-wrap{
+  display:grid;
+  grid-template-rows:0fr;
+  opacity:0;
+  transform:translateY(22px);
+  pointer-events:none;
   transition:grid-template-rows .32s cubic-bezier(.22,.8,.24,1),
              opacity .24s ease,
-             transform .32s cubic-bezier(.22,.8,.24,1)!important;
+             transform .32s cubic-bezier(.22,.8,.24,1);
 }
-body.pinned-open .cal > #pinnedPanel.shared-drawer-body,
-body.journal-open .cal > #journalPanel.shared-drawer-body{
-  grid-template-rows:1fr!important;
-  opacity:1!important;transform:translateY(0)!important;
+body.pinned-open #pinnedBodyWrap,
+body.journal-open #journalBodyWrap{
+  grid-template-rows:1fr;
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
+}
+.utility-body-clip{
+  overflow:auto;
+  min-height:0;
+  max-height:min(62dvh,560px);
+  overscroll-behavior:contain;
+}
+.utility-body-clip > .pinned-panel,
+.utility-body-clip > .journal-panel{
+  position:static!important;
+  left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
+  width:100%!important;max-width:none!important;
+  min-height:0!important;height:auto!important;
+  margin:0!important;
+  padding:10px 14px 14px!important;
+  border:0!important;border-radius:0!important;
+  background:transparent!important;
+  background-color:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  transform:none!important;
+  transform-origin:center bottom!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  overflow:visible!important;
+  transition:none!important;
+  display:flex!important;
+  flex-direction:column;
+}
+body.pinned-open .cal,
+body.journal-open .cal{
+  visibility:visible!important;
   pointer-events:auto!important;
 }
-.cal > .shared-drawer-body > .utility-panel-clip{
-  min-height:0;
-  height:calc(100dvh - var(--centik-topbar-h) - 94px - max(12px,env(safe-area-inset-bottom)));
-  max-height:calc(100dvh - var(--centik-topbar-h) - 94px - max(12px,env(safe-area-inset-bottom)));
-  overflow-y:auto;overscroll-behavior:contain;
-  padding:12px 16px 14px;
-  display:flex;flex-direction:column;
-  background:transparent;
+body.pinned-open .calendar-backdrop,
+body.journal-open .calendar-backdrop{
+  visibility:hidden!important;
+  pointer-events:none!important;
+  opacity:0!important;
 }
-body.pinned-open .cal,body.journal-open .cal{
-  visibility:visible!important;pointer-events:auto!important;
+body.pinned-open .cal-body-wrap,
+body.journal-open .cal-body-wrap{
+  grid-template-rows:0fr!important;
+  opacity:0!important;
+  transform:translateY(22px)!important;
+  pointer-events:none!important;
 }
-body.pinned-open .cal-head,body.journal-open .cal-head{
-  position:relative;z-index:3;background:color-mix(in srgb,var(--paper) 96%,transparent)
+body.pinned-open .cal-head,
+body.journal-open .cal-head{
+  position:relative;
+  z-index:3;
+  background:color-mix(in srgb,var(--paper) 96%,transparent);
 }
-body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{
-  grid-template-rows:0fr!important;opacity:0!important;transform:translateY(22px)!important;
+body.pinned-open main,
+body.journal-open main{
+  transform:none!important;
+  opacity:1!important;
+  pointer-events:none!important;
 }
-@media(max-width:430px){
-  .cal > .shared-drawer-body > .utility-panel-clip{
-    height:calc(100dvh - var(--centik-topbar-h) - 86px - max(8px,env(safe-area-inset-bottom)));
-    max-height:calc(100dvh - var(--centik-topbar-h) - 86px - max(8px,env(safe-area-inset-bottom)));
-    padding:10px 14px 12px;
-  }
+body.pinned-open,
+body.journal-open{
+  overflow:hidden;
 }
 @media(prefers-reduced-motion:reduce){
-  .cal > #pinnedPanel.shared-drawer-body,
-  .cal > #journalPanel.shared-drawer-body{transition:none!important}
+  .utility-body-wrap{transition:none!important}
 }
 </style>
 </head>
@@ -844,24 +876,10 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{
         </div>
       </div>
     </div>
-    <div class="cal-head" id="calendarHandle">
-      <button class="drawer-launch pinned-launch" id="pinnedButton" type="button" aria-label="Çakılı görevleri aç">
-        <svg class="pushpin-icon" viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(18 12 12)"><ellipse class="pin-cap" cx="12" cy="4.4" rx="4.7" ry="2.2"></ellipse><path class="pin-body" d="M9.2 5.1h5.6l-.8 5.7c2.5.75 4.15 2.25 4.15 4.05 0 2.45-2.8 4.2-6.15 4.2s-6.15-1.75-6.15-4.2c0-1.8 1.65-3.3 4.15-4.05l-.8-5.7Z"></path><ellipse class="pin-cap" cx="12" cy="4.15" rx="4.25" ry="1.72" opacity=".72"></ellipse><path class="pin-highlight" d="M7.75 13.55c.38-1.12 1.15-1.9 2.05-2.25-.5.75-.8 1.55-.9 2.35-.08.58-.44.98-.83.86-.36-.11-.44-.44-.32-.96Z"></path><path class="pin-needle" d="M10.9 18.4h2.2L12 24Z"></path></g></svg>
-        <span>Çakılı</span><span class="pinned-unread-badge" id="pinnedUnreadBadge" hidden aria-hidden="true"></span>
-      </button>
-      <div class="calendar-month-slot">
-        <button class="nav" id="mPrev" type="button" aria-label="Takvimi aç"></button>
-        <button class="month-toggle" id="monthToggle" type="button" aria-expanded="false" aria-controls="calendarBodyWrap"><span id="monthTitle"></span></button>
-        <button class="nav" id="mNext" type="button" aria-label="Takvimi aç"></button>
-      </div>
-      <button class="drawer-launch journal-launch" id="journalButton" type="button" aria-label="Çeteleyi aç">
-        <svg class="journal-book" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.2 4.1c2.6-.65 4.8-.2 6.8 1.35v10.1c-2-1.55-4.2-2-6.8-1.35V4.1Z"></path><path d="M16.8 4.1c-2.6-.65-4.8-.2-6.8 1.35v10.1c2-1.55 4.2-2 6.8-1.35V4.1Z"></path></svg>
-        <span>Çetele</span><span class="journal-launch-state" id="journalButtonState" aria-hidden="true">+</span>
-      </button>
-    </div>
-  </section>
-
-<section class="pinned-panel" id="pinnedPanel" aria-labelledby="pinnedTitle" hidden>
+    
+    <div class="utility-body-wrap" id="pinnedBodyWrap" aria-hidden="true">
+      <div class="utility-body-clip">
+<section class="pinned-panel" id="pinnedPanel" aria-labelledby="pinnedTitle">
   <div class="panel-pull-handle" id="pinnedPullHandle" aria-hidden="true"></div>
   <div class="pinned-head">
     <button class="pinned-back" id="pinnedBack" type="button" aria-label="Çakılı listelerine dön" title="Listelere dön" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 4.8-5.2 5.2 5.2 5.2"></path></svg></button>
@@ -896,23 +914,11 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{
     </section>
   </section>
 </section>
-
-<dialog id="pinnedShareDialog">
-  <div class="pinned-share-box">
-    <h3>Çakılı listeyi paylaş</h3>
-    <p>Listeyi bir aktif Çentik kullanıcısıyla paylaşabilirsiniz. İki kullanıcı da görevleri anlık olarak düzenleyebilir.</p>
-    <label>Kullanıcının e-posta adresi<input id="pinnedShareEmail" type="text" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other" placeholder="ornek@eposta.com"></label>
-    <p class="pinned-share-note" id="pinnedShareCurrent"></p>
-    <p class="pinned-status" id="pinnedShareStatus" aria-live="polite"></p>
-    <div class="pinned-share-actions">
-      <button type="button" id="closePinnedShare">Vazgeç</button>
-      <button type="button" class="danger" id="removePinnedShare">Paylaşımı kaldır</button>
-      <button type="button" class="primary" id="savePinnedShare">Paylaş</button>
+      </div>
     </div>
-  </div>
-</dialog>
-
-<section class="journal-panel" id="journalPanel" aria-labelledby="journalTitle" hidden>
+    <div class="utility-body-wrap" id="journalBodyWrap" aria-hidden="true">
+      <div class="utility-body-clip">
+<section class="journal-panel" id="journalPanel" aria-labelledby="journalTitle">
   <div class="panel-pull-handle" id="journalPullHandle" aria-hidden="true"></div>
   <div class="journal-head">
     <div class="journal-head-copy"><div class="panel-title-line"><span class="panel-title-icon journal-title-icon" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M3.2 4.1c2.6-.65 4.8-.2 6.8 1.35v10.1c-2-1.55-4.2-2-6.8-1.35V4.1Z"></path><path d="M16.8 4.1c-2.6-.65-4.8-.2-6.8 1.35v10.1c2-1.55 4.2-2 6.8-1.35V4.1Z"></path></svg></span><h2 id="journalTitle">Çetele</h2></div><p>Gününü kaydet.</p></div>
@@ -958,6 +964,43 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{
     <p class="journal-save-status" id="journalSaveStatus" aria-live="polite"></p>
   </section>
 </section>
+      </div>
+    </div>
+    <div class="cal-head" id="calendarHandle">
+      <button class="drawer-launch pinned-launch" id="pinnedButton" type="button" aria-label="Çakılı görevleri aç">
+        <svg class="pushpin-icon" viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(18 12 12)"><ellipse class="pin-cap" cx="12" cy="4.4" rx="4.7" ry="2.2"></ellipse><path class="pin-body" d="M9.2 5.1h5.6l-.8 5.7c2.5.75 4.15 2.25 4.15 4.05 0 2.45-2.8 4.2-6.15 4.2s-6.15-1.75-6.15-4.2c0-1.8 1.65-3.3 4.15-4.05l-.8-5.7Z"></path><ellipse class="pin-cap" cx="12" cy="4.15" rx="4.25" ry="1.72" opacity=".72"></ellipse><path class="pin-highlight" d="M7.75 13.55c.38-1.12 1.15-1.9 2.05-2.25-.5.75-.8 1.55-.9 2.35-.08.58-.44.98-.83.86-.36-.11-.44-.44-.32-.96Z"></path><path class="pin-needle" d="M10.9 18.4h2.2L12 24Z"></path></g></svg>
+        <span>Çakılı</span><span class="pinned-unread-badge" id="pinnedUnreadBadge" hidden aria-hidden="true"></span>
+      </button>
+      <div class="calendar-month-slot">
+        <button class="nav" id="mPrev" type="button" aria-label="Takvimi aç"></button>
+        <button class="month-toggle" id="monthToggle" type="button" aria-expanded="false" aria-controls="calendarBodyWrap"><span id="monthTitle"></span></button>
+        <button class="nav" id="mNext" type="button" aria-label="Takvimi aç"></button>
+      </div>
+      <button class="drawer-launch journal-launch" id="journalButton" type="button" aria-label="Çeteleyi aç">
+        <svg class="journal-book" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.2 4.1c2.6-.65 4.8-.2 6.8 1.35v10.1c-2-1.55-4.2-2-6.8-1.35V4.1Z"></path><path d="M16.8 4.1c-2.6-.65-4.8-.2-6.8 1.35v10.1c2-1.55 4.2-2 6.8-1.35V4.1Z"></path></svg>
+        <span>Çetele</span><span class="journal-launch-state" id="journalButtonState" aria-hidden="true">+</span>
+      </button>
+    </div>
+  </section>
+
+
+
+<dialog id="pinnedShareDialog">
+  <div class="pinned-share-box">
+    <h3>Çakılı listeyi paylaş</h3>
+    <p>Listeyi bir aktif Çentik kullanıcısıyla paylaşabilirsiniz. İki kullanıcı da görevleri anlık olarak düzenleyebilir.</p>
+    <label>Kullanıcının e-posta adresi<input id="pinnedShareEmail" type="text" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other" placeholder="ornek@eposta.com"></label>
+    <p class="pinned-share-note" id="pinnedShareCurrent"></p>
+    <p class="pinned-status" id="pinnedShareStatus" aria-live="polite"></p>
+    <div class="pinned-share-actions">
+      <button type="button" id="closePinnedShare">Vazgeç</button>
+      <button type="button" class="danger" id="removePinnedShare">Paylaşımı kaldır</button>
+      <button type="button" class="primary" id="savePinnedShare">Paylaş</button>
+    </div>
+  </div>
+</dialog>
+
+
 </div>
 
 <dialog id="journalPinDialog">
@@ -1047,42 +1090,36 @@ let diagnosticsResult=null;
 const DIAG_LOG_LIMIT=30;
 const $=id=>document.getElementById(id);
 
-/* Çakılı/Çetele gövdeleri Takvim gibi sürekli DOM'da kalır.
-   display:none geçişi olmadığı için kapalı 0fr karesi her açılışta gerçekten vardır. */
-function mountSharedDrawerBodies(){
-  const shell=document.getElementById("calendarDrawer"),head=document.getElementById("calendarHandle");
-  if(!shell||!head)return;
-  [["pinnedPanel","pinned"],["journalPanel","journal"]].forEach(([id,kind])=>{
-    const panel=document.getElementById(id);if(!panel)return;
-    panel.classList.add("shared-drawer-body");
-    if(!panel.querySelector(":scope > .utility-panel-clip")){
-      const clip=document.createElement("div");
-      clip.className="utility-panel-clip";
-      clip.dataset.drawerKind=kind;
-      while(panel.firstChild)clip.appendChild(panel.firstChild);
-      panel.appendChild(clip);
-    }
-    if(panel.parentElement!==shell)shell.insertBefore(panel,head);
-    panel.removeAttribute("hidden");
-    panel.inert=true;
-    panel.setAttribute("aria-hidden","true");
-  });
-  document.getElementById("pinnedButton")?.setAttribute("aria-expanded","false");
-  document.getElementById("journalButton")?.setAttribute("aria-expanded","false");
+function utilityDrawerIds(kind){
+  return kind==="pinned"
+    ?{panel:"pinnedPanel",wrap:"pinnedBodyWrap",button:"pinnedButton",cls:"pinned-open"}
+    :{panel:"journalPanel",wrap:"journalBodyWrap",button:"journalButton",cls:"journal-open"};
 }
-function setSharedDrawerOpen(kind,open){
-  const isPinned=kind==="pinned";
-  const panel=document.getElementById(isPinned?"pinnedPanel":"journalPanel");
-  const button=document.getElementById(isPinned?"pinnedButton":"journalButton");
-  const cls=isPinned?"pinned-open":"journal-open";
-  document.body.classList.toggle(cls,!!open);
+function setUtilityDrawerState(kind,open){
+  const ids=utilityDrawerIds(kind);
+  const panel=$(ids.panel),wrap=$(ids.wrap),button=$(ids.button);
+  document.body.classList.toggle(ids.cls,!!open);
   if(panel){
     panel.inert=!open;
     panel.setAttribute("aria-hidden",String(!open));
   }
-  button?.setAttribute("aria-expanded",String(!!open));
+  if(wrap)wrap.setAttribute("aria-hidden",String(!open));
+  if(button)button.setAttribute("aria-expanded",String(!!open));
 }
-mountSharedDrawerBodies();
+function initUtilityDrawerBodies(){
+  ["pinned","journal"].forEach(kind=>{
+    const ids=utilityDrawerIds(kind),panel=$(ids.panel),wrap=$(ids.wrap);
+    if(panel){
+      panel.hidden=false;
+      panel.inert=true;
+      panel.setAttribute("aria-hidden","true");
+    }
+    wrap?.setAttribute("aria-hidden","true");
+  });
+  $("pinnedButton")?.setAttribute("aria-expanded","false");
+  $("journalButton")?.setAttribute("aria-expanded","false");
+}
+initUtilityDrawerBodies();
 const getToken=()=>{try{return localStorage.getItem(AUTH_TOKEN)||""}catch(e){return ""}};
 const getCachedUser=()=>{try{return JSON.parse(localStorage.getItem(AUTH_USER)||"null")}catch(e){return null}};
 function hasLocalSession(){return !!(currentUser?.id&&getToken())}
@@ -1608,17 +1645,18 @@ function pinnedShowOverview(){
 function openPinnedPanel(){
   if(!requireLocalSession()||document.body.classList.contains("pinned-open"))return;
   if(document.body.classList.contains("journal-open")&&!closeJournalView(false))return;
-  setCalendarOpen(false);clearTimeout(pinnedPanelHideTimer);pinnedPanelHideTimer=null;
-  const panel=$("pinnedPanel");if(!panel)return;pinnedShowOverview();
-  setSharedDrawerOpen("pinned",true);
+  setCalendarOpen(false);
+  clearTimeout(pinnedPanelHideTimer);pinnedPanelHideTimer=null;
+  pinnedShowOverview();
+  setUtilityDrawerState("pinned",true);
   loadPinnedLists();startPinnedListsRefresh();
 }
 function closePinnedPanel(force=false){
   if($("pinnedShareDialog")?.open)$("pinnedShareDialog").close();
-  stopPinnedLive();stopPinnedListsRefresh();clearTimeout(pinnedPendingDeleteTimer);
-  pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;
+  stopPinnedLive();stopPinnedListsRefresh();
+  clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;
   resetFullPanelDrag($("calendarDrawer"));
-  setSharedDrawerOpen("pinned",false);
+  setUtilityDrawerState("pinned",false);
   pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;
   clearTimeout(pinnedPanelHideTimer);pinnedPanelHideTimer=null;
   if(!force)setTimeout(()=>refreshPinnedUnread({force:true}),350);
@@ -1828,7 +1866,7 @@ function openJournalShell(mode,date=current,message=""){
   clearTimeout(journalPanelHideTimer);journalPanelHideTimer=null;
   const panel=$("journalPanel");if(!panel)return;
   setJournalPanelMode(mode,date,message);
-  setSharedDrawerOpen("journal",true);
+  setUtilityDrawerState("journal",true);
 }
 function finishJournalUnlock(value){
   $("journalUnlockPin").value="";$("journalUnlockStatus").textContent="";const r=journalUnlockResolver;journalUnlockResolver=null;if(r)r(value);
@@ -1882,7 +1920,11 @@ async function openJournalForCurrent(){
 function closeJournalView(force=false){
   if(!force&&journalContext&&journalDirty&&!confirm("Çetele’de kaydedilmemiş değişiklikler var. Kapatılsın mı?"))return false;
   journalOpenSeq++;if(journalUnlockResolver)finishJournalUnlock(null);
-  const panel=$("journalPanel");resetFullPanelDrag($("calendarDrawer"));journalContext=null;journalActivePin="";journalDirty=false;journalClearEditor();clearJournalLimitWarning();$("journalSaveStatus").textContent="";setSharedDrawerOpen("journal",false);renderJournalButton();
+  resetFullPanelDrag($("calendarDrawer"));
+  journalContext=null;journalActivePin="";journalDirty=false;
+  journalClearEditor();clearJournalLimitWarning();$("journalSaveStatus").textContent="";
+  setUtilityDrawerState("journal",false);
+  renderJournalButton();
   clearTimeout(journalPanelHideTimer);journalPanelHideTimer=null;
   return true;
 }
@@ -1936,7 +1978,7 @@ function utilityPullKindOpen(kind){
 function utilityPullPanel(kind){return $("calendarDrawer")}
 function utilityPullScroller(kind,target){
   if(kind==="calendar")return target.closest?.(".cal-body-clip")||$("calendarBodyWrap")?.querySelector?.(".cal-body-clip")||null;
-  return target.closest?.(".utility-panel-clip")||$(kind==="pinned"?"pinnedPanel":"journalPanel")?.querySelector?.(".utility-panel-clip")||null;
+  return target.closest?.(".utility-body-clip")||$(kind==="pinned"?"pinnedBodyWrap":"journalBodyWrap")?.querySelector?.(".utility-body-clip")||null;
 }
 function utilityPullBlankTarget(kind,target){
   if(!(target instanceof Element))return false;
