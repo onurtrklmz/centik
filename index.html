@@ -2408,13 +2408,16 @@ const HOME_REFRESH_GESTURE_BLOCK=[
 ].join(",");
 const HOME_REFRESH_WHEEL_THRESHOLD=78;
 const HOME_REFRESH_TOUCH_THRESHOLD=86;
+const HOME_RELOAD_TOUCH_THRESHOLD=164;
 const HOME_REFRESH_RESET_MS=180;
 const HOME_REFRESH_COOLDOWN_MS=900;
 let homeRefreshGesture={
   wheelY:0,
   wheelTimer:null,
   cooldownUntil:0,
-  touch:null
+  touch:null,
+  refreshPromise:null,
+  reloadPending:false
 };
 function homeRefreshDrawerOpen(){
   return calendarOpen||
@@ -2442,10 +2445,26 @@ function scheduleHomeRefreshWheelReset(){
   homeRefreshGesture.wheelTimer=setTimeout(resetHomeRefreshWheel,HOME_REFRESH_RESET_MS);
 }
 async function triggerHomeRefreshGesture(){
+  if(homeRefreshGesture.refreshPromise)return homeRefreshGesture.refreshPromise;
   if(Date.now()<homeRefreshGesture.cooldownUntil)return false;
   homeRefreshGesture.cooldownUntil=Date.now()+HOME_REFRESH_COOLDOWN_MS;
   resetHomeRefreshWheel();
-  try{await refreshAppData();return true}catch(_){return false}
+  let p;
+  p=(async()=>{
+    try{return !!(await refreshAppData())}catch(_){return false}
+  })().finally(()=>{
+    if(homeRefreshGesture.refreshPromise===p)homeRefreshGesture.refreshPromise=null;
+  });
+  homeRefreshGesture.refreshPromise=p;
+  return p;
+}
+async function triggerHomePageReloadAfterRefresh(){
+  if(homeRefreshGesture.reloadPending)return;
+  homeRefreshGesture.reloadPending=true;
+  try{
+    if(homeRefreshGesture.refreshPromise)await homeRefreshGesture.refreshPromise;
+  }catch(_){}
+  window.location.reload();
 }
 
 // Masaüstü trackpad: ana sayfa tepede ve çekmece kapalıyken iki parmak aşağı = veri yenile.
@@ -2465,7 +2484,9 @@ globalDaySwipeSurface.addEventListener("wheel",e=>{
   triggerHomeRefreshGesture();
 },{passive:false});
 
-// Mobil: native pull-to-refresh yerine aynı uygulama içi veri yenileme.
+// Mobil iki kademeli pull:
+// orta mesafe = uygulama/veritabanı yenileme,
+// uzun çekiş = veri yenileme tamamlandıktan sonra tam sayfa reload.
 // Yalnız sayfa tepedeyken, tek parmakla ve etkileşimli kontrol dışında başlayan aşağı çekiş alınır.
 globalDaySwipeSurface.addEventListener("touchstart",e=>{
   if(e.touches?.length!==1||homeRefreshDrawerOpen()||homeRefreshBlockedTarget(e.target)||
@@ -2475,7 +2496,7 @@ globalDaySwipeSurface.addEventListener("touchstart",e=>{
   const t=e.touches[0];
   homeRefreshGesture.touch={
     startX:t.clientX,startY:t.clientY,lastY:t.clientY,
-    axis:"",triggered:false,cancelled:false
+    axis:"",refreshTriggered:false,reloadTriggered:false,cancelled:false
   };
 },{passive:true});
 
@@ -2496,9 +2517,18 @@ globalDaySwipeSurface.addEventListener("touchmove",e=>{
 
   // Jest uygulamaya ait olduğunda tarayıcının native pull-to-refresh'ini bastır.
   if(e.cancelable)e.preventDefault();
-  if(dy>=HOME_REFRESH_TOUCH_THRESHOLD&&!g.triggered){
-    g.triggered=true;
+
+  // 1. kademe: orta mesafede uygulama/veritabanı yenile.
+  if(dy>=HOME_REFRESH_TOUCH_THRESHOLD&&!g.refreshTriggered){
+    g.refreshTriggered=true;
     triggerHomeRefreshGesture();
+  }
+
+  // 2. kademe: aynı çekiş belirgin biçimde devam ederse tam sayfa yenile.
+  // Önce başlatılmış veri yenilemenin bitmesini bekler; sonra reload yapar.
+  if(dy>=HOME_RELOAD_TOUCH_THRESHOLD&&g.refreshTriggered&&!g.reloadTriggered){
+    g.reloadTriggered=true;
+    triggerHomePageReloadAfterRefresh();
   }
 },{passive:false});
 
