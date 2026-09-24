@@ -1,7 +1,7 @@
-// v86: Kullanıcının son düzeltilmiş logo masterından tüm favicon/PWA/Apple ikon paketi yeniden üretildi.
+// v87: Takvim, Çakılı ve Çetele için tepe barı da kapsayan ortak global arka plan blur katmanı eklendi.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v86-final-logo-pack";
+const SURUM = "centik-v87-unified-drawer-blur";
 const KABUK = [
   "./",
   "./index.html",
