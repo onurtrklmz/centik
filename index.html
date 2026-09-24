@@ -763,6 +763,59 @@ body.journal-open{
 
 /* r17 — ana sayfada native pull-to-refresh yerine uygulama içi veri yenileme */
 html,body{overscroll-behavior-y:none}
+
+
+/* r22 — mobil iki kademeli pull için ikinci kademe reload göstergesi */
+.pull-reload-indicator{
+  position:fixed;
+  left:50%;
+  top:max(10px,env(safe-area-inset-top));
+  z-index:120;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:7px 11px;
+  border:1px solid color-mix(in srgb,var(--focus) 28%,var(--line));
+  border-radius:999px;
+  background:color-mix(in srgb,var(--paper) 94%,transparent);
+  color:var(--ink);
+  box-shadow:0 8px 24px rgba(0,0,0,.14);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  font-size:.76rem;
+  font-weight:800;
+  line-height:1;
+  opacity:0;
+  transform:translate(-50%,-14px) scale(.96);
+  pointer-events:none;
+  transition:opacity .14s ease,transform .14s ease,border-color .14s ease,background .14s ease;
+}
+.pull-reload-indicator svg{
+  width:18px;
+  height:18px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  flex:none;
+}
+.pull-reload-indicator.is-visible{
+  opacity:1;
+  transform:translate(-50%,0) scale(1);
+}
+.pull-reload-indicator.is-armed{
+  border-color:color-mix(in srgb,var(--focus) 54%,var(--line));
+  background:color-mix(in srgb,var(--focus) 10%,var(--paper));
+}
+.pull-reload-indicator.is-reloading svg{
+  animation:pullReloadSpin .55s linear infinite;
+}
+@keyframes pullReloadSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){
+  .pull-reload-indicator{transition:none}
+  .pull-reload-indicator.is-reloading svg{animation:none}
+}
 </style>
 </head>
 <body class="auth-locked">
@@ -2408,6 +2461,7 @@ const HOME_REFRESH_GESTURE_BLOCK=[
 ].join(",");
 const HOME_REFRESH_WHEEL_THRESHOLD=78;
 const HOME_REFRESH_TOUCH_THRESHOLD=72;
+const HOME_RELOAD_PREVIEW_THRESHOLD=104;
 const HOME_RELOAD_TOUCH_THRESHOLD=136;
 const HOME_REFRESH_RESET_MS=180;
 const HOME_REFRESH_COOLDOWN_MS=900;
@@ -2417,7 +2471,8 @@ let homeRefreshGesture={
   cooldownUntil:0,
   touch:null,
   refreshPromise:null,
-  reloadPending:false
+  reloadPending:false,
+  reloadVisual:"idle"
 };
 function homeRefreshDrawerOpen(){
   return calendarOpen||
@@ -2440,6 +2495,13 @@ function resetHomeRefreshWheel(){
   clearTimeout(homeRefreshGesture.wheelTimer);
   homeRefreshGesture.wheelTimer=null;
 }
+function setHomeReloadVisual(mode="idle"){
+  const el=$("pullReloadIndicator");if(!el)return;
+  homeRefreshGesture.reloadVisual=mode;
+  el.classList.toggle("is-visible",mode!=="idle");
+  el.classList.toggle("is-armed",mode==="preview"||mode==="armed"||mode==="reloading");
+  el.classList.toggle("is-reloading",mode==="reloading");
+}
 function scheduleHomeRefreshWheelReset(){
   clearTimeout(homeRefreshGesture.wheelTimer);
   homeRefreshGesture.wheelTimer=setTimeout(resetHomeRefreshWheel,HOME_REFRESH_RESET_MS);
@@ -2461,6 +2523,7 @@ async function triggerHomeRefreshGesture(){
 async function triggerHomePageReloadAfterRefresh(){
   if(homeRefreshGesture.reloadPending)return;
   homeRefreshGesture.reloadPending=true;
+  setHomeReloadVisual("reloading");
   try{
     if(homeRefreshGesture.refreshPromise)await homeRefreshGesture.refreshPromise;
   }catch(_){}
@@ -2494,6 +2557,7 @@ globalDaySwipeSurface.addEventListener("touchstart",e=>{
     homeRefreshGesture.touch=null;return;
   }
   const t=e.touches[0];
+  setHomeReloadVisual("idle");
   homeRefreshGesture.touch={
     startX:t.clientX,startY:t.clientY,lastY:t.clientY,
     axis:"",refreshTriggered:false,reloadTriggered:false,cancelled:false
@@ -2511,7 +2575,7 @@ globalDaySwipeSurface.addEventListener("touchmove",e=>{
     else if(ax>ay)g.axis="x";
   }
   if(g.axis==="x"||dy<0||!homeRefreshPageTop()){
-    g.cancelled=true;return;
+    g.cancelled=true;setHomeReloadVisual("idle");return;
   }
   if(g.axis!=="y")return;
 
@@ -2524,16 +2588,26 @@ globalDaySwipeSurface.addEventListener("touchmove",e=>{
     triggerHomeRefreshGesture();
   }
 
+  // İkinci kademeye yaklaşıldığını görünür kıl:
+  // reload eşiğine varmadan ikon görünür; kullanıcı çekmeyi bırakırsa kaybolur.
+  if(g.refreshTriggered&&!g.reloadTriggered){
+    if(dy>=HOME_RELOAD_PREVIEW_THRESHOLD)setHomeReloadVisual("preview");
+    else setHomeReloadVisual("idle");
+  }
+
   // 2. kademe: aynı çekiş belirgin biçimde devam ederse tam sayfa yenile.
   // Önce başlatılmış veri yenilemenin bitmesini bekler; sonra reload yapar.
   if(dy>=HOME_RELOAD_TOUCH_THRESHOLD&&g.refreshTriggered&&!g.reloadTriggered){
     g.reloadTriggered=true;
+    setHomeReloadVisual("armed");
     triggerHomePageReloadAfterRefresh();
   }
 },{passive:false});
 
 function finishHomeRefreshTouch(){
+  const g=homeRefreshGesture.touch;
   homeRefreshGesture.touch=null;
+  if(!g?.reloadTriggered)setHomeReloadVisual("idle");
 }
 globalDaySwipeSurface.addEventListener("touchend",finishHomeRefreshTouch,{passive:true});
 globalDaySwipeSurface.addEventListener("touchcancel",finishHomeRefreshTouch,{passive:true});
@@ -3217,5 +3291,13 @@ async function boot(){
 boot();
 if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>r.update().catch(()=>{})).catch(()=>{}));
 </script>
+
+<div class="pull-reload-indicator" id="pullReloadIndicator" aria-hidden="true">
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M20 6v5h-5"></path>
+    <path d="M19.1 11A7.2 7.2 0 1 0 20 15"></path>
+  </svg>
+  <span>Sayfayı yenile</span>
+</div>
 </body>
 </html>
