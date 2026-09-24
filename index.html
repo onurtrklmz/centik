@@ -637,6 +637,10 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-r
 
 
 
+/* r10: Çakılı/Çetele gövdeleri tepe barın 6px altına kadar açılır.
+   Sabit clip yüksekliği + layout/paint containment, ağır Çetele DOM'unun
+   grid animasyonu sırasında tekrar tekrar intrinsic-height ölçümünü azaltır.
+   Aç/kapa süresi ve easing r9 ile aynıdır. */
 /* ——— V94 ideal ortak çekmece motoru ———
    Takvim, Çakılı ve Çetele aynı .cal kabuğunun kalıcı gövdeleridir.
    Her gövde 0fr↔1fr ile açılır/kapanır; alt bar ortak ve sabittir.
@@ -647,6 +651,7 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-r
   opacity:0;
   transform:translateY(22px);
   pointer-events:none;
+  will-change:grid-template-rows,opacity,transform;
   transition:grid-template-rows .32s cubic-bezier(.22,.8,.24,1),
              opacity .24s ease,
              transform .32s cubic-bezier(.22,.8,.24,1);
@@ -661,8 +666,10 @@ body.journal-open #journalBodyWrap{
 .utility-body-clip{
   overflow:auto;
   min-height:0;
-  max-height:min(62dvh,560px);
+  height:calc(100dvh - var(--centik-topbar-h) - var(--centik-drawer-bar-h) - max(12px,env(safe-area-inset-bottom)) - 6px);
+  max-height:calc(100dvh - var(--centik-topbar-h) - var(--centik-drawer-bar-h) - max(12px,env(safe-area-inset-bottom)) - 6px);
   overscroll-behavior:contain;
+  contain:layout paint;
 }
 .utility-body-clip > .pinned-panel,
 .utility-body-clip > .journal-panel{

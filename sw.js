@@ -1,8 +1,8 @@
-// v94-ui-r9: Takvim, Çakılı ve Çetele kalıcı olarak aynı .cal kabuğunda ayrı 0fr↔1fr gövdeler kullanır.
+// v94-ui-r10: Çakılı/Çetele tepe bar altına kadar açılır; sabit gövde yüksekliği ile Çetele grid animasyonu hafifletildi.
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v94-ideal-shared-drawer-r9";
+const SURUM = "centik-v94-ideal-shared-drawer-r10";
 const KABUK = [
   "./",
   "./index.html",
