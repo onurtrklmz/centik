@@ -1,7 +1,7 @@
-// v84: Çakılı/Çetele başlık ikonları eklendi; Çakılı yerel durum metinleri kaldırıldı; global loading arka plan pulse aldı.
+// v85: Kullanıcının temizlediği yeni logo masterından favicon, PWA ve Apple ikon paketi yeniden üretildi.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v84-panel-icons-clean-status-pulse";
+const SURUM = "centik-v85-clean-logo-pack";
 const KABUK = [
   "./",
   "./index.html",
