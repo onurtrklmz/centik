@@ -1,7 +1,7 @@
-// v83: Logo görsel paketi güncellendi; beyaz dış alanlar transparanlaştırıldı ve koyu ikon tonu açıldı.
+// v84: Çakılı/Çetele başlık ikonları eklendi; Çakılı yerel durum metinleri kaldırıldı; global loading arka plan pulse aldı.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v83-logo-darkmode-fix";
+const SURUM = "centik-v84-panel-icons-clean-status-pulse";
 const KABUK = [
   "./",
   "./index.html",

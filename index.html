@@ -227,7 +227,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 .journal-limit-status[hidden]{display:none}
 .journal-save{width:100%;min-height:50px;border:0;border-radius:13px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));color:#fff;font-weight:750;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 8px 22px color-mix(in srgb,var(--focus) 18%,transparent);transition:transform .11s ease,box-shadow .14s ease,filter .14s ease,opacity .14s ease;-webkit-tap-highlight-color:transparent}
 .journal-save svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.journal-save:disabled{opacity:.72;cursor:progress}.journal-save:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 10px 24px color-mix(in srgb,var(--focus) 24%,transparent)}.journal-save:not(:disabled):active{transform:translateY(1px) scale(.985);filter:brightness(.95)}
-.backend-action-busy,.journal-save.is-busy,.pin-footer button.is-busy{animation:savePulse .62s ease-in-out infinite alternate!important;cursor:progress!important;transform-origin:center;pointer-events:none}.backend-action-busy:disabled,.journal-save.is-busy:disabled,.pin-footer button.is-busy:disabled{opacity:1}.sync-refresh.backend-action-busy{animation:none!important;transform:none!important}.sync-refresh.backend-action-busy .sync-icon-refresh{animation:syncRotate .9s linear infinite!important}.sync-refresh.backend-action-busy::after{content:attr(data-busy-label);position:absolute;right:0;top:calc(100% + 7px);z-index:90;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);box-shadow:var(--shadow);font:700 .70rem/1 var(--sans);white-space:nowrap;pointer-events:none}
+.backend-action-busy,.journal-save.is-busy,.pin-footer button.is-busy{animation:savePulse .62s ease-in-out infinite alternate!important;cursor:progress!important;transform-origin:center;pointer-events:none}.backend-action-busy:disabled,.journal-save.is-busy:disabled,.pin-footer button.is-busy:disabled{opacity:1}.sync-refresh.backend-action-busy{transform:none!important}.sync-refresh.backend-action-busy.is-loading{animation:syncBgPulse .78s ease-in-out infinite alternate!important}.sync-refresh.backend-action-busy .sync-icon-refresh{animation:syncRotate .9s linear infinite!important}.sync-refresh.backend-action-busy::after{content:attr(data-busy-label);position:absolute;right:0;top:calc(100% + 7px);z-index:90;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);box-shadow:var(--shadow);font:700 .70rem/1 var(--sans);white-space:nowrap;pointer-events:none}
 .journal-save-status{min-height:1.35em;margin:10px 2px 0;text-align:center;color:var(--muted);font-size:.80rem}.journal-save-status.error{color:#d64a4a}.journal-save-status.ok{color:#20a968}
 .journal-privacy{margin:14px 0 4px;padding:14px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--paper) 88%,transparent)}
 .journal-privacy h3{margin:0 0 4px;font-size:.96rem}.journal-privacy p{margin:0 0 12px;color:var(--muted);font-size:.82rem;line-height:1.45}.journal-pin-state{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;padding:9px 10px;border-radius:10px;background:var(--bg);font-size:.82rem}.journal-pin-state strong{font-size:.78rem;color:var(--focus)}
@@ -387,6 +387,7 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
 .sync-refresh{position:relative;width:40px;height:40px;padding:0;justify-content:center;overflow:visible;color:var(--marka)}
 .sync-refresh .sync-icon{width:19px;height:19px;display:none;fill:currentColor}
 .sync-refresh .sync-icon-refresh{display:block}
+.sync-refresh.is-loading{animation:syncBgPulse .78s ease-in-out infinite alternate}
 .sync-refresh.is-loading .sync-icon-refresh{animation:syncRotate .9s linear infinite}
 .sync-refresh.is-success{color:#17864b;border-color:color-mix(in srgb,#17864b 34%,var(--line));background:color-mix(in srgb,#17864b 9%,var(--paper))}
 .sync-refresh.is-success .sync-icon-refresh{display:none}
@@ -395,7 +396,8 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
 .sync-refresh .sync-error-mark{display:none;position:absolute;right:-2px;bottom:-2px;width:16px;height:16px;border-radius:50%;background:#c63232;color:#fff;border:2px solid var(--bar);font:800 11px/12px var(--sans);align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.24)}
 .sync-refresh.is-error .sync-error-mark{display:flex}
 @keyframes syncRotate{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){.sync-refresh.is-loading .sync-icon-refresh{animation:none}}
+@keyframes syncBgPulse{from{background:color-mix(in srgb,var(--focus) 5%,var(--paper));border-color:color-mix(in srgb,var(--focus) 22%,var(--line));box-shadow:var(--shadow)}to{background:color-mix(in srgb,var(--focus) 20%,var(--paper));border-color:color-mix(in srgb,var(--focus) 52%,var(--line));box-shadow:0 0 0 4px color-mix(in srgb,var(--focus) 9%,transparent),var(--shadow)}}
+@media (prefers-reduced-motion:reduce){.sync-refresh.is-loading{animation:none}.sync-refresh.is-loading .sync-icon-refresh{animation:none}}
 /* ——— Kimlik doğrulama kapısı: fail-closed ——— */
 .auth-gate{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:22px;overflow:auto;background:var(--body-base,var(--bg));background-color:var(--bg)}
 .auth-gate::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(52% 42% at 12% -6%,var(--glow-a),transparent 62%),radial-gradient(46% 38% at 88% -2%,var(--glow-b),transparent 60%),radial-gradient(40% 34% at 62% 8%,var(--glow-c),transparent 65%)}
@@ -476,6 +478,14 @@ body.journal-open{overflow:hidden}
 .pinned-back,.pinned-icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--paper);display:grid;place-items:center;color:var(--focus);box-shadow:var(--shadow);flex:none}
 .pinned-back svg,.pinned-icon-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .pinned-head-copy{min-width:0;flex:1}.pinned-head-copy h2{font-size:1.7rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pinned-head-copy p{margin:2px 0 0;color:var(--muted);font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.panel-title-line{display:flex;align-items:center;gap:10px;min-width:0}
+.panel-title-line h2{min-width:0}
+.panel-title-icon{width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;color:var(--focus)}
+.panel-title-icon svg{width:26px;height:26px;display:block}
+.panel-title-icon .pushpin-icon .pin-cap,.panel-title-icon .pushpin-icon .pin-body{fill:currentColor;stroke:color-mix(in srgb,currentColor 64%,var(--ink));stroke-width:.55}
+.panel-title-icon .pushpin-icon .pin-highlight{fill:color-mix(in srgb,#fff 70%,currentColor)}
+.panel-title-icon .pushpin-icon .pin-needle{fill:color-mix(in srgb,var(--muted) 60%,#fff);stroke:none}
+.panel-title-icon.journal-title-icon svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .pinned-head-actions{display:flex;gap:6px;flex:none}
 .pinned-create{display:flex;gap:8px;margin:0 0 16px}.pinned-create input{min-width:0;flex:1;border:1px solid var(--line);border-radius:11px;background:var(--paper);color:var(--ink);padding:11px 12px}.pinned-create button{border:0;border-radius:11px;background:var(--focus);color:#fff;font-weight:800;padding:0 14px}
 .pinned-lists{display:grid;gap:10px}
@@ -485,7 +495,7 @@ body.journal-open{overflow:hidden}
 .pinned-list-pin svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.pinned-list-pin .pushpin-icon{color:currentColor}
 .pinned-list-copy{min-width:0}.pinned-list-copy strong{display:block;font-size:.96rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pinned-list-copy small{display:block;margin-top:4px;color:var(--muted);font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pinned-list-arrow{font-size:1.2rem;color:var(--muted)}.pinned-list-card .pinned-unread-badge{top:-7px;right:-7px;border-color:var(--paper)}
 .pinned-empty{padding:22px 12px;color:var(--muted);text-align:center;border:1px dashed var(--line);border-radius:14px}
-.pinned-editor-meta{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:-5px 0 13px;color:var(--muted);font-size:.78rem}.pinned-live{display:inline-flex;align-items:center;gap:6px;max-width:52%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:750;color:#168a50}.pinned-live::before{content:"";width:7px;height:7px;border-radius:50%;background:#21b66c;box-shadow:0 0 0 3px color-mix(in srgb,#21b66c 15%,transparent);flex:none}.pinned-live.is-error{color:#c63232}.pinned-live.is-error::before{background:#c63232;box-shadow:0 0 0 3px color-mix(in srgb,#c63232 14%,transparent)}
+.pinned-editor-meta{display:flex;align-items:center;margin:-5px 0 13px;color:var(--muted);font-size:.78rem}
 .pinned-panel .sheet{margin-top:0}.pinned-panel .tally{margin-bottom:12px}
 .pinned-owner-tools{display:flex;gap:6px}.pinned-owner-tools[hidden]{display:none}
 .pinned-share-note{margin:8px 0 0;color:var(--muted);font-size:.78rem}
@@ -735,7 +745,7 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-r
   <div class="panel-pull-handle" id="pinnedPullHandle" aria-hidden="true"></div>
   <div class="pinned-head">
     <button class="pinned-back" id="pinnedBack" type="button" aria-label="Çakılı listelerine dön" title="Listelere dön" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 4.8-5.2 5.2 5.2 5.2"></path></svg></button>
-    <div class="pinned-head-copy"><h2 id="pinnedTitle">Çakılı</h2><p id="pinnedSubtitle">Tarihten bağımsız listelerin.</p></div>
+    <div class="pinned-head-copy"><div class="panel-title-line"><span class="panel-title-icon pinned-title-icon" aria-hidden="true"><svg class="pushpin-icon" viewBox="0 0 24 24"><g transform="rotate(18 12 12)"><ellipse class="pin-cap" cx="12" cy="4.4" rx="4.7" ry="2.2"></ellipse><path class="pin-body" d="M9.2 5.1h5.6l-.8 5.7c2.5.75 4.15 2.25 4.15 4.05 0 2.45-2.8 4.2-6.15 4.2s-6.15-1.75-6.15-4.2c0-1.8 1.65-3.3 4.15-4.05l-.8-5.7Z"></path><ellipse class="pin-cap" cx="12" cy="4.15" rx="4.25" ry="1.72" opacity=".72"></ellipse><path class="pin-highlight" d="M7.75 13.55c.38-1.12 1.15-1.9 2.05-2.25-.5.75-.8 1.55-.9 2.35-.08.58-.44.98-.83.86-.36-.11-.44-.44-.32-.96Z"></path><path class="pin-needle" d="M10.9 18.4h2.2L12 24Z"></path></g></svg></span><h2 id="pinnedTitle">Çakılı</h2></div><p id="pinnedSubtitle">Tarihten bağımsız listelerin.</p></div>
     <div class="pinned-head-actions pinned-owner-tools" id="pinnedOwnerTools" hidden>
       <button class="pinned-icon-btn" id="renamePinnedList" type="button" aria-label="Liste adını değiştir" title="Liste adını değiştir"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 14.8 3.3 17l2.2-.7L15.2 6.6 13.4 4.8 4 14.8Z"></path><path d="m12.4 5.8 1.8 1.8"></path></svg></button>
       <button class="pinned-icon-btn" id="sharePinnedList" type="button" aria-label="Listeyi paylaş" title="Paylaş" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="7" cy="7" r="2.3"></circle><path d="M2.8 15.9c.25-3 1.9-4.6 4.2-4.6s3.95 1.6 4.2 4.6"></path><path d="M14.2 6.2v5.6M11.4 9h5.6"></path></svg></button>
@@ -749,11 +759,10 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-r
       <button id="pinnedCreateButton" type="submit">Ekle</button>
     </form>
     <div class="pinned-lists" id="pinnedLists"></div>
-    <p class="pinned-status" id="pinnedOverviewStatus" aria-live="polite"></p>
   </section>
 
   <section id="pinnedEditor" hidden>
-    <div class="pinned-editor-meta"><span id="pinnedListMeta"></span><span class="pinned-live" id="pinnedEditorStatus" aria-live="polite">Canlı</span></div>
+    <div class="pinned-editor-meta"><span id="pinnedListMeta"></span></div>
     <div class="tally" aria-live="polite">
       <div class="tally-side tally-day"><span class="tally-unit tally-progress"><b id="pinnedDoneCount">0</b><span class="count-sep">/</span><b id="pinnedTotalCount">0</b><span class="tally-label">görev bitti</span></span></div>
       <div class="tally-side tally-month"><span>bekleyen:</span><b id="pinnedOpenCount">0</b></div>
@@ -786,7 +795,7 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-r
 <section class="journal-panel" id="journalPanel" aria-labelledby="journalTitle" hidden>
   <div class="panel-pull-handle" id="journalPullHandle" aria-hidden="true"></div>
   <div class="journal-head">
-    <div class="journal-head-copy"><h2 id="journalTitle">Çetele</h2><p>Gününü kaydet.</p></div>
+    <div class="journal-head-copy"><div class="panel-title-line"><span class="panel-title-icon journal-title-icon" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M3.2 4.1c2.6-.65 4.8-.2 6.8 1.35v10.1c-2-1.55-4.2-2-6.8-1.35V4.1Z"></path><path d="M16.8 4.1c-2.6-.65-4.8-.2-6.8 1.35v10.1c2-1.55 4.2-2 6.8-1.35V4.1Z"></path></svg></span><h2 id="journalTitle">Çetele</h2></div><p>Gününü kaydet.</p></div>
   </div>
 
   <section class="journal-slide-view" id="journalUnlockView" hidden aria-labelledby="journalUnlockTitle">
@@ -889,7 +898,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v83-logo-darkmode-fix", CENTIK_EXPECTED_SERVER_BUILD="v29-cakili-list-unread";
+const CENTIK_CLIENT_BUILD="v84-panel-icons-clean-status-pulse", CENTIK_EXPECTED_SERVER_BUILD="v29-cakili-list-unread";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -1346,13 +1355,6 @@ function resetPinnedState(){
 function pinnedTaskId(){return `p${Date.now().toString(36)}${Math.random().toString(36).slice(2,8)}`}
 function pinnedSetStatus(id,text=""){
   const el=$(id);if(!el)return;
-  if(id==="pinnedEditorStatus"){
-    const raw=String(text||"").trim(),loading=/yükleniyor/i.test(raw),status=loading?"":raw;
-    el.classList.remove("is-loading");el.classList.toggle("is-error",!!status);
-    el.textContent=!status?"Canlı":status;
-    el.title=!status?"Canlı senkronizasyon aktif":status;
-    return;
-  }
   el.textContent=text||"";
 }
 function pinnedListById(id){return pinnedLists.find(x=>x.id===id)||null}
