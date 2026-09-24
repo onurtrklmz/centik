@@ -2547,20 +2547,30 @@ async function ensureBeniDurtMessaging(){
   }
   return beniDurtMessaging;
 }
-async function prepareBeniDurtSubscription(){
+async function prepareBeniDurtSubscription(permissionPromise=null){
   if(!("Notification" in window)||!("serviceWorker" in navigator))throw new Error("durt_izin");
-  let permission=Notification.permission;if(permission!=="granted")permission=await Notification.requestPermission();
+  let permission=Notification.permission;
+  if(permission!=="granted"&&permissionPromise)permission=await permissionPromise;
   if(permission!=="granted")throw new Error("durt_izin");
   const x=await ensureBeniDurtMessaging();const token=await x.messaging.getToken({vapidKey:x.vapidKey,serviceWorkerRegistration:x.reg});
   if(!token)throw new Error("durt_izin");return token;
 }
-async function saveBeniDurtPreference(){
+async function saveBeniDurtPreference(permissionPromise=null){
   if(!currentUser?.id)return false;const active=$("beniDurtEnabled").checked,time=$("beniDurtTime").value;
   if(active&&!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time)){setBeniDurtState("Geçerli bir saat seçin.",true);return false}
-  let fcmToken="";if(active){setBeniDurtState("Bildirim izni hazırlanıyor…");try{fcmToken=await prepareBeniDurtSubscription()}catch(e){setBeniDurtState(authMessage(e.message||"durt_izin"),true);return false}}
+  let fcmToken="",deviceReady=!active,permissionError=false;
+  if(active){
+    setBeniDurtState("Beni Dürt ayarı kaydediliyor…");
+    try{fcmToken=await prepareBeniDurtSubscription(permissionPromise);deviceReady=!!fcmToken}catch(e){permissionError=true}
+  }
   const j=await api("beniDurtSave",{token:getToken(),active,time:time||"20:00",timeZone:beniDurtTimeZone(),deviceId:beniDurtDeviceId(),fcmToken},{timeout:30000});
   if(!j.ok){setBeniDurtState(authMessage(j.error),true);return false}
-  currentUser=j.user||{...currentUser,beniDurt:{active,time:time||"20:00",timeZone:beniDurtTimeZone()}};setSession(getToken(),currentUser);renderBeniDurtUI();return true;
+  currentUser=j.user||{...currentUser,beniDurt:{active,time:time||"20:00",timeZone:beniDurtTimeZone()}};setSession(getToken(),currentUser);renderBeniDurtUI();
+  if(active&&!deviceReady){
+    const msg=Notification.permission==="denied"?"Saat kaydedildi · bu cihazda bildirim izni kapalı. Tarayıcı/sistem ayarlarından izin verin.":"Saat kaydedildi · bu cihaz henüz bildirim almaya hazır değil.";
+    setBeniDurtState(msg,permissionError);
+  }else if(active){setBeniDurtState("Beni Dürt açık · saat kaydedildi ve bu cihaz bildirim alabilir.")}
+  return true;
 }
 
 function closeAccountMenu(){const m=$("accountMenu");if(!m)return;m.hidden=true;$("settings").setAttribute("aria-expanded","false")}
@@ -2584,10 +2594,16 @@ async function openManagementDialog(){
   if(!registeredUsers||Date.now()-registeredUsersAt>60000)await loadRegisteredUsers();
 }
 async function saveSettings(){
+  const wantsNudge=$("beniDurtEnabled").checked;
+  let permissionPromise=null;
+  // Bildirim izni isteğini doğrudan Kaydet tıklamasının kullanıcı etkileşimi içinde başlat.
+  // Promise daha sonra beklenir; böylece araya backend çağrısı girip tarayıcı gesture bağlamını bozmaz.
+  if(wantsNudge&&("Notification" in window)&&Notification.permission==="default"){
+    try{permissionPromise=Notification.requestPermission()}catch(e){permissionPromise=Promise.resolve(Notification.permission)}
+  }
   const b=$("saveSettings");if(!setBackendActionBusy(b,true,"Kaydediliyor…"))return;$("settingsSaveStatus").textContent="";
   try{
-    // Notification.requestPermission kullanıcı tıklaması bağlamında başlatılabilsin diye Beni Dürt önce kaydedilir.
-    const nudgeOk=await saveBeniDurtPreference();if(nudgeOk===false){$("settingsSaveStatus").textContent="Beni Dürt ayarı kaydedilemedi.";return}
+    const nudgeOk=await saveBeniDurtPreference(permissionPromise);if(nudgeOk===false){$("settingsSaveStatus").textContent="Beni Dürt ayarı kaydedilemedi.";return}
     const [themeOk]=await Promise.all([syncThemePreference(),wait(250)]);
     if(themeOk!==false){settingsOriginalTheme=null;settingsOriginalNudge=null;$("accountDialog").close()}
     else $("settingsSaveStatus").textContent="Ayar kaydedilemedi. Yeniden deneyin.";
