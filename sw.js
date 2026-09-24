@@ -1,7 +1,7 @@
-// v89: Çakılı liste başlığı plain-text yazma ve görev düzenleme input focus/Space düzeltmeleri.
+// v90: Parola yöneticisi kapsamı yalnız login alanıyla sınırlandı; PIN ve diğer credential-benzeri alanlar nötrleştirildi.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v89-pinned-title-edit-focus-fix";
+const SURUM = "centik-v90-password-manager-scope";
 const KABUK = [
   "./",
   "./index.html",

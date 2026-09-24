@@ -416,7 +416,12 @@ body.calendar-open::after,body.pinned-open::after,body.journal-open::after{
 .auth-brand{display:flex;align-items:center;gap:13px;margin-bottom:18px}.auth-brand img{width:46px;height:46px;object-fit:contain}.auth-brand h1{font-size:1.75rem;line-height:1}.auth-brand p{margin:5px 0 0;color:var(--muted);font-size:.86rem}
 .auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:5px;border:1px solid var(--line);border-radius:12px;background:var(--bg);margin-bottom:16px}.auth-tabs button{min-height:42px;border:0;border-radius:9px;background:transparent;color:var(--muted);font-weight:700}.auth-tabs button.active{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
 body.auth-locked{overflow:hidden!important}body.auth-locked .ust-cubuk,body.auth-locked main{visibility:hidden!important;pointer-events:none!important;user-select:none!important;-webkit-user-select:none!important}
-.auth-pane label{display:block;margin:13px 0;font-size:.88rem;font-weight:600}.auth-pane input{display:block;width:100%;margin-top:6px;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}.password-field{position:relative;display:block;margin-top:6px}.auth-pane .password-field input{margin-top:0;padding-right:50px}.password-toggle{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:38px;height:38px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer}.password-toggle:hover{background:color-mix(in srgb,var(--marka) 8%,transparent);color:var(--ink)}.password-toggle:focus-visible{outline:2px solid var(--focus);outline-offset:1px}.password-toggle svg{width:20px;height:20px;pointer-events:none}.password-toggle .eye-slash{display:none}.password-toggle.is-visible .eye-slash{display:block}.auth-pane small{display:block;color:var(--muted);margin:-6px 0 12px}.auth-primary{width:100%;border:0;border-radius:11px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));color:#fff;font-weight:700;padding:12px 14px;margin-top:7px}.auth-link{display:block;margin:12px auto 0;border:0;background:transparent;color:var(--marka);font-size:.88rem}.auth-status{min-height:1.4em;color:var(--muted);font-size:.86rem;margin:14px 0 0}.auth-status.error{color:#b42318}.account-box{padding:4px}.account-box .row{margin-top:20px}
+.auth-pane label{display:block;margin:13px 0;font-size:.88rem;font-weight:600}.auth-pane input{display:block;width:100%;margin-top:6px;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.pm-secret{
+  -webkit-text-security:disc;
+  text-security:disc;
+}
+.password-field{position:relative;display:block;margin-top:6px}.auth-pane .password-field input{margin-top:0;padding-right:50px}.password-toggle{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:38px;height:38px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer}.password-toggle:hover{background:color-mix(in srgb,var(--marka) 8%,transparent);color:var(--ink)}.password-toggle:focus-visible{outline:2px solid var(--focus);outline-offset:1px}.password-toggle svg{width:20px;height:20px;pointer-events:none}.password-toggle .eye-slash{display:none}.password-toggle.is-visible .eye-slash{display:block}.auth-pane small{display:block;color:var(--muted);margin:-6px 0 12px}.auth-primary{width:100%;border:0;border-radius:11px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));color:#fff;font-weight:700;padding:12px 14px;margin-top:7px}.auth-link{display:block;margin:12px auto 0;border:0;background:transparent;color:var(--marka);font-size:.88rem}.auth-status{min-height:1.4em;color:var(--muted);font-size:.86rem;margin:14px 0 0}.auth-status.error{color:#b42318}.account-box{padding:4px}.account-box .row{margin-top:20px}
 .admin-panel{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
 .theme-settings{margin:18px 0 4px;padding:14px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--paper) 88%,transparent)}
 .theme-settings h3{margin:0 0 4px;font-size:.96rem}.theme-settings p{margin:0 0 12px;color:var(--muted);font-size:.82rem}
@@ -796,7 +801,7 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-r
   <div class="pinned-share-box">
     <h3>Çakılı listeyi paylaş</h3>
     <p>Listeyi bir aktif Çentik kullanıcısıyla paylaşabilirsiniz. İki kullanıcı da görevleri anlık olarak düzenleyebilir.</p>
-    <label>Kullanıcının e-posta adresi<input id="pinnedShareEmail" type="email" autocomplete="email" placeholder="ornek@eposta.com"></label>
+    <label>Kullanıcının e-posta adresi<input id="pinnedShareEmail" type="text" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other" placeholder="ornek@eposta.com"></label>
     <p class="pinned-share-note" id="pinnedShareCurrent"></p>
     <p class="pinned-status" id="pinnedShareStatus" aria-live="polite"></p>
     <div class="pinned-share-actions">
@@ -817,7 +822,7 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-r
     <div class="journal-card journal-unlock-card">
       <div class="journal-field-label"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6.3 9V6.8a3.7 3.7 0 0 1 7.4 0V9"></path><rect x="4.6" y="8.8" width="10.8" height="8" rx="2"></rect></svg><span id="journalUnlockTitle">Çetele PIN'i</span></div>
       <p class="pin-note">Bu Çeteleyi açmak için PIN'inizi girin. PIN hiçbir cihazda hatırlanmaz.</p>
-      <div class="pin-fields"><label>PIN<input id="journalUnlockPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"></label></div>
+      <div class="pin-fields"><label>PIN<input id="journalUnlockPin" class="pm-secret" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" autocapitalize="none" spellcheck="false" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other"></label></div>
       <p class="pin-status" id="journalUnlockStatus" aria-live="polite"></p>
       <button type="button" class="journal-save" id="confirmJournalUnlock"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v14M5 8l5-5 5 5"></path></svg><span>Aç</span></button>
     </div>
@@ -852,9 +857,9 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-r
     <div class="modal-head"><h2 id="journalPinDialogTitle">Çetele PIN'i</h2></div>
     <p class="pin-note" id="journalPinDialogNote">4 veya 6 haneli bir PIN belirleyin.</p>
     <div class="pin-fields">
-      <label id="journalCurrentPinWrap" hidden>Mevcut PIN<input id="journalCurrentPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"></label>
-      <label id="journalNewPinWrap">Yeni PIN<input id="journalNewPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"></label>
-      <label id="journalConfirmPinWrap">Yeni PIN'i tekrar girin<input id="journalConfirmPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"></label>
+      <label id="journalCurrentPinWrap" hidden>Mevcut PIN<input id="journalCurrentPin" class="pm-secret" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" autocapitalize="none" spellcheck="false" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other"></label>
+      <label id="journalNewPinWrap">Yeni PIN<input id="journalNewPin" class="pm-secret" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" autocapitalize="none" spellcheck="false" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other"></label>
+      <label id="journalConfirmPinWrap">Yeni PIN'i tekrar girin<input id="journalConfirmPin" class="pm-secret" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" autocapitalize="none" spellcheck="false" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other"></label>
     </div>
     <p class="pin-status" id="journalPinStatus" aria-live="polite"></p>
     <div class="pin-footer"><button type="button" id="cancelJournalPin">Vazgeç</button><button type="button" class="primary" id="confirmJournalPin">Kaydet</button></div>
@@ -870,29 +875,29 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-r
       <button type="button" data-pane="registerPane">Kayıt ol</button>
     </div>
 
-    <form class="auth-pane" id="loginPane">
-      <label>E-posta<input id="loginEmail" type="email" autocomplete="email" required></label>
+    <form class="auth-pane" id="loginPane" autocomplete="on">
+      <label>E-posta<input id="loginEmail" name="username" type="email" autocomplete="username" required></label>
       <label>Parola<span class="password-field"><input id="loginPassword" type="password" autocomplete="current-password" required minlength="10"><button class="password-toggle" type="button" id="toggleLoginPassword" aria-label="Parolayı göster" aria-pressed="false" title="Parolayı göster"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.7" fill="none" stroke="currentColor" stroke-width="1.7"/><path class="eye-slash" d="M4.2 4.2 19.8 19.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></span></label>
       <button class="auth-primary" type="submit">Giriş yap</button>
       <button class="auth-link" type="button" id="forgotBtn">Parolamı unuttum</button>
     </form>
 
-    <form class="auth-pane" id="registerPane" hidden>
+    <form class="auth-pane" id="registerPane" autocomplete="off" hidden>
       <label>Adınız<input id="registerName" type="text" autocomplete="name" required minlength="2" maxlength="60"></label>
-      <label>E-posta<input id="registerEmail" type="email" autocomplete="email" required></label>
-      <label>Parola<input id="registerPassword" type="password" autocomplete="new-password" required minlength="10"></label>
+      <label>E-posta<input id="registerEmail" type="text" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other" required></label>
+      <label>Parola<input id="registerPassword" class="pm-secret" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other" required minlength="10"></label>
       <small>En az 10 karakter kullanın. Yeni hesaplar yönetici onayından sonra etkinleşir.</small>
       <button class="auth-primary" type="submit">Hesap başvurusu gönder</button>
     </form>
 
-    <form class="auth-pane" id="resetPane" hidden>
+    <form class="auth-pane" id="resetPane" autocomplete="off" hidden>
       <h2>Parolayı sıfırla</h2>
       <p class="sub">E-postanıza 6 haneli bir kod göndereceğiz.</p>
-      <label>E-posta<input id="resetEmail" name="centik-reset-email" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" required></label>
+      <label>E-posta<input id="resetEmail" name="centik-reset-email" type="text" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other" required></label>
       <small>Sıfırlama kodu bu e-posta adresine gönderilecektir.</small>
       <div id="resetCodeFields" hidden>
-        <label>Kod<input id="resetCode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code"></label>
-        <label>Yeni parola<input id="resetPassword" type="password" autocomplete="new-password" minlength="10"></label>
+        <label>Kod<input id="resetCode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" data-1p-ignore="true" data-lpignore="true" data-bwignore="true"></label>
+        <label>Yeni parola<input id="resetPassword" class="pm-secret" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other" minlength="10"></label>
       </div>
       <button class="auth-primary" type="submit" id="resetSubmit">Kod gönder</button>
       <button class="auth-link" type="button" id="backLoginBtn">Girişe dön</button>
@@ -913,7 +918,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v89-pinned-title-edit-focus-fix", CENTIK_EXPECTED_SERVER_BUILD="v31-pinned-title-edit-focus-fix";
+const CENTIK_CLIENT_BUILD="v90-password-manager-scope", CENTIK_EXPECTED_SERVER_BUILD="v31-pinned-title-edit-focus-fix";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
