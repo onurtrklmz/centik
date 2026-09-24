@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v71: Çakılı için temaya uyumlu toplu iğne ikonu ve yeni liste ekleme loading durumu eklendi.
-const SURUM = "centik-v71-cakili-pin-loading";
+// v72: Çakılı ve Çetele tam ekran çekmeceleri aşağı sürüklenerek kapanabilir; alt sağa Geri dön düğmesi eklendi.
+const SURUM = "centik-v72-panel-pull-return";
 const KABUK = [
   "./",
   "./index.html",

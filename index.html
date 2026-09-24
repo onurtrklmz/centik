@@ -499,6 +499,18 @@ body.journal-open{overflow:hidden}
   .calendar-month-slot .month-toggle{font-size:.98rem}
   .pinned-panel,.journal-panel{width:100%;padding-left:14px;padding-right:14px}
 }
+
+/* ——— V72 Çakılı / Çetele aşağı çekme + alt geri dön ——— */
+.pinned-panel,.journal-panel{display:flex;flex-direction:column}
+.pinned-panel.panel-dragging,.journal-panel.panel-dragging{transition:none!important;cursor:grabbing}
+.panel-pull-handle{height:22px;min-height:22px;display:grid;place-items:start center;margin:-8px 0 4px;padding-top:5px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;flex:none}
+.panel-pull-handle::before{content:"";display:block;width:46px;height:5px;border-radius:999px;background:color-mix(in srgb,var(--muted) 38%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--paper) 30%,transparent)}
+.panel-pull-handle:active{cursor:grabbing}
+.panel-bottom-actions{display:flex;justify-content:flex-end;align-items:center;margin-top:auto;padding-top:26px;flex:none}
+.panel-home-return{min-height:42px;border:1px solid color-mix(in srgb,var(--focus) 34%,var(--line));border-radius:12px;background:color-mix(in srgb,var(--focus) 8%,var(--paper));color:var(--focus);display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 13px;font-weight:800;box-shadow:var(--shadow)}
+.panel-home-return:hover,.panel-home-return:focus-visible{background:color-mix(in srgb,var(--focus) 14%,var(--paper));outline:none}
+.panel-home-return svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+@media(prefers-reduced-motion:reduce){.pinned-panel.panel-dragging,.journal-panel.panel-dragging{transition:none!important}}
 </style>
 </head>
 <body class="auth-locked">
@@ -654,6 +666,7 @@ body.journal-open{overflow:hidden}
 
 
 <section class="pinned-panel" id="pinnedPanel" aria-labelledby="pinnedTitle" hidden>
+  <div class="panel-pull-handle" id="pinnedPullHandle" aria-hidden="true"></div>
   <div class="pinned-head">
     <button class="pinned-back" id="pinnedBack" type="button" aria-label="Geri dön" title="Geri dön"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 4.8-5.2 5.2 5.2 5.2"></path></svg></button>
     <div class="pinned-head-copy"><h2 id="pinnedTitle">Çakılı</h2><p id="pinnedSubtitle">Tarihten bağımsız listelerin.</p></div>
@@ -688,6 +701,7 @@ body.journal-open{overflow:hidden}
     </section>
     <p class="pinned-status" id="pinnedEditorStatus" aria-live="polite"></p>
   </section>
+  <div class="panel-bottom-actions"><button class="panel-home-return" id="pinnedHomeReturn" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 4.8-5.2 5.2 5.2 5.2"></path></svg><span>Geri dön</span></button></div>
 </section>
 
 <dialog id="pinnedShareDialog">
@@ -706,6 +720,7 @@ body.journal-open{overflow:hidden}
 </dialog>
 
 <section class="journal-panel" id="journalPanel" aria-labelledby="journalTitle" hidden>
+  <div class="panel-pull-handle" id="journalPullHandle" aria-hidden="true"></div>
   <div class="journal-head">
     <button class="journal-back" id="closeJournal" type="button" aria-label="Çeteleyi kapat" title="Geri dön"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 4.8-5.2 5.2 5.2 5.2"></path></svg></button>
     <div class="journal-head-copy"><h2 id="journalTitle">Çetele</h2><p>Gününü kaydet.</p></div>
@@ -741,6 +756,7 @@ body.journal-open{overflow:hidden}
     <button class="journal-save" id="saveJournal" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m4.3 10.2 3.5 3.5 7.9-8"></path></svg><span>Çetele tut</span></button>
     <p class="journal-save-status" id="journalSaveStatus" aria-live="polite"></p>
   </section>
+  <div class="panel-bottom-actions"><button class="panel-home-return" id="journalHomeReturn" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 4.8-5.2 5.2 5.2 5.2"></path></svg><span>Geri dön</span></button></div>
 </section>
 </div>
 
@@ -811,7 +827,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v71-cakili-pin-loading", CENTIK_EXPECTED_SERVER_BUILD="v27-cakili-shared-control";
+const CENTIK_CLIENT_BUILD="v72-panel-pull-return", CENTIK_EXPECTED_SERVER_BUILD="v27-cakili-shared-control";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -1296,7 +1312,7 @@ function openPinnedPanel(){
   if(!requireLocalSession()||document.body.classList.contains("journal-open"))return;setCalendarOpen(false);const panel=$("pinnedPanel");panel.hidden=false;document.body.classList.add("pinned-open");pinnedShowOverview();loadPinnedLists();startPinnedListsRefresh();
 }
 function closePinnedPanel(force=false){
-  if($("pinnedShareDialog")?.open)$("pinnedShareDialog").close();stopPinnedLive();stopPinnedListsRefresh();clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;document.body.classList.remove("pinned-open");pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;const panel=$("pinnedPanel");if(force){panel.hidden=true}else setTimeout(()=>{if(!document.body.classList.contains("pinned-open"))panel.hidden=true},310);return true
+  if($("pinnedShareDialog")?.open)$("pinnedShareDialog").close();stopPinnedLive();stopPinnedListsRefresh();clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;const panel=$("pinnedPanel");panel?.classList.remove("panel-dragging");panel?.style.removeProperty("transform");document.body.classList.remove("pinned-open");pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;if(force){panel.hidden=true}else setTimeout(()=>{if(!document.body.classList.contains("pinned-open"))panel.hidden=true},310);return true
 }
 function startPinnedListsRefresh(){stopPinnedListsRefresh();pinnedListsTimer=setInterval(()=>{if(document.visibilityState==="visible"&&document.body.classList.contains("pinned-open")&&!pinnedActiveList)loadPinnedLists({silent:true})},12000)}
 function stopPinnedListsRefresh(){if(pinnedListsTimer){clearInterval(pinnedListsTimer);pinnedListsTimer=null}}
@@ -1477,8 +1493,8 @@ async function openJournalForCurrent(){
 function closeJournalView(force=false){
   if(!force&&journalContext&&journalDirty&&!confirm("Çetele’de kaydedilmemiş değişiklikler var. Kapatılsın mı?"))return false;
   journalOpenSeq++;if(journalUnlockResolver)finishJournalUnlock(null);
-  journalContext=null;journalActivePin="";journalDirty=false;$("journalText").value="";clearJournalLimitWarning();$("journalSaveStatus").textContent="";document.body.classList.remove("journal-open");renderJournalButton();
-  clearTimeout(journalPanelHideTimer);const panel=$("journalPanel");if(force){if(panel)panel.hidden=true}else journalPanelHideTimer=setTimeout(()=>{if(panel&&!document.body.classList.contains("journal-open"))panel.hidden=true},300);
+  const panel=$("journalPanel");panel?.classList.remove("panel-dragging");panel?.style.removeProperty("transform");journalContext=null;journalActivePin="";journalDirty=false;$("journalText").value="";clearJournalLimitWarning();$("journalSaveStatus").textContent="";document.body.classList.remove("journal-open");renderJournalButton();
+  clearTimeout(journalPanelHideTimer);if(force){if(panel)panel.hidden=true}else journalPanelHideTimer=setTimeout(()=>{if(panel&&!document.body.classList.contains("journal-open"))panel.hidden=true},300);
   return true;
 }
 function clearJournalLimitWarning(){const el=$("journalLimitStatus");if(el){el.hidden=true;el.textContent="Çetele sınıra ulaştı"}}
@@ -1490,6 +1506,33 @@ function enforceJournalLimit(){
 }
 $("journalText").addEventListener("input",enforceJournalLimit);
 $("journalButton").onclick=openJournalForCurrent;$("closeJournal").onclick=()=>closeJournalView(false);
+$("pinnedHomeReturn").onclick=()=>closePinnedPanel(false);
+$("journalHomeReturn").onclick=()=>closeJournalView(false);
+
+// Çakılı ve Çetele tam ekran çekmeceleri üstteki tutamaktan aşağı sürüklenerek kapatılabilir.
+let fullPanelDrag=null;
+function fullPanelFor(kind){return kind==="pinned"?$("pinnedPanel"):$("journalPanel")}
+function fullPanelOpen(kind){return document.body.classList.contains(kind==="pinned"?"pinned-open":"journal-open")}
+function resetFullPanelDrag(panel){if(!panel)return;panel.classList.remove("panel-dragging");panel.style.removeProperty("transform")}
+function beginFullPanelDrag(e,kind){
+  if(e.pointerType==="mouse"&&e.button!==0)return;if(!fullPanelOpen(kind))return;const panel=fullPanelFor(kind);if(!panel)return;
+  fullPanelDrag={id:e.pointerId,kind,panel,startY:e.clientY,lastY:e.clientY,startAt:performance.now(),dragging:false};
+  panel.classList.add("panel-dragging");
+  try{e.currentTarget.setPointerCapture?.(e.pointerId)}catch(_){}
+}
+function moveFullPanelDrag(e){
+  const g=fullPanelDrag;if(!g||g.id!==e.pointerId)return;const dy=e.clientY-g.startY;g.lastY=e.clientY;
+  if(dy<=0){if(g.dragging){g.panel.style.transform="translate(-50%,0px)"}return}
+  if(!g.dragging&&dy<6)return;g.dragging=true;const y=Math.min(dy,window.innerHeight*.92);g.panel.style.transform=`translate(-50%,${y}px)`;
+  if(e.cancelable)e.preventDefault();
+}
+function finishFullPanelDrag(e,{cancel=false}={}){
+  const g=fullPanelDrag;if(!g||g.id!==e.pointerId)return;fullPanelDrag=null;const dy=Math.max(0,(e.clientY??g.lastY)-g.startY),dt=Math.max(1,performance.now()-g.startAt),velocity=dy/dt;
+  resetFullPanelDrag(g.panel);if(cancel||!g.dragging)return;const shouldClose=dy>=110||(dy>=52&&velocity>=.55);if(!shouldClose)return;
+  if(g.kind==="pinned")closePinnedPanel(false);else closeJournalView(false);
+}
+[["pinnedPullHandle","pinned"],["journalPullHandle","journal"]].forEach(([id,kind])=>{const h=$(id);h.addEventListener("pointerdown",e=>beginFullPanelDrag(e,kind));h.addEventListener("pointermove",moveFullPanelDrag);h.addEventListener("pointerup",e=>finishFullPanelDrag(e));h.addEventListener("pointercancel",e=>finishFullPanelDrag(e,{cancel:true}))});
+window.addEventListener("blur",()=>{if(fullPanelDrag){const p=fullPanelDrag.panel;fullPanelDrag=null;resetFullPanelDrag(p)}});
 async function saveJournal(){
   if(!journalContext||!requireLocalSession())return;const btn=$("saveJournal"),date=journalContext.date,content=$("journalText").value;
   if(!content.trim()){setJournalPanelMode("editor",date);$("journalSaveStatus").className="journal-save-status error";$("journalSaveStatus").textContent="Çetele boş";return}
