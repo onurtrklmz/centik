@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v78-surface-pull-journal-fit";
+const SURUM = "centik-v80-pinned-unified-status";
 const KABUK = [
   "./",
   "./index.html",
