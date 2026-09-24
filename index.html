@@ -113,7 +113,6 @@ body::before{
   background:var(--bar);
   backdrop-filter:blur(16px) saturate(1.5);-webkit-backdrop-filter:blur(16px) saturate(1.5);
   border-bottom:1px solid var(--bar-line);
-  transition:filter .22s ease,opacity .22s ease,background .22s ease;
 }
 .ust-cubuk .wrap{max-width:520px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:12px}
 .brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0;padding:11px 0 10px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
@@ -352,21 +351,21 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
 
 .calendar-backdrop{
   position:fixed;inset:0;z-index:45;
-  background:rgba(4,8,16,.25);
+  background:transparent;
   opacity:0;pointer-events:none;
   transition:opacity .22s ease;
-  backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px)
+  backdrop-filter:none;-webkit-backdrop-filter:none
 }
 .calendar-backdrop.open{opacity:1;pointer-events:auto}
 
 /* ——— V87: üç çekmece için ortak global blur ——— */
 body::after{
   content:"";position:fixed;inset:0;z-index:44;pointer-events:none;
-  background:rgba(4,8,16,.25);opacity:0;visibility:hidden;
+  background:rgba(18,22,30,.12);opacity:0;visibility:hidden;
   backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px);
   transition:opacity .22s ease,visibility 0s linear .22s;
 }
-body.pinned-open::after,body.journal-open::after{
+body.calendar-open::after,body.pinned-open::after,body.journal-open::after{
   opacity:1;visibility:visible;transition-delay:0s;
 }
 .cal{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));z-index:46;width:min(520px,calc(100% - 24px));transform:translate(-50%,var(--drawer-drag-y,0px));transition:transform .17s cubic-bezier(.22,.8,.24,1);border:1px solid var(--line);border-radius:17px;background:color-mix(in srgb,var(--paper) 94%,transparent);box-shadow:0 14px 40px rgba(0,0,0,.16);overflow:hidden;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
@@ -425,7 +424,7 @@ body.pinned-open::after,body.journal-open::after{
 .sync-refresh .sync-error-mark{display:none;position:absolute;right:-2px;bottom:-2px;width:16px;height:16px;border-radius:50%;background:#c63232;color:#fff;border:2px solid var(--bar);font:800 11px/12px var(--sans);align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.24)}
 .sync-refresh.is-error .sync-error-mark{display:flex}
 @keyframes syncRotate{to{transform:rotate(360deg)}}
-@keyframes syncBgPulse{from{background:color-mix(in srgb,var(--focus) 5%,var(--paper));border-color:color-mix(in srgb,var(--focus) 22%,var(--line));box-shadow:var(--shadow)}to{background:color-mix(in srgb,var(--focus) 20%,var(--paper));border-color:color-mix(in srgb,var(--focus) 52%,var(--line));box-shadow:0 0 0 4px color-mix(in srgb,var(--focus) 9%,transparent),var(--shadow)}}
+@keyframes syncBgPulse{from{background:color-mix(in srgb,var(--focus) 7%,var(--paper));border-color:color-mix(in srgb,var(--focus) 28%,var(--line));box-shadow:var(--shadow)}to{background:color-mix(in srgb,var(--focus) 24%,var(--paper));border-color:color-mix(in srgb,var(--focus) 62%,var(--line));box-shadow:0 0 0 5px color-mix(in srgb,var(--focus) 13%,transparent),var(--shadow)}}
 @media (prefers-reduced-motion:reduce){.sync-refresh.is-loading{animation:none}.sync-refresh.is-loading .sync-icon-refresh{animation:none}}
 /* ——— Kimlik doğrulama kapısı: fail-closed ——— */
 .auth-gate{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:22px;overflow:auto;background:var(--body-base,var(--bg));background-color:var(--bg)}
@@ -506,7 +505,7 @@ body.journal-open .journal-panel,body.pinned-open .pinned-panel{transform:transl
 body.journal-open .cal,body.journal-open .calendar-backdrop,body.pinned-open .cal,body.pinned-open .calendar-backdrop{visibility:hidden!important;pointer-events:none!important}
 body.pinned-open{overflow:hidden}
 body.journal-open{overflow:hidden}
-@media(prefers-reduced-motion:reduce){.pinned-panel,.journal-panel{transition:none!important}body::after,.ust-cubuk{transition:none!important}}
+@media(prefers-reduced-motion:reduce){.pinned-panel,.journal-panel{transition:none!important}body::after{transition:none!important}}
 
 .pinned-head{display:flex;align-items:center;gap:12px;margin:0 0 18px}
 .pinned-back,.pinned-icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--paper);display:grid;place-items:center;color:var(--focus);box-shadow:var(--shadow);flex:none}
@@ -586,12 +585,6 @@ body.pinned-open .ust-cubuk,body.journal-open .ust-cubuk{
   z-index:40;
   background:color-mix(in srgb,var(--bar) 84%,transparent);
   backdrop-filter:blur(18px) saturate(1.35);-webkit-backdrop-filter:blur(18px) saturate(1.35);
-}
-body.calendar-open .ust-cubuk{
-  filter:blur(1px);
-  opacity:.76;
-  pointer-events:none;
-  transition:filter .22s ease,opacity .22s ease;
 }
 body.pinned-open main,body.journal-open main{pointer-events:none}
 body.pinned-open .cal-head,body.journal-open .cal-head{background:color-mix(in srgb,var(--paper) 96%,transparent)}
@@ -703,32 +696,6 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-r
     <ul id="list" class="task-list"></ul>
   </section>
 
-  <div class="calendar-backdrop" id="calendarBackdrop" aria-hidden="true"></div>
-  <section class="cal" id="calendarDrawer" aria-label="Takvim">
-    <div class="cal-body-wrap" id="calendarBodyWrap">
-      <div class="cal-body-clip">
-        <div class="cal-body" id="calendarBody">
-          <div class="drawer-hint" aria-hidden="true"></div>
-          <div class="grid" id="grid"></div>
-        </div>
-      </div>
-    </div>
-    <div class="cal-head" id="calendarHandle">
-      <button class="drawer-launch pinned-launch" id="pinnedButton" type="button" aria-label="Çakılı görevleri aç">
-        <svg class="pushpin-icon" viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(18 12 12)"><ellipse class="pin-cap" cx="12" cy="4.4" rx="4.7" ry="2.2"></ellipse><path class="pin-body" d="M9.2 5.1h5.6l-.8 5.7c2.5.75 4.15 2.25 4.15 4.05 0 2.45-2.8 4.2-6.15 4.2s-6.15-1.75-6.15-4.2c0-1.8 1.65-3.3 4.15-4.05l-.8-5.7Z"></path><ellipse class="pin-cap" cx="12" cy="4.15" rx="4.25" ry="1.72" opacity=".72"></ellipse><path class="pin-highlight" d="M7.75 13.55c.38-1.12 1.15-1.9 2.05-2.25-.5.75-.8 1.55-.9 2.35-.08.58-.44.98-.83.86-.36-.11-.44-.44-.32-.96Z"></path><path class="pin-needle" d="M10.9 18.4h2.2L12 24Z"></path></g></svg>
-        <span>Çakılı</span><span class="pinned-unread-badge" id="pinnedUnreadBadge" hidden aria-hidden="true"></span>
-      </button>
-      <div class="calendar-month-slot">
-        <button class="nav" id="mPrev" type="button" aria-label="Takvimi aç"></button>
-        <button class="month-toggle" id="monthToggle" type="button" aria-expanded="false" aria-controls="calendarBodyWrap"><span id="monthTitle"></span></button>
-        <button class="nav" id="mNext" type="button" aria-label="Takvimi aç"></button>
-      </div>
-      <button class="drawer-launch journal-launch" id="journalButton" type="button" aria-label="Çeteleyi aç">
-        <svg class="journal-book" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.2 4.1c2.6-.65 4.8-.2 6.8 1.35v10.1c-2-1.55-4.2-2-6.8-1.35V4.1Z"></path><path d="M16.8 4.1c-2.6-.65-4.8-.2-6.8 1.35v10.1c2-1.55 4.2-2 6.8-1.35V4.1Z"></path></svg>
-        <span>Çetele</span><span class="journal-launch-state" id="journalButtonState" aria-hidden="true">+</span>
-      </button>
-    </div>
-  </section>
 
 
   <dialog id="accountDialog">
@@ -785,6 +752,32 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-r
   </dialog>
 </main>
 
+  <div class="calendar-backdrop" id="calendarBackdrop" aria-hidden="true"></div>
+  <section class="cal" id="calendarDrawer" aria-label="Takvim">
+    <div class="cal-body-wrap" id="calendarBodyWrap">
+      <div class="cal-body-clip">
+        <div class="cal-body" id="calendarBody">
+          <div class="drawer-hint" aria-hidden="true"></div>
+          <div class="grid" id="grid"></div>
+        </div>
+      </div>
+    </div>
+    <div class="cal-head" id="calendarHandle">
+      <button class="drawer-launch pinned-launch" id="pinnedButton" type="button" aria-label="Çakılı görevleri aç">
+        <svg class="pushpin-icon" viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(18 12 12)"><ellipse class="pin-cap" cx="12" cy="4.4" rx="4.7" ry="2.2"></ellipse><path class="pin-body" d="M9.2 5.1h5.6l-.8 5.7c2.5.75 4.15 2.25 4.15 4.05 0 2.45-2.8 4.2-6.15 4.2s-6.15-1.75-6.15-4.2c0-1.8 1.65-3.3 4.15-4.05l-.8-5.7Z"></path><ellipse class="pin-cap" cx="12" cy="4.15" rx="4.25" ry="1.72" opacity=".72"></ellipse><path class="pin-highlight" d="M7.75 13.55c.38-1.12 1.15-1.9 2.05-2.25-.5.75-.8 1.55-.9 2.35-.08.58-.44.98-.83.86-.36-.11-.44-.44-.32-.96Z"></path><path class="pin-needle" d="M10.9 18.4h2.2L12 24Z"></path></g></svg>
+        <span>Çakılı</span><span class="pinned-unread-badge" id="pinnedUnreadBadge" hidden aria-hidden="true"></span>
+      </button>
+      <div class="calendar-month-slot">
+        <button class="nav" id="mPrev" type="button" aria-label="Takvimi aç"></button>
+        <button class="month-toggle" id="monthToggle" type="button" aria-expanded="false" aria-controls="calendarBodyWrap"><span id="monthTitle"></span></button>
+        <button class="nav" id="mNext" type="button" aria-label="Takvimi aç"></button>
+      </div>
+      <button class="drawer-launch journal-launch" id="journalButton" type="button" aria-label="Çeteleyi aç">
+        <svg class="journal-book" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.2 4.1c2.6-.65 4.8-.2 6.8 1.35v10.1c-2-1.55-4.2-2-6.8-1.35V4.1Z"></path><path d="M16.8 4.1c-2.6-.65-4.8-.2-6.8 1.35v10.1c2-1.55 4.2-2 6.8-1.35V4.1Z"></path></svg>
+        <span>Çetele</span><span class="journal-launch-state" id="journalButtonState" aria-hidden="true">+</span>
+      </button>
+    </div>
+  </section>
 
 <section class="pinned-panel" id="pinnedPanel" aria-labelledby="pinnedTitle" hidden>
   <div class="panel-pull-handle" id="pinnedPullHandle" aria-hidden="true"></div>
@@ -952,7 +945,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v92-cetele-wysiwyg", CENTIK_EXPECTED_SERVER_BUILD="v32-cetele-wysiwyg";
+const CENTIK_CLIENT_BUILD="v93-universal-blur-overlay", CENTIK_EXPECTED_SERVER_BUILD="v32-cetele-wysiwyg";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;

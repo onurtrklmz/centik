@@ -1,7 +1,7 @@
-// v92: Çetele textarea yerine 7 araçlı hafif WYSIWYG editör ve güvenli rich-text saklama eklendi.
+// v93: Takvim, Çakılı ve Çetele tek evrensel hafif blur/perde katmanına alındı; loading pulse kontrastı artırıldı.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v92-cetele-wysiwyg";
+const SURUM = "centik-v93-universal-blur-overlay";
 const KABUK = [
   "./",
   "./index.html",
