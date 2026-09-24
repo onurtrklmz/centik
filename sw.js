@@ -1,8 +1,8 @@
-// v94-ui-r20: Mobil ana sayfa pull jesti iki kademeli: veri yenileme, daha uzun çekişte tam sayfa reload.
+// v94-ui-r21: Mobil iki kademeli pull eşikleri 72px veri yenileme / 136px tam sayfa yenileme olarak düşürüldü.
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v94-ideal-shared-drawer-r20";
+const SURUM = "centik-v94-ideal-shared-drawer-r21";
 const KABUK = [
   "./",
   "./index.html",
