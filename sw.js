@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v73: Çakılı açılış animasyonu Çetele ile eşitlendi; Geri dön düğmelerine ev simgesi, takvim günlerine otomatik kapanma eklendi.
-const SURUM = "centik-v73-panel-motion-home-calendar";
+// v74: Çentik uygulama logosu, favicon ve PWA ikonları yeni görsel kimlikle güncellendi.
+const SURUM = "centik-v74-new-logo";
 const KABUK = [
   "./",
   "./index.html",

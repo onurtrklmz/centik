@@ -1,7 +1,7 @@
 {
   "name": "Çentik",
   "short_name": "Çentik",
-  "description": "Günlük görevlerini işaretleyip ilerlemeni takip et.",
+  "description": "Günlük ve tarihten bağımsız Çakılı görevlerini takip et.",
   "lang": "tr",
   "start_url": "./",
   "scope": "./",
