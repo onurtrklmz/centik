@@ -1,7 +1,7 @@
-// v82: Sunucu işlemleri için merkezî tepe-bar loading sistemi; arka plan polling sessizdir.
+// v83: Logo görsel paketi güncellendi; beyaz dış alanlar transparanlaştırıldı ve koyu ikon tonu açıldı.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v82-global-loading";
+const SURUM = "centik-v83-logo-darkmode-fix";
 const KABUK = [
   "./",
   "./index.html",
