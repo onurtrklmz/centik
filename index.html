@@ -637,25 +637,28 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-r
 
 
 
-/* r11: yalnız Çakılı/Çetele açılma üst sınırı büyütüldü.
-   Sabit height YOK; 0fr kapanma mekanizması r9 ile birebir korunur. */
+/* r12: Çakılı/Çetele wrapper yüksekliği doğrudan animasyonla 0px'ten
+   tepe barın 6px altındaki kesin yüksekliğe çıkar. İçerik alanı %100 yüksekliğe
+   sahiptir ve kendi içinde scroll eder. Takvim gövdesine dokunulmaz. */
 /* ——— V94 ideal ortak çekmece motoru ———
    Takvim, Çakılı ve Çetele aynı .cal kabuğunun kalıcı gövdeleridir.
    Her gövde 0fr↔1fr ile açılır/kapanır; alt bar ortak ve sabittir.
    Geçici mount/unmount, ayrı fixed panel animasyonu ve hidden timer yoktur. */
 .utility-body-wrap{
-  display:grid;
-  grid-template-rows:0fr;
+  display:block;
+  height:0;
+  min-height:0;
+  overflow:hidden;
   opacity:0;
   transform:translateY(22px);
   pointer-events:none;
-  transition:grid-template-rows .32s cubic-bezier(.22,.8,.24,1),
+  transition:height .32s cubic-bezier(.22,.8,.24,1),
              opacity .24s ease,
              transform .32s cubic-bezier(.22,.8,.24,1);
 }
 body.pinned-open #pinnedBodyWrap,
 body.journal-open #journalBodyWrap{
-  grid-template-rows:1fr;
+  height:calc(100dvh - var(--centik-topbar-h) - var(--centik-drawer-bar-h) - max(12px,env(safe-area-inset-bottom)) - 6px);
   opacity:1;
   transform:translateY(0);
   pointer-events:auto;
@@ -663,7 +666,8 @@ body.journal-open #journalBodyWrap{
 .utility-body-clip{
   overflow:auto;
   min-height:0;
-  max-height:calc(100dvh - var(--centik-topbar-h) - var(--centik-drawer-bar-h) - max(12px,env(safe-area-inset-bottom)) - 6px);
+  height:100%;
+  max-height:none;
   overscroll-behavior:contain;
 }
 .utility-body-clip > .pinned-panel,
