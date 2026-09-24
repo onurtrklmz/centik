@@ -1,7 +1,7 @@
-// v90: Parola yöneticisi kapsamı yalnız login alanıyla sınırlandı; PIN ve diğer credential-benzeri alanlar nötrleştirildi.
+// v91: Takvim global blur katmanından ayrıldı; kendi backdrop katmanının üstünde net kalırken tepe bar ayrıca blur edilir.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v90-password-manager-scope";
+const SURUM = "centik-v91-calendar-blur-layer-fix";
 const KABUK = [
   "./",
   "./index.html",

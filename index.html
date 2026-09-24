@@ -113,6 +113,7 @@ body::before{
   background:var(--bar);
   backdrop-filter:blur(16px) saturate(1.5);-webkit-backdrop-filter:blur(16px) saturate(1.5);
   border-bottom:1px solid var(--bar-line);
+  transition:filter .22s ease,opacity .22s ease,background .22s ease;
 }
 .ust-cubuk .wrap{max-width:520px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:12px}
 .brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0;padding:11px 0 10px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
@@ -338,7 +339,13 @@ li.deleting .check,li.deleting .edit{pointer-events:none;opacity:.45}
 .undo-toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:90;width:min(430px,calc(100% - 28px));display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px solid var(--line);border-radius:13px;background:var(--paper);color:var(--ink);box-shadow:0 12px 36px rgba(0,0,0,.22);font-size:.9rem}
 .undo-toast button{border:0;background:transparent;color:var(--focus);font-weight:800;padding:5px 2px;white-space:nowrap}
 
-.calendar-backdrop{position:fixed;inset:0;z-index:45;background:transparent;opacity:0;pointer-events:none;transition:opacity .22s ease;backdrop-filter:none;-webkit-backdrop-filter:none}
+.calendar-backdrop{
+  position:fixed;inset:0;z-index:45;
+  background:rgba(4,8,16,.25);
+  opacity:0;pointer-events:none;
+  transition:opacity .22s ease;
+  backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px)
+}
 .calendar-backdrop.open{opacity:1;pointer-events:auto}
 
 /* ——— V87: üç çekmece için ortak global blur ——— */
@@ -348,7 +355,7 @@ body::after{
   backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px);
   transition:opacity .22s ease,visibility 0s linear .22s;
 }
-body.calendar-open::after,body.pinned-open::after,body.journal-open::after{
+body.pinned-open::after,body.journal-open::after{
   opacity:1;visibility:visible;transition-delay:0s;
 }
 .cal{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));z-index:46;width:min(520px,calc(100% - 24px));transform:translate(-50%,var(--drawer-drag-y,0px));transition:transform .17s cubic-bezier(.22,.8,.24,1);border:1px solid var(--line);border-radius:17px;background:color-mix(in srgb,var(--paper) 94%,transparent);box-shadow:0 14px 40px rgba(0,0,0,.16);overflow:hidden;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
@@ -488,7 +495,7 @@ body.journal-open .journal-panel,body.pinned-open .pinned-panel{transform:transl
 body.journal-open .cal,body.journal-open .calendar-backdrop,body.pinned-open .cal,body.pinned-open .calendar-backdrop{visibility:hidden!important;pointer-events:none!important}
 body.pinned-open{overflow:hidden}
 body.journal-open{overflow:hidden}
-@media(prefers-reduced-motion:reduce){.pinned-panel,.journal-panel{transition:none!important}body::after{transition:none!important}}
+@media(prefers-reduced-motion:reduce){.pinned-panel,.journal-panel{transition:none!important}body::after,.ust-cubuk{transition:none!important}}
 
 .pinned-head{display:flex;align-items:center;gap:12px;margin:0 0 18px}
 .pinned-back,.pinned-icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--paper);display:grid;place-items:center;color:var(--focus);box-shadow:var(--shadow);flex:none}
@@ -568,6 +575,12 @@ body.pinned-open .ust-cubuk,body.journal-open .ust-cubuk{
   z-index:40;
   background:color-mix(in srgb,var(--bar) 84%,transparent);
   backdrop-filter:blur(18px) saturate(1.35);-webkit-backdrop-filter:blur(18px) saturate(1.35);
+}
+body.calendar-open .ust-cubuk{
+  filter:blur(1px);
+  opacity:.76;
+  pointer-events:none;
+  transition:filter .22s ease,opacity .22s ease;
 }
 body.pinned-open main,body.journal-open main{pointer-events:none}
 body.pinned-open .cal-head,body.journal-open .cal-head{background:color-mix(in srgb,var(--paper) 96%,transparent)}
@@ -918,7 +931,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v90-password-manager-scope", CENTIK_EXPECTED_SERVER_BUILD="v31-pinned-title-edit-focus-fix";
+const CENTIK_CLIENT_BUILD="v91-calendar-blur-layer-fix", CENTIK_EXPECTED_SERVER_BUILD="v31-pinned-title-edit-focus-fix";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
