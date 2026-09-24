@@ -2731,6 +2731,98 @@ document.addEventListener("pointerup",endDrawerGesture);
 document.addEventListener("pointercancel",e=>{if(drawerGesture&&drawerGesture.id===e.pointerId){drawerGesture=null;resetDrawerDragVisual()}});
 window.addEventListener("blur",()=>{if(drawerGesture){drawerGesture=null;resetDrawerDragVisual()}});
 
+// Masaüstü trackpad — ortak .cal çekmece motoru.
+// Tek motor aktif gövdeyi kendisi bulur:
+//   Takvim: yatay iki-parmak = ay değiştir, aşağı çekiş = kapat.
+//   Çakılı/Çetele: aşağı çekiş = kapat.
+// Scroll edilmiş utility içerikte önce native scroll tepeye gelir; tepedeyken jest çekmeceye devredilir.
+const DRAWER_TRACKPAD_RESET_MS=180;
+const DRAWER_TRACKPAD_COOLDOWN_MS=430;
+const DRAWER_TRACKPAD_X_THRESHOLD=72;
+const DRAWER_TRACKPAD_Y_THRESHOLD=76;
+const DRAWER_TRACKPAD_AXIS_MIN=4;
+let drawerTrackpad={x:0,y:0,axis:"",timer:null,cooldownUntil:0};
+
+function activeDrawerTrackpadKind(){
+  if(calendarOpen)return "calendar";
+  if(document.body.classList.contains("pinned-open"))return "pinned";
+  if(document.body.classList.contains("journal-open"))return "journal";
+  return "";
+}
+function drawerTrackpadScroller(kind,target){
+  if(kind==="calendar")return target.closest?.(".cal-body-clip")||$("calendarBodyWrap")?.querySelector?.(".cal-body-clip")||null;
+  return target.closest?.(".utility-body-clip")||$(kind==="pinned"?"pinnedBodyWrap":"journalBodyWrap")?.querySelector?.(".utility-body-clip")||null;
+}
+function drawerTrackpadEditingTarget(target){
+  return !!target?.closest?.('input,textarea,select,[contenteditable="true"],dialog');
+}
+function drawerTrackpadAxis(dx,dy){
+  const ax=Math.abs(dx),ay=Math.abs(dy);
+  if(Math.max(ax,ay)<DRAWER_TRACKPAD_AXIS_MIN)return "";
+  if(ax>ay*1.45)return "x";
+  if(ay>ax*1.20)return "y";
+  return "";
+}
+function resetDrawerTrackpad({visual=true}={}){
+  drawerTrackpad.x=0;drawerTrackpad.y=0;drawerTrackpad.axis="";
+  clearTimeout(drawerTrackpad.timer);drawerTrackpad.timer=null;
+  if(visual)resetDrawerDragVisual();
+}
+function scheduleDrawerTrackpadReset(){
+  clearTimeout(drawerTrackpad.timer);
+  drawerTrackpad.timer=setTimeout(()=>resetDrawerTrackpad(),DRAWER_TRACKPAD_RESET_MS);
+}
+function closeActiveDrawerFromTrackpad(kind){
+  resetDrawerTrackpad();
+  drawerTrackpad.cooldownUntil=Date.now()+DRAWER_TRACKPAD_COOLDOWN_MS;
+  if(kind==="calendar")setCalendarOpen(false);
+  else if(kind==="pinned")closePinnedPanel(false);
+  else if(kind==="journal")closeJournalView(false);
+}
+function handleDrawerTrackpadWheel(e){
+  const kind=activeDrawerTrackpadKind();
+  if(!kind||e.ctrlKey||Date.now()<drawerTrackpad.cooldownUntil)return;
+  if(kind==="calendar"&&calendarAnimating)return;
+  if(drawerTrackpadEditingTarget(e.target))return;
+
+  const dx=Number(e.deltaX)||0,dy=Number(e.deltaY)||0;
+  const axis=drawerTrackpadAxis(dx,dy);
+  if(!axis)return;
+
+  // Takvimde yatay hareket mevcut ana-sayfa trackpad mantığı gibi birikerek tek ay değiştirir.
+  if(axis==="x"){
+    if(kind!=="calendar"){resetDrawerTrackpad();return}
+    if(e.cancelable)e.preventDefault();
+    drawerTrackpad.axis="x";drawerTrackpad.y=0;drawerTrackpad.x+=dx;
+    scheduleDrawerTrackpadReset();
+    if(Math.abs(drawerTrackpad.x)<DRAWER_TRACKPAD_X_THRESHOLD)return;
+    const dir=drawerTrackpad.x>0?1:-1;
+    resetDrawerTrackpad();
+    drawerTrackpad.cooldownUntil=Date.now()+DRAWER_TRACKPAD_COOLDOWN_MS;
+    shiftMonth(dir);
+    return;
+  }
+
+  // macOS doğal kaydırmada iki parmağı aşağı çekmek deltaY<0 üretir.
+  // İç scroll tepede değilse native scroll'u engelleme; tepeye gelince çekmece motoru devralır.
+  if(dy>=0){resetDrawerTrackpad();return}
+  const scroller=drawerTrackpadScroller(kind,e.target);
+  if(scroller&&Number(scroller.scrollTop)>2){resetDrawerTrackpad();return}
+
+  if(e.cancelable)e.preventDefault();
+  drawerTrackpad.axis="y";drawerTrackpad.x=0;drawerTrackpad.y+=-dy;
+  scheduleDrawerTrackpadReset();
+
+  const drawer=$("calendarDrawer");
+  drawer.classList.add("drawer-dragging");
+  drawer.style.setProperty("--drawer-drag-y",`${Math.min(150,drawerTrackpad.y*.72)}px`);
+
+  if(drawerTrackpad.y<DRAWER_TRACKPAD_Y_THRESHOLD)return;
+  closeActiveDrawerFromTrackpad(kind);
+}
+$("calendarDrawer").addEventListener("wheel",handleDrawerTrackpadWheel,{passive:false});
+window.addEventListener("blur",()=>resetDrawerTrackpad());
+
 // Takvim açıkken dışarı tıklamak çekmeceyi kapatır. Tıklama kendi
 // hedefinde çalışmaya devam eder; yalnızca takvim geri aşağı iner.
 document.addEventListener("pointerdown",e=>{
