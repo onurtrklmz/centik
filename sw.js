@@ -1,7 +1,7 @@
-// v91: Takvim global blur katmanından ayrıldı; kendi backdrop katmanının üstünde net kalırken tepe bar ayrıca blur edilir.
+// v92: Çetele textarea yerine 7 araçlı hafif WYSIWYG editör ve güvenli rich-text saklama eklendi.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v91-calendar-blur-layer-fix";
+const SURUM = "centik-v92-cetele-wysiwyg";
 const KABUK = [
   "./",
   "./index.html",
