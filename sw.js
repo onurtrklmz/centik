@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v72: Çakılı ve Çetele tam ekran çekmeceleri aşağı sürüklenerek kapanabilir; alt sağa Geri dön düğmesi eklendi.
-const SURUM = "centik-v72-panel-pull-return";
+// v73: Çakılı açılış animasyonu Çetele ile eşitlendi; Geri dön düğmelerine ev simgesi, takvim günlerine otomatik kapanma eklendi.
+const SURUM = "centik-v73-panel-motion-home-calendar";
 const KABUK = [
   "./",
   "./index.html",

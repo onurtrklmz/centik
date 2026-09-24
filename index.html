@@ -510,6 +510,7 @@ body.journal-open{overflow:hidden}
 .panel-home-return{min-height:42px;border:1px solid color-mix(in srgb,var(--focus) 34%,var(--line));border-radius:12px;background:color-mix(in srgb,var(--focus) 8%,var(--paper));color:var(--focus);display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 13px;font-weight:800;box-shadow:var(--shadow)}
 .panel-home-return:hover,.panel-home-return:focus-visible{background:color-mix(in srgb,var(--focus) 14%,var(--paper));outline:none}
 .panel-home-return svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.panel-home-return .return-arrow-icon{width:15px;margin-right:-3px}.panel-home-return .return-home-icon{width:17px}
 @media(prefers-reduced-motion:reduce){.pinned-panel.panel-dragging,.journal-panel.panel-dragging{transition:none!important}}
 </style>
 </head>
@@ -701,7 +702,7 @@ body.journal-open{overflow:hidden}
     </section>
     <p class="pinned-status" id="pinnedEditorStatus" aria-live="polite"></p>
   </section>
-  <div class="panel-bottom-actions"><button class="panel-home-return" id="pinnedHomeReturn" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 4.8-5.2 5.2 5.2 5.2"></path></svg><span>Geri dön</span></button></div>
+  <div class="panel-bottom-actions"><button class="panel-home-return" id="pinnedHomeReturn" type="button"><svg class="return-arrow-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 4.8-5.2 5.2 5.2 5.2"></path></svg><svg class="return-home-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.2 9.1 10 3.5l6.8 5.6"></path><path d="M5.1 8.2v8.1h9.8V8.2"></path><path d="M8.2 16.3v-5h3.6v5"></path></svg><span>Geri dön</span></button></div>
 </section>
 
 <dialog id="pinnedShareDialog">
@@ -756,7 +757,7 @@ body.journal-open{overflow:hidden}
     <button class="journal-save" id="saveJournal" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m4.3 10.2 3.5 3.5 7.9-8"></path></svg><span>Çetele tut</span></button>
     <p class="journal-save-status" id="journalSaveStatus" aria-live="polite"></p>
   </section>
-  <div class="panel-bottom-actions"><button class="panel-home-return" id="journalHomeReturn" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 4.8-5.2 5.2 5.2 5.2"></path></svg><span>Geri dön</span></button></div>
+  <div class="panel-bottom-actions"><button class="panel-home-return" id="journalHomeReturn" type="button"><svg class="return-arrow-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 4.8-5.2 5.2 5.2 5.2"></path></svg><svg class="return-home-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.2 9.1 10 3.5l6.8 5.6"></path><path d="M5.1 8.2v8.1h9.8V8.2"></path><path d="M8.2 16.3v-5h3.6v5"></path></svg><span>Geri dön</span></button></div>
 </section>
 </div>
 
@@ -827,14 +828,14 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v72-panel-pull-return", CENTIK_EXPECTED_SERVER_BUILD="v27-cakili-shared-control";
+const CENTIK_CLIENT_BUILD="v73-panel-motion-home-calendar", CENTIK_EXPECTED_SERVER_BUILD="v27-cakili-shared-control";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
 let queuedForceSync=false, queuedForceSilent=true, foregroundSyncTimer=null, settingsOriginalTheme=null, hiddenSince=0;
 let pendingDelete=null, pendingDeleteTimer=null;
 let journalStatusCache=new Map(),journalStatusSeenAt=new Map(),journalStatusPending=new Map(),journalMonthCache=new Map(),journalMonthPending=new Map(),journalContext=null,journalActivePin="",journalDirty=false,journalPinMode="set";
-let pinnedLists=[],pinnedActiveList=null,pinnedTasks=[],pinnedRevision=null,pinnedLiveTimer=null,pinnedListsTimer=null,pinnedPendingDelete=null,pinnedPendingDeleteTimer=null;
+let pinnedLists=[],pinnedActiveList=null,pinnedTasks=[],pinnedRevision=null,pinnedLiveTimer=null,pinnedListsTimer=null,pinnedPendingDelete=null,pinnedPendingDeleteTimer=null,pinnedPanelHideTimer=null;
 const JOURNAL_STATUS_FRESH_MS=45000, JOURNAL_MONTH_FRESH_MS=300000, JOURNAL_CHAR_LIMIT=12000;
 let pushQueue=[], pushQueued=new Set(), pushWorker=null;
 const DELETE_UNDO_MS=2000;
@@ -1273,7 +1274,7 @@ function renderCal(){
     const ceteleMark=hasCetele?'<svg class="cal-cetele-mark" viewBox="0 0 20 16" aria-hidden="true"><path d="M2.5 2.4c2.7-.7 5-.25 7.5 1.25v9.7c-2.5-1.5-4.8-1.95-7.5-1.25V2.4Z"></path><path d="M17.5 2.4c-2.7-.7-5-.25-7.5 1.25v9.7c2.5-1.5 4.8-1.95 7.5-1.25V2.4Z"></path><path d="M10 3.65v9.7"></path></svg>':"";
     b.innerHTML=`<span>${dd}</span><small>${total?`${n}/${total}`:"·"}</small>${ceteleMark}`;
     b.setAttribute("aria-label",`${dd} ${AYLAR[m]}: ${n}/${total} görev tamamlandı${hasCetele?", Çetele var":""}`);
-    b.onclick=()=>go(k);
+    b.onclick=()=>{setCalendarOpen(false);go(k)};
     g.append(b);
   }
 }
@@ -1282,6 +1283,7 @@ function renderCal(){
 
 function resetPinnedState(){
   if($("pinnedShareDialog")?.open)$("pinnedShareDialog").close();
+  clearTimeout(pinnedPanelHideTimer);pinnedPanelHideTimer=null;
   clearInterval(pinnedLiveTimer);clearInterval(pinnedListsTimer);pinnedLiveTimer=null;pinnedListsTimer=null;
   clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;
   pinnedLists=[];pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;
@@ -1309,10 +1311,15 @@ function pinnedShowOverview(){
   stopPinnedLive();pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;$("pinnedOverview").hidden=false;$("pinnedEditor").hidden=true;$("pinnedOwnerTools").hidden=true;$("pinnedTitle").textContent="Çakılı";$("pinnedSubtitle").textContent="Tarihten bağımsız listelerin.";renderPinnedOverview();
 }
 function openPinnedPanel(){
-  if(!requireLocalSession()||document.body.classList.contains("journal-open"))return;setCalendarOpen(false);const panel=$("pinnedPanel");panel.hidden=false;document.body.classList.add("pinned-open");pinnedShowOverview();loadPinnedLists();startPinnedListsRefresh();
+  if(!requireLocalSession()||document.body.classList.contains("journal-open")||document.body.classList.contains("pinned-open"))return;
+  setCalendarOpen(false);clearTimeout(pinnedPanelHideTimer);pinnedPanelHideTimer=null;
+  const panel=$("pinnedPanel");if(!panel)return;panel.hidden=false;pinnedShowOverview();
+  // Çetele ile aynı açılma davranışı: panel önce kapalı konumda çizilir, ardından açık sınıfı bir sonraki karede eklenir.
+  requestAnimationFrame(()=>{if(!panel.hidden)document.body.classList.add("pinned-open")});
+  loadPinnedLists();startPinnedListsRefresh();
 }
 function closePinnedPanel(force=false){
-  if($("pinnedShareDialog")?.open)$("pinnedShareDialog").close();stopPinnedLive();stopPinnedListsRefresh();clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;const panel=$("pinnedPanel");panel?.classList.remove("panel-dragging");panel?.style.removeProperty("transform");document.body.classList.remove("pinned-open");pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;if(force){panel.hidden=true}else setTimeout(()=>{if(!document.body.classList.contains("pinned-open"))panel.hidden=true},310);return true
+  if($("pinnedShareDialog")?.open)$("pinnedShareDialog").close();stopPinnedLive();stopPinnedListsRefresh();clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;const panel=$("pinnedPanel");panel?.classList.remove("panel-dragging");panel?.style.removeProperty("transform");document.body.classList.remove("pinned-open");pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;clearTimeout(pinnedPanelHideTimer);if(force){if(panel)panel.hidden=true}else pinnedPanelHideTimer=setTimeout(()=>{if(panel&&!document.body.classList.contains("pinned-open"))panel.hidden=true},300);return true
 }
 function startPinnedListsRefresh(){stopPinnedListsRefresh();pinnedListsTimer=setInterval(()=>{if(document.visibilityState==="visible"&&document.body.classList.contains("pinned-open")&&!pinnedActiveList)loadPinnedLists({silent:true})},12000)}
 function stopPinnedListsRefresh(){if(pinnedListsTimer){clearInterval(pinnedListsTimer);pinnedListsTimer=null}}
