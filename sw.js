@@ -1,7 +1,7 @@
-// v88: 60 günlük oturum dayanıklılığı ve arka plan dönüşünde güvenli session doğrulama düzeltmeleri.
+// v89: Çakılı liste başlığı plain-text yazma ve görev düzenleme input focus/Space düzeltmeleri.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v88-session-resilience";
+const SURUM = "centik-v89-pinned-title-edit-focus-fix";
 const KABUK = [
   "./",
   "./index.html",

@@ -913,7 +913,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v88-session-resilience", CENTIK_EXPECTED_SERVER_BUILD="v30-session-resilience";
+const CENTIK_CLIENT_BUILD="v89-pinned-title-edit-focus-fix", CENTIK_EXPECTED_SERVER_BUILD="v31-pinned-title-edit-focus-fix";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -1493,7 +1493,35 @@ async function pinnedMutate(kind,data,{silent=false}={}){
 async function addPinnedTask(text){text=String(text||"").trim();if(!text||!pinnedActiveList)return;const item={id:pinnedTaskId(),t:text.slice(0,1000),done:false,parentId:""};pinnedTasks.push(item);renderPinnedTasks();await pinnedMutate("add",{taskId:item.id,text:item.t})}
 async function pinnedToggleTask(id){const it=pinnedTasks.find(x=>x.id===id);if(!it||pinnedDeleteHas(id))return;it.done=!it.done;renderPinnedTasks();await pinnedMutate("toggle",{taskId:id,done:it.done})}
 async function updatePinnedTask(id,text){const it=pinnedTasks.find(x=>x.id===id),t=String(text||"").trim();if(!it||!t)return false;it.t=t.slice(0,1000);renderPinnedTasks();return pinnedMutate("update",{taskId:id,text:it.t})}
-function editPinnedTask(id,li){const it=pinnedTasks.find(x=>x.id===id);if(!it||li.classList.contains("editing")||pinnedDeleteHas(id))return;li.classList.add("editing");const span=li.querySelector(".txt"),btn=li.querySelector(".edit"),input=document.createElement("input");input.className="edit-input";input.type="text";input.maxLength=1000;input.value=it.t;span.replaceWith(input);const save=async()=>{if(!(await updatePinnedTask(id,input.value))){input.focus();input.select()}};btn.textContent="✓";btn.onclick=save;input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();save()}else if(e.key==="Escape"){e.preventDefault();renderPinnedTasks()}});requestAnimationFrame(()=>input.focus())}
+function editPinnedTask(id,li){
+  const it=pinnedTasks.find(x=>x.id===id);
+  if(!it||li.classList.contains("editing")||pinnedDeleteHas(id))return;
+  li.classList.add("editing");
+  const span=li.querySelector(".txt"),btn=li.querySelector(".edit"),input=document.createElement("input");
+  input.className="edit-input";input.type="text";input.maxLength=1000;input.value=it.t;input.setAttribute("aria-label","Çakılı görevi düzenle");
+  span.replaceWith(input);
+  const focusEditor=()=>{
+    try{btn.blur()}catch(_){}
+    try{input.focus({preventScroll:true})}catch(_){input.focus()}
+    try{const n=input.value.length;input.setSelectionRange(n,n)}catch(_){}
+  };
+  const save=async()=>{
+    if(!(await updatePinnedTask(id,input.value))){
+      focusEditor();
+      try{input.select()}catch(_){}
+    }
+  };
+  btn.innerHTML='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.485 1.929a.75.75 0 0 1 .086 1.056l-7.5 8.75a.75.75 0 0 1-1.08.037L1.93 8.71a.75.75 0 0 1 1.06-1.06l2.49 2.49 6.95-8.11a.75.75 0 0 1 1.056-.101Z"/></svg>';
+  btn.setAttribute("aria-label","Düzenlemeyi kaydet");btn.title="Kaydet";btn.onclick=save;
+  input.addEventListener("keydown",e=>{
+    e.stopPropagation();
+    if(e.key==="Enter"){e.preventDefault();save()}
+    else if(e.key==="Escape"){e.preventDefault();renderPinnedTasks()}
+  });
+  input.addEventListener("keyup",e=>e.stopPropagation());
+  focusEditor();
+  requestAnimationFrame(focusEditor);
+}
 function queuePinnedDelete(id){const it=pinnedTasks.find(x=>x.id===id);if(!it)return;if(pinnedPendingDelete)finalizePinnedDelete();pinnedPendingDelete={id,ids:pinnedCollectDeleteIds(id)};pinnedPendingDeleteTimer=setTimeout(finalizePinnedDelete,DELETE_UNDO_MS);renderPinnedTasks()}
 function undoPinnedDelete(){clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;renderPinnedTasks()}
 async function finalizePinnedDelete(){if(!pinnedPendingDelete)return;clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;const id=pinnedPendingDelete.id,ids=new Set(pinnedPendingDelete.ids||[id]);pinnedPendingDelete=null;pinnedTasks=pinnedTasks.filter(x=>!ids.has(x.id));renderPinnedTasks();await pinnedMutate("delete",{taskId:id})}
