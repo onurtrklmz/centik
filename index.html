@@ -552,6 +552,34 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-r
   .pinned-panel,.journal-panel{width:calc(100% - 16px);padding-left:14px;padding-right:14px;bottom:max(8px,env(safe-area-inset-bottom))}
 }
 
+/* ——— V78 boş yüzeyden aşağı çekerek kapatma + kompakt Çetele ——— */
+.journal-panel .journal-head{margin-bottom:10px}
+#journalEditorView{min-height:0}
+#journalEditorView .journal-card{padding:10px 12px;margin-bottom:8px}
+#journalEditorView .journal-field-label{margin-bottom:7px}
+#journalEditorView .journal-date-input{padding:9px 11px}
+#journalEditorView .journal-textarea{
+  min-height:140px;
+  height:clamp(140px,calc(100dvh - var(--centik-topbar-h) - 430px),230px);
+  max-height:230px;
+  resize:none;
+  padding:11px 12px;
+}
+#journalEditorView .journal-save{min-height:46px}
+#journalEditorView .journal-save-status{margin-top:6px}
+.journal-panel .panel-bottom-actions{padding-top:12px}
+@media(max-height:680px){
+  .journal-panel{padding-top:9px}
+  .journal-panel .panel-pull-handle{height:18px;min-height:18px;margin-bottom:1px}
+  .journal-panel .journal-head{margin-bottom:7px}
+  #journalEditorView .journal-card{padding:8px 10px;margin-bottom:6px}
+  #journalEditorView .journal-field-label{margin-bottom:5px}
+  #journalEditorView .journal-textarea{height:clamp(125px,calc(100dvh - var(--centik-topbar-h) - 410px),175px);min-height:125px;max-height:175px}
+  #journalEditorView .journal-save{min-height:43px}
+  .journal-panel .panel-bottom-actions{padding-top:8px}
+  .journal-panel .panel-home-return{min-height:38px;padding:7px 11px}
+}
+
 </style>
 </head>
 <body class="auth-locked">
@@ -870,7 +898,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v77-sync-spinner-list-badges", CENTIK_EXPECTED_SERVER_BUILD="v29-cakili-list-unread";
+const CENTIK_CLIENT_BUILD="v78-surface-pull-journal-fit", CENTIK_EXPECTED_SERVER_BUILD="v29-cakili-list-unread";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -1586,6 +1614,64 @@ function finishFullPanelDrag(e,{cancel=false}={}){
 }
 [["pinnedPullHandle","pinned"],["journalPullHandle","journal"]].forEach(([id,kind])=>{const h=$(id);h.addEventListener("pointerdown",e=>beginFullPanelDrag(e,kind));h.addEventListener("pointermove",moveFullPanelDrag);h.addEventListener("pointerup",e=>finishFullPanelDrag(e));h.addEventListener("pointercancel",e=>finishFullPanelDrag(e,{cancel:true}))});
 window.addEventListener("blur",()=>{if(fullPanelDrag){const p=fullPanelDrag.panel;fullPanelDrag=null;resetFullPanelDrag(p)}});
+
+// V78: Takvim, Çakılı ve Çetele boş yüzeylerinde aşağı çekme ile kapatma.
+// Etkileşimli alanlardan başlayan dokunuşlar ve içerik aşağı kaydırılmışken yapılan hareketler bu jesti başlatmaz.
+let utilitySurfacePull=null;
+const utilityInteractiveSelector='button,input,textarea,select,a,label,[contenteditable="true"],[role="button"],dialog,.task-row,.pinned-list-card,.sheet,.journal-card,.pinned-create,.tally,.panel-pull-handle,#calendarHandle';
+function utilityPullKindOpen(kind){
+  if(kind==="calendar")return calendarOpen;
+  return document.body.classList.contains(kind==="pinned"?"pinned-open":"journal-open");
+}
+function utilityPullPanel(kind){return kind==="calendar"?$("calendarDrawer"):fullPanelFor(kind)}
+function utilityPullScroller(kind,target){
+  if(kind==="calendar")return target.closest?.(".cal-body-clip")||$("calendarBodyWrap")?.querySelector?.(".cal-body-clip")||null;
+  return utilityPullPanel(kind);
+}
+function utilityPullBlankTarget(kind,target){
+  if(!(target instanceof Element))return false;
+  if(target.closest(utilityInteractiveSelector))return false;
+  if(kind==="calendar"&&target.closest(".cell:not(.blank)"))return false;
+  return true;
+}
+function resetUtilitySurfacePullVisual(g){
+  if(!g?.panel)return;
+  if(g.kind==="calendar"){g.panel.classList.remove("drawer-dragging");g.panel.style.removeProperty("--drawer-drag-y")}
+  else resetFullPanelDrag(g.panel);
+}
+function beginUtilitySurfacePull(e,kind){
+  if(!utilityPullKindOpen(kind)||!utilityPullBlankTarget(kind,e.target))return;
+  const touch=e.touches?.[0];if(!touch)return;
+  const panel=utilityPullPanel(kind);if(!panel)return;
+  const scroller=utilityPullScroller(kind,e.target);
+  if(scroller&&Number(scroller.scrollTop)>2)return;
+  utilitySurfacePull={kind,panel,scroller,startX:touch.clientX,startY:touch.clientY,lastY:touch.clientY,startAt:performance.now(),dragging:false,cancelled:false};
+}
+function moveUtilitySurfacePull(e){
+  const g=utilitySurfacePull;if(!g||g.cancelled)return;const touch=e.touches?.[0];if(!touch)return;
+  if(g.scroller&&Number(g.scroller.scrollTop)>2){g.cancelled=true;resetUtilitySurfacePullVisual(g);return}
+  const dx=touch.clientX-g.startX,dy=touch.clientY-g.startY,ax=Math.abs(dx),ay=Math.abs(dy);g.lastY=touch.clientY;
+  if(dy<0){g.cancelled=true;resetUtilitySurfacePullVisual(g);return}
+  if(!g.dragging){if(ay<7||ay<=ax*1.08)return;g.dragging=true;if(g.kind==="calendar")g.panel.classList.add("drawer-dragging");else g.panel.classList.add("panel-dragging")}
+  const y=Math.min(Math.max(0,dy),window.innerHeight*.78);
+  if(g.kind==="calendar")g.panel.style.setProperty("--drawer-drag-y",`${Math.min(y,180)}px`);else g.panel.style.transform=`translate(-50%,${y}px)`;
+  if(e.cancelable)e.preventDefault();
+}
+function finishUtilitySurfacePull(e,{cancel=false}={}){
+  const g=utilitySurfacePull;if(!g)return;utilitySurfacePull=null;
+  const changed=e.changedTouches?.[0],endY=changed?changed.clientY:g.lastY,dy=Math.max(0,endY-g.startY),dt=Math.max(1,performance.now()-g.startAt),velocity=dy/dt;
+  resetUtilitySurfacePullVisual(g);if(cancel||g.cancelled||!g.dragging)return;
+  if(!(dy>=82||(dy>=46&&velocity>=.50)))return;
+  if(g.kind==="calendar")setCalendarOpen(false);else if(g.kind==="pinned")closePinnedPanel(false);else closeJournalView(false);
+}
+[["calendarDrawer","calendar"],["pinnedPanel","pinned"],["journalPanel","journal"]].forEach(([id,kind])=>{
+  const el=$(id);if(!el)return;
+  el.addEventListener("touchstart",e=>beginUtilitySurfacePull(e,kind),{passive:true});
+  el.addEventListener("touchmove",moveUtilitySurfacePull,{passive:false});
+  el.addEventListener("touchend",e=>finishUtilitySurfacePull(e),{passive:true});
+  el.addEventListener("touchcancel",e=>finishUtilitySurfacePull(e,{cancel:true}),{passive:true});
+});
+window.addEventListener("blur",()=>{if(utilitySurfacePull){const g=utilitySurfacePull;utilitySurfacePull=null;resetUtilitySurfacePullVisual(g)}});
 async function saveJournal(){
   if(!journalContext||!requireLocalSession())return;const btn=$("saveJournal"),date=journalContext.date,content=$("journalText").value;
   if(!content.trim()){setJournalPanelMode("editor",date);$("journalSaveStatus").className="journal-save-status error";$("journalSaveStatus").textContent="Çetele boş";return}

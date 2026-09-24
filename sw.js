@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v77: Üst bar senkron oku dönen loading animasyonuna döndü; Çakılı okunmamış sayıları liste bazında gösteriliyor.
-const SURUM = "centik-v77-sync-spinner-list-badges";
+// v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
+const SURUM = "centik-v78-surface-pull-journal-fit";
 const KABUK = [
   "./",
   "./index.html",
