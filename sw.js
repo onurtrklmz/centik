@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v70: Paylaşılan Çakılı listelerde ortak yeniden adlandırma ve tam silme eklendi.
-const SURUM = "centik-v70-cakili-shared-control";
+// v71: Çakılı için temaya uyumlu toplu iğne ikonu ve yeni liste ekleme loading durumu eklendi.
+const SURUM = "centik-v71-cakili-pin-loading";
 const KABUK = [
   "./",
   "./index.html",

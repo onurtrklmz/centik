@@ -439,11 +439,12 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 
 
-/* ——— V70 Çakılı ortak liste yönetimi + üçlü çekmece ——— */
+/* ——— V71 Çakılı toplu iğne ikonu + liste ekleme loading ——— */
 .cal-head{grid-template-columns:minmax(82px,.92fr) minmax(0,2.25fr) minmax(82px,.92fr);gap:6px;min-height:58px;padding:5px 8px}
 .drawer-launch{min-width:0;height:44px;border:1px solid color-mix(in srgb,var(--focus) 36%,var(--line));border-radius:13px;background:color-mix(in srgb,var(--focus) 6%,var(--paper));color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 5px;font-size:.68rem;font-weight:800;line-height:1;white-space:nowrap;box-shadow:0 2px 8px color-mix(in srgb,var(--focus) 7%,transparent);transition:background .14s,border-color .14s,transform .14s,color .14s}
 .drawer-launch:hover,.drawer-launch:focus-visible{background:color-mix(in srgb,var(--focus) 12%,var(--paper));transform:translateY(-1px)}
 .drawer-launch svg{width:20px;height:20px;fill:none;stroke:var(--focus);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.pushpin-icon{overflow:visible}.pushpin-icon .pin-cap,.pushpin-icon .pin-body{fill:currentColor;stroke:none}.pushpin-icon .pin-cap{opacity:.92}.pushpin-icon .pin-body{opacity:1}.pushpin-icon .pin-needle{fill:color-mix(in srgb,var(--focus) 42%,var(--muted));stroke:none}.pushpin-icon .pin-highlight{fill:#fff;stroke:none;opacity:.38}.drawer-launch .pushpin-icon{color:var(--focus)}
 .calendar-month-slot{min-width:0;height:44px;display:grid;grid-template-columns:30px minmax(0,1fr) 30px;align-items:center;gap:3px;border:1px solid color-mix(in srgb,var(--focus) 26%,var(--line));border-radius:13px;background:color-mix(in srgb,var(--paper) 92%,transparent);overflow:hidden}
 .calendar-month-slot .nav{width:28px;height:34px;border:0;background:transparent;box-shadow:none;font-size:1.15rem}
 .calendar-month-slot .nav:hover{transform:none;background:color-mix(in srgb,var(--focus) 8%,transparent)}
@@ -477,7 +478,7 @@ body.journal-open{overflow:hidden}
 .pinned-list-card{width:100%;border:1px solid var(--line);border-radius:14px;background:var(--paper);color:var(--ink);padding:14px;display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:11px;text-align:left;box-shadow:var(--shadow);transition:transform .14s,border-color .14s,background .14s}
 .pinned-list-card:hover{transform:translateY(-1px);border-color:color-mix(in srgb,var(--focus) 42%,var(--line));background:color-mix(in srgb,var(--focus) 4%,var(--paper))}
 .pinned-list-pin{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--focus) 10%,var(--paper));color:var(--focus)}
-.pinned-list-pin svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pinned-list-pin svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.pinned-list-pin .pushpin-icon{color:currentColor}
 .pinned-list-copy{min-width:0}.pinned-list-copy strong{display:block;font-size:.96rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pinned-list-copy small{display:block;margin-top:4px;color:var(--muted);font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pinned-list-arrow{font-size:1.2rem;color:var(--muted)}
 .pinned-empty{padding:22px 12px;color:var(--muted);text-align:center;border:1px dashed var(--line);border-radius:14px}
 .pinned-editor-meta{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:-5px 0 13px;color:var(--muted);font-size:.78rem}.pinned-live{display:inline-flex;align-items:center;gap:6px}.pinned-live::before{content:"";width:7px;height:7px;border-radius:50%;background:#21b66c;box-shadow:0 0 0 3px color-mix(in srgb,#21b66c 15%,transparent)}
@@ -573,7 +574,7 @@ body.journal-open{overflow:hidden}
   <section class="cal" id="calendarDrawer" aria-label="Takvim">
     <div class="cal-head" id="calendarHandle">
       <button class="drawer-launch pinned-launch" id="pinnedButton" type="button" aria-label="Çakılı görevleri aç">
-        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7.2 3.2 5.6 1.4-1.4 3.1 2.8 2.8-4.1 1.1-1.1 4.1-2.8-2.8-3.1 1.4 1.4-5.6 2.7-5.5Z"></path><path d="m8.1 11.9-4.3 4.3"></path></svg>
+        <svg class="pushpin-icon" viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(18 12 12)"><ellipse class="pin-cap" cx="12" cy="4.4" rx="4.7" ry="2.2"></ellipse><path class="pin-body" d="M9.2 5.1h5.6l-.8 5.7c2.5.75 4.15 2.25 4.15 4.05 0 2.45-2.8 4.2-6.15 4.2s-6.15-1.75-6.15-4.2c0-1.8 1.65-3.3 4.15-4.05l-.8-5.7Z"></path><ellipse class="pin-cap" cx="12" cy="4.15" rx="4.25" ry="1.72" opacity=".72"></ellipse><path class="pin-highlight" d="M7.75 13.55c.38-1.12 1.15-1.9 2.05-2.25-.5.75-.8 1.55-.9 2.35-.08.58-.44.98-.83.86-.36-.11-.44-.44-.32-.96Z"></path><path class="pin-needle" d="M10.9 18.4h2.2L12 24Z"></path></g></svg>
         <span>Çakılı</span>
       </button>
       <div class="calendar-month-slot">
@@ -666,7 +667,7 @@ body.journal-open{overflow:hidden}
   <section id="pinnedOverview">
     <form class="pinned-create" id="pinnedCreateForm">
       <input id="pinnedListTitleInput" type="text" maxlength="100" autocomplete="off" placeholder="Yeni liste: Alışveriş, Ödemeler…" aria-label="Yeni Çakılı listesi adı">
-      <button type="submit">Ekle</button>
+      <button id="pinnedCreateButton" type="submit">Ekle</button>
     </form>
     <div class="pinned-lists" id="pinnedLists"></div>
     <p class="pinned-status" id="pinnedOverviewStatus" aria-live="polite"></p>
@@ -810,7 +811,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v70-cakili-shared-control", CENTIK_EXPECTED_SERVER_BUILD="v27-cakili-shared-control";
+const CENTIK_CLIENT_BUILD="v71-cakili-pin-loading", CENTIK_EXPECTED_SERVER_BUILD="v27-cakili-shared-control";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -1278,7 +1279,7 @@ function renderPinnedOverview(){
   pinnedLists.forEach(list=>{
     const b=document.createElement("button");b.type="button";b.className="pinned-list-card";b.dataset.listId=list.id;
     const shared=list.sharedUser?(list.isOwner?`${list.sharedUser.name||list.sharedUser.email} ile paylaşılıyor`:`${list.owner?.name||list.owner?.email||"Liste sahibi"} ile ortak`):"Yalnızca sen";
-    b.innerHTML='<span class="pinned-list-pin"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7.2 3.2 5.6 1.4-1.4 3.1 2.8 2.8-4.1 1.1-1.1 4.1-2.8-2.8-3.1 1.4 1.4-5.6 2.7-5.5Z"></path><path d="m8.1 11.9-4.3 4.3"></path></svg></span>'+
+    b.innerHTML='<span class="pinned-list-pin"><svg class="pushpin-icon" viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(18 12 12)"><ellipse class="pin-cap" cx="12" cy="4.4" rx="4.7" ry="2.2"></ellipse><path class="pin-body" d="M9.2 5.1h5.6l-.8 5.7c2.5.75 4.15 2.25 4.15 4.05 0 2.45-2.8 4.2-6.15 4.2s-6.15-1.75-6.15-4.2c0-1.8 1.65-3.3 4.15-4.05l-.8-5.7Z"></path><ellipse class="pin-cap" cx="12" cy="4.15" rx="4.25" ry="1.72" opacity=".72"></ellipse><path class="pin-highlight" d="M7.75 13.55c.38-1.12 1.15-1.9 2.05-2.25-.5.75-.8 1.55-.9 2.35-.08.58-.44.98-.83.86-.36-.11-.44-.44-.32-.96Z"></path><path class="pin-needle" d="M10.9 18.4h2.2L12 24Z"></path></g></svg></span>'+
       `<span class="pinned-list-copy"><strong>${escapeHtml(list.title)}</strong><small>${escapeHtml(shared)}</small></span><span class="pinned-list-arrow">›</span>`;
     b.onclick=()=>openPinnedList(list.id);box.appendChild(b);
   });
@@ -1341,7 +1342,7 @@ function openPinnedShareDialog(){if(!pinnedActiveList?.isOwner)return;const u=pi
 async function savePinnedShare(email){if(!pinnedActiveList?.isOwner)return;const btn=email?$("savePinnedShare"):$("removePinnedShare");if(!setBackendActionBusy(btn,true,email?"Paylaşılıyor…":"Kaldırılıyor…"))return;try{const j=await api("pinnedShare",{token:getToken(),listId:pinnedActiveList.id,email},{timeout:30000});if(!j.ok){pinnedSetStatus("pinnedShareStatus",authMessage(j.error));return}pinnedActiveList=j.list;const ix=pinnedLists.findIndex(x=>x.id===j.list.id);if(ix>=0)pinnedLists[ix]=j.list;updatePinnedHeader();$("pinnedShareDialog").close()}catch(e){pinnedSetStatus("pinnedShareStatus","Paylaşım ayarı kaydedilemedi.")}finally{setBackendActionBusy(btn,false)}}
 $("pinnedButton").onclick=openPinnedPanel;
 $("pinnedBack").onclick=()=>{if(pinnedActiveList){pinnedShowOverview();loadPinnedLists({silent:true})}else closePinnedPanel()};
-$("pinnedCreateForm").addEventListener("submit",e=>{e.preventDefault();const i=$("pinnedListTitleInput"),v=i.value;i.value="";createPinnedList(v)});
+$("pinnedCreateForm").addEventListener("submit",async e=>{e.preventDefault();const i=$("pinnedListTitleInput"),v=i.value,btn=e.submitter||$("pinnedCreateButton");if(!String(v||"").trim())return;if(!setBackendActionBusy(btn,true,"Ekleniyor…"))return;i.value="";try{await createPinnedList(v)}finally{setBackendActionBusy(btn,false)}});
 $("pinnedAddForm").addEventListener("submit",e=>{e.preventDefault();const i=$("pinnedNewTask"),v=i.value;i.value="";addPinnedTask(v);i.focus()});
 $("renamePinnedList").onclick=renamePinnedActive;$("deletePinnedList").onclick=deletePinnedActive;$("sharePinnedList").onclick=openPinnedShareDialog;$("closePinnedShare").onclick=()=>$("pinnedShareDialog").close();$("savePinnedShare").onclick=()=>savePinnedShare($("pinnedShareEmail").value.trim());$("removePinnedShare").onclick=()=>savePinnedShare("");
 $("pinnedShareDialog").addEventListener("cancel",e=>{e.preventDefault();$("pinnedShareDialog").close()});
