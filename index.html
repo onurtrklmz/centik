@@ -759,6 +759,10 @@ body.journal-open{
   pointer-events:none;
 }
 
+
+
+/* r17 — ana sayfada native pull-to-refresh yerine uygulama içi veri yenileme */
+html,body{overscroll-behavior-y:none}
 </style>
 </head>
 <body class="auth-locked">
@@ -2393,6 +2397,117 @@ globalDaySwipeSurface.addEventListener("wheel",e=>{
   resetTrackpadDaySwipe();trackpadDayCooldownUntil=Date.now()+430;shiftDay(dir);
 },{passive:false});
 
+
+// V94 r17 — Ana yüzey ortak yenileme jesti.
+// Yenile butonu, masaüstü trackpad aşağı çekişi ve mobil pull hareketi
+// aynı refreshAppData() işlevini kullanır.
+const HOME_REFRESH_GESTURE_BLOCK=[
+  "#calendarDrawer","#calendarBackdrop","dialog",".account-menu-wrap",
+  ".task-row",".add",".upcoming-notice",".day-head",
+  "button","input","textarea","select","a","label","[contenteditable='true']"
+].join(",");
+const HOME_REFRESH_WHEEL_THRESHOLD=78;
+const HOME_REFRESH_TOUCH_THRESHOLD=86;
+const HOME_REFRESH_RESET_MS=180;
+const HOME_REFRESH_COOLDOWN_MS=900;
+let homeRefreshGesture={
+  wheelY:0,
+  wheelTimer:null,
+  cooldownUntil:0,
+  touch:null
+};
+function homeRefreshDrawerOpen(){
+  return calendarOpen||
+    document.body.classList.contains("pinned-open")||
+    document.body.classList.contains("journal-open");
+}
+function homeRefreshBlockedTarget(target){
+  return !target||!!target.closest?.(HOME_REFRESH_GESTURE_BLOCK);
+}
+function homeRefreshPageTop(){
+  return Math.max(
+    0,
+    Number(window.scrollY)||0,
+    Number(document.documentElement?.scrollTop)||0,
+    Number(document.body?.scrollTop)||0
+  )<=2;
+}
+function resetHomeRefreshWheel(){
+  homeRefreshGesture.wheelY=0;
+  clearTimeout(homeRefreshGesture.wheelTimer);
+  homeRefreshGesture.wheelTimer=null;
+}
+function scheduleHomeRefreshWheelReset(){
+  clearTimeout(homeRefreshGesture.wheelTimer);
+  homeRefreshGesture.wheelTimer=setTimeout(resetHomeRefreshWheel,HOME_REFRESH_RESET_MS);
+}
+async function triggerHomeRefreshGesture(){
+  if(Date.now()<homeRefreshGesture.cooldownUntil)return false;
+  homeRefreshGesture.cooldownUntil=Date.now()+HOME_REFRESH_COOLDOWN_MS;
+  resetHomeRefreshWheel();
+  try{await refreshAppData();return true}catch(_){return false}
+}
+
+// Masaüstü trackpad: ana sayfa tepede ve çekmece kapalıyken iki parmak aşağı = veri yenile.
+// Doğal kaydırmada "aşağı çekme" deltaY<0 olarak gelir.
+globalDaySwipeSurface.addEventListener("wheel",e=>{
+  if(homeRefreshDrawerOpen()||homeRefreshBlockedTarget(e.target)||!homeRefreshPageTop()||
+     Date.now()<homeRefreshGesture.cooldownUntil||e.ctrlKey)return;
+  const dx=Number(e.deltaX)||0,dy=Number(e.deltaY)||0,ax=Math.abs(dx),ay=Math.abs(dy);
+  if(dy>=0||ay<4||ay<=ax*1.35){
+    if(ax>=ay)resetHomeRefreshWheel();
+    return;
+  }
+  if(e.cancelable)e.preventDefault();
+  homeRefreshGesture.wheelY+=-dy;
+  scheduleHomeRefreshWheelReset();
+  if(homeRefreshGesture.wheelY<HOME_REFRESH_WHEEL_THRESHOLD)return;
+  triggerHomeRefreshGesture();
+},{passive:false});
+
+// Mobil: native pull-to-refresh yerine aynı uygulama içi veri yenileme.
+// Yalnız sayfa tepedeyken, tek parmakla ve etkileşimli kontrol dışında başlayan aşağı çekiş alınır.
+globalDaySwipeSurface.addEventListener("touchstart",e=>{
+  if(e.touches?.length!==1||homeRefreshDrawerOpen()||homeRefreshBlockedTarget(e.target)||
+     !homeRefreshPageTop()||Date.now()<homeRefreshGesture.cooldownUntil){
+    homeRefreshGesture.touch=null;return;
+  }
+  const t=e.touches[0];
+  homeRefreshGesture.touch={
+    startX:t.clientX,startY:t.clientY,lastY:t.clientY,
+    axis:"",triggered:false,cancelled:false
+  };
+},{passive:true});
+
+globalDaySwipeSurface.addEventListener("touchmove",e=>{
+  const g=homeRefreshGesture.touch;
+  if(!g||g.cancelled||e.touches?.length!==1)return;
+  const t=e.touches[0],dx=t.clientX-g.startX,dy=t.clientY-g.startY;
+  const ax=Math.abs(dx),ay=Math.abs(dy);g.lastY=t.clientY;
+
+  if(!g.axis&&Math.max(ax,ay)>=8){
+    if(ay>ax*1.20)g.axis="y";
+    else if(ax>ay)g.axis="x";
+  }
+  if(g.axis==="x"||dy<0||!homeRefreshPageTop()){
+    g.cancelled=true;return;
+  }
+  if(g.axis!=="y")return;
+
+  // Jest uygulamaya ait olduğunda tarayıcının native pull-to-refresh'ini bastır.
+  if(e.cancelable)e.preventDefault();
+  if(dy>=HOME_REFRESH_TOUCH_THRESHOLD&&!g.triggered){
+    g.triggered=true;
+    triggerHomeRefreshGesture();
+  }
+},{passive:false});
+
+function finishHomeRefreshTouch(){
+  homeRefreshGesture.touch=null;
+}
+globalDaySwipeSurface.addEventListener("touchend",finishHomeRefreshTouch,{passive:true});
+globalDaySwipeSurface.addEventListener("touchcancel",finishHomeRefreshTouch,{passive:true});
+
 // Görev sıralama + tek seviyeli alt görev: dikey hareket sıralar, belirgin yatay hareket hiyerarşiyi değiştirir.
 // Checkbox, düzenleme, silme ve input kontrolleri sıralamayı başlatmaz.
 const taskList=$("list");
@@ -2564,7 +2679,10 @@ taskList.addEventListener("touchend",()=>{if(taskReorder?.mode==="touch")finishT
 taskList.addEventListener("touchcancel",()=>{if(taskReorder?.mode==="touch")finishTaskReorder(false)});
 taskList.addEventListener("contextmenu",e=>{if(taskReorder?.active&&taskReorderRow(e.target))e.preventDefault()});
 
-$("refresh").onclick=()=>withBackendAction($("refresh"),"Yenileniyor…",()=>connect({force:true,silent:false,reason:"manual"}));
+function refreshAppData(){
+  return withBackendAction($("refresh"),"Yenileniyor…",()=>connect({force:true,silent:false,reason:"manual"}));
+}
+$("refresh").onclick=refreshAppData;
 
 // V76: tepe bar yüksekliğini çekmecelerin üst sınırı için dinamik tut.
 function syncUtilityDrawerTop(){const bar=document.querySelector(".ust-cubuk");if(!bar)return;document.documentElement.style.setProperty("--centik-topbar-h",`${Math.ceil(bar.getBoundingClientRect().height)}px`)}

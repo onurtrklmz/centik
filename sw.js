@@ -1,8 +1,8 @@
-// v94-ui-r16: Ortak .cal trackpad motoru eklendi; Takvim yatay ay değiştirir, tüm açık çekmeceler aşağı pull ile kapanır.
+// v94-ui-r17: Ana sayfa trackpad aşağı ve mobil pull, yenile butonuyla aynı refreshAppData() işlevini kullanır.
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v94-ideal-shared-drawer-r16";
+const SURUM = "centik-v94-ideal-shared-drawer-r17";
 const KABUK = [
   "./",
   "./index.html",
