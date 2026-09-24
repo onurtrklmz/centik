@@ -1,8 +1,8 @@
-// v94-ui-r13: Çakılı boş-yüzey aşağı çekme wrapper'a taşındı; Takvim üstüne ay başlığı ve çekme alanı eklendi.
+// v94-ui-r15: Çakılı/Çetele özel pull-zone kaldırıldı; ortak scroll→drawer handoff jest motoru kullanılıyor.
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v94-ideal-shared-drawer-r13";
+const SURUM = "centik-v94-ideal-shared-drawer-r15";
 const KABUK = [
   "./",
   "./index.html",
