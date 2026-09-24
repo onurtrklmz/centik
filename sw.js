@@ -1,7 +1,7 @@
-// v87: Takvim, Çakılı ve Çetele için tepe barı da kapsayan ortak global arka plan blur katmanı eklendi.
+// v88: 60 günlük oturum dayanıklılığı ve arka plan dönüşünde güvenli session doğrulama düzeltmeleri.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v87-unified-drawer-blur";
+const SURUM = "centik-v88-session-resilience";
 const KABUK = [
   "./",
   "./index.html",

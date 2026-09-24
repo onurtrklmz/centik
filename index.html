@@ -913,12 +913,12 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v87-unified-drawer-blur", CENTIK_EXPECTED_SERVER_BUILD="v29-cakili-list-unread";
+const CENTIK_CLIENT_BUILD="v88-session-resilience", CENTIK_EXPECTED_SERVER_BUILD="v30-session-resilience";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
 let queuedForceSync=false, queuedForceSilent=true, foregroundSyncTimer=null, settingsOriginalTheme=null, hiddenSince=0;
-let syncBaseStatus="idle",globalLoadingCount=0;
+let syncBaseStatus="idle",globalLoadingCount=0,sessionVerifyPromise=null,sessionVerifyToken="";
 let pendingDelete=null, pendingDeleteTimer=null;
 let journalStatusCache=new Map(),journalStatusSeenAt=new Map(),journalStatusPending=new Map(),journalMonthCache=new Map(),journalMonthPending=new Map(),journalContext=null,journalActivePin="",journalDirty=false,journalPinMode="set";
 let pinnedLists=[],pinnedActiveList=null,pinnedTasks=[],pinnedRevision=null,pinnedLiveTimer=null,pinnedListsTimer=null,pinnedPendingDelete=null,pinnedPendingDeleteTimer=null,pinnedPanelHideTimer=null,pinnedUnreadCount=0,pinnedUnreadTimer=null,pinnedUnreadPromise=null,lastPinnedUnreadCheckAt=0,pinnedUnreadSeq=0;
@@ -1007,7 +1007,7 @@ async function reliableApi(action,data={},options={}){
   const retries=Math.max(0,Number(options.retries??0)),timeout=Math.max(4000,Number(options.timeout)||15000);let lastErr=null;
   for(let attempt=0;attempt<=retries;attempt++){
     try{
-      const j=await api(action,data,{timeout,signal:options.signal,globalLoading:options.globalLoading});
+      const j=await api(action,data,{timeout,signal:options.signal,globalLoading:options.globalLoading,skipAuthRecovery:options.skipAuthRecovery});
       if(j&&j.ok===false&&j.error==="mesgul"&&attempt<retries){await wait(500*(attempt+1));continue}
       return j;
     }catch(e){
@@ -1019,8 +1019,28 @@ async function reliableApi(action,data={},options={}){
   throw lastErr||new Error("sunucu");
 }
 
-// V82: Tüm kullanıcı kaynaklı sunucu işlemleri tepe bardaki tek merkezî loading sayacını kullanır.
-// Arka plan polling/rozet/status kontrolleri globalLoading:false ile sessiz kalır.
+// V88: Tek bir alt API yanıtı yerel 60 günlük oturumu artık doğrudan silemez.
+// `oturum` yanıtı mevcut token için bir kez hafif `me` çağrısıyla doğrulanır; eski token yanıtları yok sayılır.
+async function verifySessionAfterAuthError(token){
+  token=String(token||"");
+  if(!token||token!==getToken()||!currentUser?.id)return "stale";
+  if(sessionVerifyPromise&&sessionVerifyToken===token)return sessionVerifyPromise;
+  sessionVerifyToken=token;
+  let p;p=(async()=>{
+    try{
+      const j=await api("me",{token},{timeout:15000,globalLoading:false,skipAuthRecovery:true});
+      if(token!==getToken()||!currentUser?.id)return "stale";
+      if(j?.ok){
+        if(j.user){currentUser=j.user;setSession(token,currentUser);applyUserTheme(true);updateUserUI()}
+        return "valid";
+      }
+      if(j?.error==="oturum")return "invalid";
+      return "unknown";
+    }catch(e){return "unknown"}
+  })().finally(()=>{if(sessionVerifyPromise===p){sessionVerifyPromise=null;sessionVerifyToken=""}});
+  sessionVerifyPromise=p;return p;
+}
+
 async function api(action,data={},options={}){
   if(!SCRIPT_URL||SCRIPT_URL.startsWith("BURAYA")) throw new Error("adres");
   const useGlobalLoading=options.globalLoading!==false;
@@ -1043,6 +1063,17 @@ async function api(action,data={},options={}){
     const r=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload),signal:ctrl.signal});
     let j;try{j=await r.json()}catch(e){throw new Error("sunucu")}
     recordDiag({ts:new Date().toISOString(),action,traceId,ok:j?.ok!==false,error:j?.error||"",clientMs:Math.round(performance.now()-started),http:r.status,server:j?._diag||null});
+    const requestToken=String(payload.token||"");
+    if(j?.ok===false&&j.error==="oturum"&&requestToken&&!options.skipAuthRecovery){
+      // Askıda kalmış eski bir isteğin cevabı yeni oturumu asla düşürmesin.
+      if(requestToken!==getToken())return {...j,error:"oturum_eski"};
+      const verdict=await verifySessionAfterAuthError(requestToken);
+      if(verdict==="valid"&&requestToken===getToken()){
+        // Sunucu oturumu geçerliyse ilk yanıtı geçici kabul edip asıl işlemi yalnız bir kez tekrar dene.
+        return api(action,data,{...options,globalLoading:false,skipAuthRecovery:true});
+      }
+      if(verdict!=="invalid")return {...j,error:"oturum_dogrulanamadi"};
+    }
     return j;
   }catch(e){
     const mapped=e?.name==="AbortError"?(options.signal?.aborted?"iptal":"zaman_asimi"):(e?.message||"sunucu");
@@ -1234,7 +1265,7 @@ async function connectNow({silent=false,force=false,reason=""}={}){
       days=fresh;saveLocal();saveLastGood();render();
     }else if(Object.keys(days).length){saveLastGood()}
     if(j.revision!==undefined)saveRevision(j.revision);
-    lastSyncAt=Date.now();recordSyncControl("completed",reason,{force,unchanged:!!j.unchanged});
+    lastSyncAt=Date.now();ensurePinnedUnreadWatch();recordSyncControl("completed",reason,{force,unchanged:!!j.unchanged});
     if(pending.size){flushPending().catch(()=>{});setSyncStatus("loading")}
     else setSyncStatus("success");
     queueJournalStatus(current);
@@ -1244,7 +1275,7 @@ async function connectNow({silent=false,force=false,reason=""}={}){
   }
 }
 
-function expireSession(){resetPinnedState();closePinnedPanel(true);clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pendingDelete=null;hideUndoToast();closeJournalView(true);journalStatusCache.clear();journalStatusSeenAt.clear();journalStatusPending.clear();journalMonthCache.clear();journalMonthPending.clear();setSession("",null);days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);setAuthStatus("Oturum süresi doldu. Yeniden giriş yapın.",true)}
+function expireSession(expectedToken=""){if(expectedToken&&expectedToken!==getToken())return false;sessionVerifyPromise=null;sessionVerifyToken="";resetPinnedState();closePinnedPanel(true);clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pinnedPendingDelete=null;pendingDelete=null;hideUndoToast();closeJournalView(true);journalStatusCache.clear();journalStatusSeenAt.clear();journalStatusPending.clear();journalMonthCache.clear();journalMonthPending.clear();setSession("",null);days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);setAuthStatus("Oturum süresi doldu. Yeniden giriş yapın.",true);return true}
 
 function addTask(t){t=t.trim();if(!t||!requireLocalSession())return;(days[current]=normalizeItems(days[current]||[])).push({id:uniqueTaskId(),t:t.slice(0,1000),done:false,parentId:""});persist(current);render()}
 function pendingDeleteHas(date,id){
@@ -1396,6 +1427,7 @@ function startPinnedUnreadWatch(){
   refreshPinnedUnread({force:true});pinnedUnreadTimer=setInterval(()=>refreshPinnedUnread(),30000);
 }
 function stopPinnedUnreadWatch(){if(pinnedUnreadTimer){clearInterval(pinnedUnreadTimer);pinnedUnreadTimer=null}pinnedUnreadSeq++;pinnedUnreadPromise=null;lastPinnedUnreadCheckAt=0}
+function ensurePinnedUnreadWatch(){if(!pinnedUnreadTimer&&hasLocalSession())startPinnedUnreadWatch()}
 function renderPinnedOverview(){
   const box=$("pinnedLists");if(!box)return;box.innerHTML="";
   if(!pinnedLists.length){box.innerHTML='<div class="pinned-empty">Henüz Çakılı listen yok. Alışveriş, ödemeler veya sürekli hatırlamak istediğin işler için bir liste oluştur.</div>';return}
@@ -1892,10 +1924,9 @@ function enterAppAfterLogin(j){
   setAuthStatus("");
   try{render()}catch(err){initError=initError||String(err?.message||err)}
   if(initError)recordDiag({ts:new Date().toISOString(),action:"login-ui-init",ok:false,error:initError,clientMs:0,server:null});
-  setSyncStatus("loading");startPinnedUnreadWatch();
-  // İlk senkron login sonucundan bağımsızdır; başarısız olursa mevcut connect() sadece
-  // senkron ikonunu hata durumuna alır, başarılı login'i geri çevirmez.
-  Promise.resolve(connect({reason:"login"})).catch(()=>{});
+  setSyncStatus("loading");
+  // Önce ana oturum/senkron doğrulanır; Çakılı arka plan sorguları ancak bundan sonra başlar.
+  Promise.resolve(connect({reason:"login"})).then(ok=>{if(ok&&hasLocalSession())ensurePinnedUnreadWatch()}).catch(()=>{});
 }
 $("loginPane").addEventListener("submit",async e=>{
   e.preventDefault();const btn=e.submitter||e.currentTarget.querySelector('button[type="submit"]');if(!setBackendActionBusy(btn,true,"Giriş yapılıyor…"))return;
@@ -2417,10 +2448,15 @@ window.addEventListener("online",()=>{requestForegroundSync("online",{minAge:500
 document.addEventListener("visibilitychange",()=>{
   if(document.visibilityState==="hidden"){hiddenSince=Date.now();return}
   const away=hiddenSince?Date.now()-hiddenSince:0;hiddenSince=0;
-  if(document.body.classList.contains("pinned-open")&&pinnedActiveList)syncPinnedActive({silent:true});
-  else refreshPinnedUnread({force:true});
-  if(away>=15000)requestForegroundSync("visibility-return",{minAge:15000});
-  else recordSyncControl("lifecycle-skip","visibility-return",{awayMs:away});
+  const refreshModules=()=>{
+    if(!hasLocalSession()||document.visibilityState!=="visible")return;
+    if(document.body.classList.contains("pinned-open")&&pinnedActiveList)syncPinnedActive({silent:true});
+    else refreshPinnedUnread({force:true});
+  };
+  if(away>=15000&&Date.now()-lastSyncAt>=15000){
+    // Uzun arka plan dönüşünde ilk yetkili istek her zaman ana sync'tir.
+    Promise.resolve(connect({silent:true,reason:"visibility-return"})).then(ok=>{if(ok)refreshModules()}).catch(()=>{});
+  }else{recordSyncControl("lifecycle-skip","visibility-return",{awayMs:away});refreshModules()}
 });
 // BFCache'den geri yüklenme gerçek bir sayfaya dönüş olayıdır; ilk açılışta boot zaten sync yapar.
 window.addEventListener("pageshow",e=>{if(e.persisted)requestForegroundSync("pageshow-bfcache",{minAge:15000})});
@@ -2480,9 +2516,9 @@ async function boot(){
   const cachedUser=getCachedUser(),token=getToken();
   // Fail-closed: kullanıcı ve token birlikte yoksa uygulama kabuğu hiç açılmaz.
   if(cachedUser?.id&&token){
-    currentUser=cachedUser;applyUserTheme(false);loadLocal();updateUserUI();render();showGate(false);startPinnedUnreadWatch();
-    // 60 günlük session sunucuda arka planda doğrulanır; geçersizse connect() expireSession() çağırıp kapıyı yeniden kilitler.
-    setSyncStatus("loading");connect({reason:"boot"});return;
+    currentUser=cachedUser;applyUserTheme(false);loadLocal();updateUserUI();render();showGate(false);
+    // 60 günlük kayan oturum önce ana sync ile doğrulanır; alt modül sorguları daha sonra başlar.
+    setSyncStatus("loading");Promise.resolve(connect({reason:"boot"})).then(ok=>{if(ok&&hasLocalSession())ensurePinnedUnreadWatch()}).catch(()=>{});return;
   }
   // Yarım kalmış/eski local kimlik bilgisini temizle.
   if(cachedUser||token)setSession("",null);
