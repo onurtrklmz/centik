@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v74: Çentik uygulama logosu, favicon ve PWA ikonları yeni görsel kimlikle güncellendi.
-const SURUM = "centik-v74-new-logo";
+// v75: Çakılı yeni-görev bildirim rozeti ve hafif okunmamış sayaç kontrolü eklendi.
+const SURUM = "centik-v75-cakili-unread";
 const KABUK = [
   "./",
   "./index.html",

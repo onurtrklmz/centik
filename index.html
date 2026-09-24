@@ -441,10 +441,10 @@ body.day-swipe-active *{-webkit-user-select:none!important;user-select:none!impo
 
 /* ——— V71 Çakılı toplu iğne ikonu + liste ekleme loading ——— */
 .cal-head{grid-template-columns:minmax(82px,.92fr) minmax(0,2.25fr) minmax(82px,.92fr);gap:6px;min-height:58px;padding:5px 8px}
-.drawer-launch{min-width:0;height:44px;border:1px solid color-mix(in srgb,var(--focus) 36%,var(--line));border-radius:13px;background:color-mix(in srgb,var(--focus) 6%,var(--paper));color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 5px;font-size:.68rem;font-weight:800;line-height:1;white-space:nowrap;box-shadow:0 2px 8px color-mix(in srgb,var(--focus) 7%,transparent);transition:background .14s,border-color .14s,transform .14s,color .14s}
+.drawer-launch{position:relative;min-width:0;height:44px;border:1px solid color-mix(in srgb,var(--focus) 36%,var(--line));border-radius:13px;background:color-mix(in srgb,var(--focus) 6%,var(--paper));color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 5px;font-size:.68rem;font-weight:800;line-height:1;white-space:nowrap;box-shadow:0 2px 8px color-mix(in srgb,var(--focus) 7%,transparent);transition:background .14s,border-color .14s,transform .14s,color .14s}
 .drawer-launch:hover,.drawer-launch:focus-visible{background:color-mix(in srgb,var(--focus) 12%,var(--paper));transform:translateY(-1px)}
 .drawer-launch svg{width:20px;height:20px;fill:none;stroke:var(--focus);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.pushpin-icon{overflow:visible}.pushpin-icon .pin-cap,.pushpin-icon .pin-body{fill:currentColor;stroke:none}.pushpin-icon .pin-cap{opacity:.92}.pushpin-icon .pin-body{opacity:1}.pushpin-icon .pin-needle{fill:color-mix(in srgb,var(--focus) 42%,var(--muted));stroke:none}.pushpin-icon .pin-highlight{fill:#fff;stroke:none;opacity:.38}.drawer-launch .pushpin-icon{color:var(--focus)}
+.pushpin-icon{overflow:visible}.pushpin-icon .pin-cap,.pushpin-icon .pin-body{fill:currentColor;stroke:none}.pushpin-icon .pin-cap{opacity:.92}.pushpin-icon .pin-body{opacity:1}.pushpin-icon .pin-needle{fill:color-mix(in srgb,var(--focus) 42%,var(--muted));stroke:none}.pushpin-icon .pin-highlight{fill:#fff;stroke:none;opacity:.38}.drawer-launch .pushpin-icon{color:var(--focus)}.pinned-unread-badge{position:absolute;top:-6px;right:-6px;min-width:22px;height:22px;padding:0 5px;border-radius:999px;display:grid;place-items:center;background:#d92d20;color:#fff;border:2px solid var(--paper);box-shadow:0 2px 7px rgba(0,0,0,.24);font:800 11px/1 var(--sans);letter-spacing:-.02em;z-index:2}.pinned-unread-badge[hidden]{display:none!important}
 .calendar-month-slot{min-width:0;height:44px;display:grid;grid-template-columns:30px minmax(0,1fr) 30px;align-items:center;gap:3px;border:1px solid color-mix(in srgb,var(--focus) 26%,var(--line));border-radius:13px;background:color-mix(in srgb,var(--paper) 92%,transparent);overflow:hidden}
 .calendar-month-slot .nav{width:28px;height:34px;border:0;background:transparent;box-shadow:none;font-size:1.15rem}
 .calendar-month-slot .nav:hover{transform:none;background:color-mix(in srgb,var(--focus) 8%,transparent)}
@@ -588,7 +588,7 @@ body.journal-open{overflow:hidden}
     <div class="cal-head" id="calendarHandle">
       <button class="drawer-launch pinned-launch" id="pinnedButton" type="button" aria-label="Çakılı görevleri aç">
         <svg class="pushpin-icon" viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(18 12 12)"><ellipse class="pin-cap" cx="12" cy="4.4" rx="4.7" ry="2.2"></ellipse><path class="pin-body" d="M9.2 5.1h5.6l-.8 5.7c2.5.75 4.15 2.25 4.15 4.05 0 2.45-2.8 4.2-6.15 4.2s-6.15-1.75-6.15-4.2c0-1.8 1.65-3.3 4.15-4.05l-.8-5.7Z"></path><ellipse class="pin-cap" cx="12" cy="4.15" rx="4.25" ry="1.72" opacity=".72"></ellipse><path class="pin-highlight" d="M7.75 13.55c.38-1.12 1.15-1.9 2.05-2.25-.5.75-.8 1.55-.9 2.35-.08.58-.44.98-.83.86-.36-.11-.44-.44-.32-.96Z"></path><path class="pin-needle" d="M10.9 18.4h2.2L12 24Z"></path></g></svg>
-        <span>Çakılı</span>
+        <span>Çakılı</span><span class="pinned-unread-badge" id="pinnedUnreadBadge" hidden aria-hidden="true"></span>
       </button>
       <div class="calendar-month-slot">
         <button class="nav" id="mPrev" type="button" aria-label="Takvimi aç"></button>
@@ -828,14 +828,14 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v74-new-logo", CENTIK_EXPECTED_SERVER_BUILD="v27-cakili-shared-control";
+const CENTIK_CLIENT_BUILD="v75-cakili-unread", CENTIK_EXPECTED_SERVER_BUILD="v28-cakili-unread";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
 let queuedForceSync=false, queuedForceSilent=true, foregroundSyncTimer=null, settingsOriginalTheme=null, hiddenSince=0;
 let pendingDelete=null, pendingDeleteTimer=null;
 let journalStatusCache=new Map(),journalStatusSeenAt=new Map(),journalStatusPending=new Map(),journalMonthCache=new Map(),journalMonthPending=new Map(),journalContext=null,journalActivePin="",journalDirty=false,journalPinMode="set";
-let pinnedLists=[],pinnedActiveList=null,pinnedTasks=[],pinnedRevision=null,pinnedLiveTimer=null,pinnedListsTimer=null,pinnedPendingDelete=null,pinnedPendingDeleteTimer=null,pinnedPanelHideTimer=null;
+let pinnedLists=[],pinnedActiveList=null,pinnedTasks=[],pinnedRevision=null,pinnedLiveTimer=null,pinnedListsTimer=null,pinnedPendingDelete=null,pinnedPendingDeleteTimer=null,pinnedPanelHideTimer=null,pinnedUnreadCount=0,pinnedUnreadTimer=null,pinnedUnreadPromise=null,lastPinnedUnreadCheckAt=0,pinnedUnreadSeq=0;
 const JOURNAL_STATUS_FRESH_MS=45000, JOURNAL_MONTH_FRESH_MS=300000, JOURNAL_CHAR_LIMIT=12000;
 let pushQueue=[], pushQueued=new Set(), pushWorker=null;
 const DELETE_UNDO_MS=2000;
@@ -884,7 +884,7 @@ function renderDiagnostics(message=""){
     const authCache=stepNames.includes("auth:cache-hit")?"HIT":(stepNames.includes("auth:cache-miss")?"MISS":"—");
     pieces.push(`<small>İstemci: ${escapeHtml(CENTIK_CLIENT_BUILD)} · Sunucu: ${escapeHtml(server.build||"bilinmiyor")} · Auth cache: <span class="${authCache==='HIT'?'diag-ok':''}">${authCache}</span>${mismatch?' · <span class="diag-bad">SÜRÜM UYUMSUZ</span>':''}</small>`);
   }
-  if(health){const c=health.counts||{};pieces.push(`<small>Sunucu testi: <span class="${diagnosticsResult.healthOk?'diag-ok':'diag-bad'}">${diagnosticsResult.healthOk?'PASS':'KONTROL GEREKİYOR'}</span> · kayıt ${c.records??'?'} · kullanıcı ${c.users??'?'} · oturum ${c.sessions??'?'} · çetele ${c.journals??'?'} · çakılı liste ${c.pinnedLists??'?'} · çakılı görev ${c.pinnedTasks??'?'} · mükerrer ${c.duplicates??'?'}</small>`)}
+  if(health){const c=health.counts||{};pieces.push(`<small>Sunucu testi: <span class="${diagnosticsResult.healthOk?'diag-ok':'diag-bad'}">${diagnosticsResult.healthOk?'PASS':'KONTROL GEREKİYOR'}</span> · kayıt ${c.records??'?'} · kullanıcı ${c.users??'?'} · oturum ${c.sessions??'?'} · çetele ${c.journals??'?'} · çakılı liste ${c.pinnedLists??'?'} · çakılı görev ${c.pinnedTasks??'?'} · çakılı bildirim ${c.pinnedNotifications??'?'} · mükerrer ${c.duplicates??'?'}</small>`)}
   if(message)pieces.push(`<small>${escapeHtml(message)}</small>`);
   pieces.push(`<pre class="diag-steps">${escapeHtml(diagStepsText(last))}</pre>`);box.innerHTML=pieces.join("");
   if($("diagBuild"))$("diagBuild").textContent=CENTIK_CLIENT_BUILD;
@@ -1286,11 +1286,35 @@ function resetPinnedState(){
   clearTimeout(pinnedPanelHideTimer);pinnedPanelHideTimer=null;
   clearInterval(pinnedLiveTimer);clearInterval(pinnedListsTimer);pinnedLiveTimer=null;pinnedListsTimer=null;
   clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;
+  stopPinnedUnreadWatch();setPinnedUnreadCount(0);
   pinnedLists=[];pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;
 }
 function pinnedTaskId(){return `p${Date.now().toString(36)}${Math.random().toString(36).slice(2,8)}`}
 function pinnedSetStatus(id,text=""){const el=$(id);if(el)el.textContent=text||""}
 function pinnedListById(id){return pinnedLists.find(x=>x.id===id)||null}
+function setPinnedUnreadCount(value){
+  pinnedUnreadCount=Math.max(0,Math.floor(Number(value)||0));const badge=$("pinnedUnreadBadge"),btn=$("pinnedButton");if(!badge||!btn)return;
+  badge.hidden=pinnedUnreadCount<1;badge.textContent=pinnedUnreadCount>99?"+99":`+${pinnedUnreadCount}`;
+  btn.setAttribute("aria-label",pinnedUnreadCount?`Çakılı görevleri aç, ${pinnedUnreadCount} yeni görev`:"Çakılı görevleri aç");
+}
+async function refreshPinnedUnread({force=false}={}){
+  if(!currentUser?.id||!getToken()||!navigator.onLine||document.visibilityState!=="visible"||document.body.classList.contains("pinned-open"))return false;
+  if(!force&&Date.now()-lastPinnedUnreadCheckAt<10000)return true;
+  if(pinnedUnreadPromise)return pinnedUnreadPromise;
+  const userId=currentUser.id,seq=++pinnedUnreadSeq;
+  let p;p=(async()=>{try{const j=await api("pinnedUnreadStatus",{token:getToken()},{timeout:30000});if(!j.ok){if(j.error==="oturum")expireSession();return false}if(seq!==pinnedUnreadSeq||currentUser?.id!==userId||document.body.classList.contains("pinned-open"))return false;lastPinnedUnreadCheckAt=Date.now();setPinnedUnreadCount(j.count);return true}catch(e){return false}})().finally(()=>{if(pinnedUnreadPromise===p)pinnedUnreadPromise=null});
+  pinnedUnreadPromise=p;return p;
+}
+async function markPinnedUnreadRead(listId=""){
+  if(!currentUser?.id||!getToken()||!navigator.onLine)return false;
+  const userId=currentUser.id,seq=++pinnedUnreadSeq;pinnedUnreadPromise=null;
+  try{const j=await api("pinnedUnreadRead",{token:getToken(),listId:String(listId||"")},{timeout:30000});if(!j.ok){if(j.error==="oturum")expireSession();return false}if(seq!==pinnedUnreadSeq||currentUser?.id!==userId)return true;setPinnedUnreadCount(j.count);lastPinnedUnreadCheckAt=Date.now();return true}catch(e){return false}
+}
+function startPinnedUnreadWatch(){
+  stopPinnedUnreadWatch();if(!currentUser?.id||!getToken())return;
+  refreshPinnedUnread({force:true});pinnedUnreadTimer=setInterval(()=>refreshPinnedUnread(),30000);
+}
+function stopPinnedUnreadWatch(){if(pinnedUnreadTimer){clearInterval(pinnedUnreadTimer);pinnedUnreadTimer=null}pinnedUnreadSeq++;pinnedUnreadPromise=null;lastPinnedUnreadCheckAt=0}
 function renderPinnedOverview(){
   const box=$("pinnedLists");if(!box)return;box.innerHTML="";
   if(!pinnedLists.length){box.innerHTML='<div class="pinned-empty">Henüz Çakılı listen yok. Alışveriş, ödemeler veya sürekli hatırlamak istediğin işler için bir liste oluştur.</div>';return}
@@ -1316,10 +1340,10 @@ function openPinnedPanel(){
   const panel=$("pinnedPanel");if(!panel)return;panel.hidden=false;pinnedShowOverview();
   // Çetele ile aynı açılma davranışı: panel önce kapalı konumda çizilir, ardından açık sınıfı bir sonraki karede eklenir.
   requestAnimationFrame(()=>{if(!panel.hidden)document.body.classList.add("pinned-open")});
-  loadPinnedLists();startPinnedListsRefresh();
+  setPinnedUnreadCount(0);markPinnedUnreadRead();loadPinnedLists();startPinnedListsRefresh();
 }
 function closePinnedPanel(force=false){
-  if($("pinnedShareDialog")?.open)$("pinnedShareDialog").close();stopPinnedLive();stopPinnedListsRefresh();clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;const panel=$("pinnedPanel");panel?.classList.remove("panel-dragging");panel?.style.removeProperty("transform");document.body.classList.remove("pinned-open");pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;clearTimeout(pinnedPanelHideTimer);if(force){if(panel)panel.hidden=true}else pinnedPanelHideTimer=setTimeout(()=>{if(panel&&!document.body.classList.contains("pinned-open"))panel.hidden=true},300);return true
+  if($("pinnedShareDialog")?.open)$("pinnedShareDialog").close();stopPinnedLive();stopPinnedListsRefresh();clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;const panel=$("pinnedPanel");panel?.classList.remove("panel-dragging");panel?.style.removeProperty("transform");document.body.classList.remove("pinned-open");pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;clearTimeout(pinnedPanelHideTimer);if(force){if(panel)panel.hidden=true}else pinnedPanelHideTimer=setTimeout(()=>{if(panel&&!document.body.classList.contains("pinned-open"))panel.hidden=true},300);if(!force)setTimeout(()=>refreshPinnedUnread({force:true}),350);return true
 }
 function startPinnedListsRefresh(){stopPinnedListsRefresh();pinnedListsTimer=setInterval(()=>{if(document.visibilityState==="visible"&&document.body.classList.contains("pinned-open")&&!pinnedActiveList)loadPinnedLists({silent:true})},12000)}
 function stopPinnedListsRefresh(){if(pinnedListsTimer){clearInterval(pinnedListsTimer);pinnedListsTimer=null}}
@@ -1330,7 +1354,7 @@ async function openPinnedList(id){
 }
 async function syncPinnedActive({force=false,silent=false}={}){
   if(!pinnedActiveList||!currentUser?.id)return false;const listId=pinnedActiveList.id,known=force?null:pinnedRevision;
-  try{const j=await api("pinnedGet",{token:getToken(),listId,knownRevision:known},{timeout:30000});if(!j.ok){if(j.error==="oturum")expireSession();else if(j.error==="cakili_yetki"){await loadPinnedLists({silent:true});pinnedShowOverview()}else if(!silent)pinnedSetStatus("pinnedEditorStatus",authMessage(j.error));return false}if(!pinnedActiveList||pinnedActiveList.id!==listId)return false;const responseRevision=Number(j.revision);if(Number.isFinite(responseRevision)&&pinnedRevision!==null&&responseRevision<pinnedRevision)return true;pinnedActiveList=j.list||pinnedActiveList;const ix=pinnedLists.findIndex(x=>x.id===listId);if(ix>=0)pinnedLists[ix]=pinnedActiveList;if(!j.unchanged){pinnedTasks=normalizeItems(j.tasks||[]);renderPinnedTasks()}pinnedRevision=Number.isFinite(responseRevision)?responseRevision:pinnedRevision;updatePinnedHeader();if(!silent)pinnedSetStatus("pinnedEditorStatus","");return true}
+  try{const j=await api("pinnedGet",{token:getToken(),listId,knownRevision:known},{timeout:30000});if(!j.ok){if(j.error==="oturum")expireSession();else if(j.error==="cakili_yetki"){await loadPinnedLists({silent:true});pinnedShowOverview()}else if(!silent)pinnedSetStatus("pinnedEditorStatus",authMessage(j.error));return false}if(!pinnedActiveList||pinnedActiveList.id!==listId)return false;const responseRevision=Number(j.revision);if(Number.isFinite(responseRevision)&&pinnedRevision!==null&&responseRevision<pinnedRevision)return true;pinnedActiveList=j.list||pinnedActiveList;const ix=pinnedLists.findIndex(x=>x.id===listId);if(ix>=0)pinnedLists[ix]=pinnedActiveList;if(!j.unchanged){pinnedTasks=normalizeItems(j.tasks||[]);renderPinnedTasks();markPinnedUnreadRead(listId)}pinnedRevision=Number.isFinite(responseRevision)?responseRevision:pinnedRevision;updatePinnedHeader();if(!silent)pinnedSetStatus("pinnedEditorStatus","");return true}
   catch(e){if(!silent)pinnedSetStatus("pinnedEditorStatus","Liste güncellenemedi. Bağlantınızı kontrol edin.");return false}
 }
 function updatePinnedHeader(){
@@ -1720,7 +1744,7 @@ function enterAppAfterLogin(j){
   setAuthStatus("");
   try{render()}catch(err){initError=initError||String(err?.message||err)}
   if(initError)recordDiag({ts:new Date().toISOString(),action:"login-ui-init",ok:false,error:initError,clientMs:0,server:null});
-  setSyncStatus("loading");
+  setSyncStatus("loading");startPinnedUnreadWatch();
   // İlk senkron login sonucundan bağımsızdır; başarısız olursa mevcut connect() sadece
   // senkron ikonunu hata durumuna alır, başarılı login'i geri çevirmez.
   Promise.resolve(connect({reason:"login"})).catch(()=>{});
@@ -2156,12 +2180,13 @@ function requestForegroundSync(reason,{minAge=15000}={}){
   },300);
 }
 // Ağ gerçekten geri geldiyse kontrol et.
-window.addEventListener("online",()=>requestForegroundSync("online",{minAge:5000}));
+window.addEventListener("online",()=>{requestForegroundSync("online",{minAge:5000});refreshPinnedUnread({force:true})});
 // Yalnız uygulama anlamlı süre arka planda kaldıysa geri dönüşte sync yap.
 document.addEventListener("visibilitychange",()=>{
   if(document.visibilityState==="hidden"){hiddenSince=Date.now();return}
   const away=hiddenSince?Date.now()-hiddenSince:0;hiddenSince=0;
   if(document.body.classList.contains("pinned-open")&&pinnedActiveList)syncPinnedActive({silent:true});
+  else refreshPinnedUnread({force:true});
   if(away>=15000)requestForegroundSync("visibility-return",{minAge:15000});
   else recordSyncControl("lifecycle-skip","visibility-return",{awayMs:away});
 });
@@ -2223,7 +2248,7 @@ async function boot(){
   const cachedUser=getCachedUser(),token=getToken();
   // Fail-closed: kullanıcı ve token birlikte yoksa uygulama kabuğu hiç açılmaz.
   if(cachedUser?.id&&token){
-    currentUser=cachedUser;applyUserTheme(false);loadLocal();updateUserUI();render();showGate(false);
+    currentUser=cachedUser;applyUserTheme(false);loadLocal();updateUserUI();render();showGate(false);startPinnedUnreadWatch();
     // 60 günlük session sunucuda arka planda doğrulanır; geçersizse connect() expireSession() çağırıp kapıyı yeniden kilitler.
     setSyncStatus("loading");connect({reason:"boot"});return;
   }
