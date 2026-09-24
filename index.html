@@ -512,6 +512,46 @@ body.journal-open{overflow:hidden}
 .panel-home-return svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .panel-home-return .return-arrow-icon{width:15px;margin-right:-3px}.panel-home-return .return-home-icon{width:17px}
 @media(prefers-reduced-motion:reduce){.pinned-panel.panel-dragging,.journal-panel.panel-dragging{transition:none!important}}
+
+/* ——— V76 ortak alt çekmece yüzeyi + kompakt yaklaşan görevler ——— */
+:root{--centik-topbar-h:60px}
+.day-head-actions{max-width:min(48vw,230px)}
+.day-head-actions .upcoming-notice{margin:0;height:38px;min-height:38px;width:auto;max-width:100%;padding:3px 6px 3px 8px;border:1px solid var(--notice-tomorrow-border);border-radius:999px;background:var(--notice-tomorrow-bg);box-shadow:var(--shadow);display:flex;align-items:center;gap:6px;overflow:hidden}
+.day-head-actions .upcoming-notice::after{display:none}
+.day-head-actions .upcoming-notice-main{flex:0 0 auto;gap:0}
+.day-head-actions .upcoming-notice-main #tomorrowNoticeText{display:none}
+.day-head-actions .upcoming-notice-main .notice-icon{width:18px;height:18px;flex:0 0 18px}
+.day-head-actions .upcoming-chips{display:flex!important;gap:5px;min-width:0;padding:0;overflow-x:auto}
+.day-head-actions .upcoming-chip{padding:6px 8px;font-size:.76rem;background:color-mix(in srgb,var(--notice-tomorrow-accent) 8%,var(--paper))}
+.sub-row .today-inline{margin-left:auto}
+
+.pinned-panel,.journal-panel{
+  left:50%;top:calc(var(--centik-topbar-h) + 6px);bottom:max(12px,env(safe-area-inset-bottom));height:auto;min-height:0;
+  width:min(520px,calc(100% - 24px));max-width:520px;margin:0;
+  padding:12px 16px calc(78px + env(safe-area-inset-bottom));
+  border:1px solid var(--line);border-radius:17px;
+  background:color-mix(in srgb,var(--paper) 96%,transparent);
+  backdrop-filter:blur(16px) saturate(1.25);-webkit-backdrop-filter:blur(16px) saturate(1.25);
+  box-shadow:0 14px 42px rgba(0,0,0,.20);
+  transform:translate(-50%,calc(100% + 24px));opacity:.98;z-index:70;overflow-y:auto;overscroll-behavior:contain;
+  transition:transform .32s cubic-bezier(.22,.8,.24,1),opacity .2s ease,visibility 0s linear .32s;
+}
+body.journal-open .journal-panel,body.pinned-open .pinned-panel{transform:translate(-50%,0);opacity:1;visibility:visible;pointer-events:auto;transition-delay:0s}
+body.pinned-open .cal,body.journal-open .cal{visibility:visible!important;pointer-events:auto!important;z-index:72}
+body.pinned-open .calendar-backdrop,body.journal-open .calendar-backdrop{visibility:hidden!important;pointer-events:none!important;opacity:0!important}
+body.pinned-open .ust-cubuk,body.journal-open .ust-cubuk{z-index:80;background:color-mix(in srgb,var(--bar) 84%,transparent);backdrop-filter:blur(18px) saturate(1.35);-webkit-backdrop-filter:blur(18px) saturate(1.35)}
+body.pinned-open main,body.journal-open main{pointer-events:none}
+body.pinned-open .cal-head,body.journal-open .cal-head{background:color-mix(in srgb,var(--paper) 96%,transparent)}
+body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-rows:0fr!important;opacity:0!important;transform:translateY(22px)!important}
+.pinned-panel .panel-bottom-actions,.journal-panel .panel-bottom-actions{padding-bottom:4px}
+@media(max-width:430px){
+  .day-head{grid-template-columns:40px minmax(0,1fr) minmax(0,46vw) 40px;gap:6px}
+  .day-head-actions{max-width:46vw}
+  .day-head-actions .upcoming-notice{padding-left:7px}
+  .day-head-actions .upcoming-chip{padding:6px 7px;font-size:.72rem}
+  .pinned-panel,.journal-panel{width:calc(100% - 16px);padding-left:14px;padding-right:14px;bottom:max(8px,env(safe-area-inset-bottom))}
+}
+
 </style>
 </head>
 <body class="auth-locked">
@@ -542,17 +582,23 @@ body.journal-open{overflow:hidden}
 
 <div class="app-stage" id="appStage">
 <main id="taskMain">
-  <div class="jump-notice tomorrow-notice upcoming-notice" id="tomorrowNotice" hidden>
-    <div class="jump-notice-main upcoming-notice-main">
-      <svg class="notice-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="11" r="5.8"></circle><path d="M10 7.7v3.65l2.35 1.4M7.6 2.8h4.8M10 2.8v2.1"></path></svg>
-      <span id="tomorrowNoticeText"></span>
-    </div>
-    <div class="upcoming-chips" id="upcomingChips" aria-label="Yaklaşan görev günleri"></div>
-  </div>
   <div class="day-head">
     <button class="nav" id="prev" aria-label="Önceki gün">‹</button>
     <h2 id="dayTitle">Bugün</h2>
     <div class="day-head-actions">
+      <div class="jump-notice tomorrow-notice upcoming-notice" id="tomorrowNotice" hidden>
+        <div class="jump-notice-main upcoming-notice-main" aria-hidden="true">
+          <svg class="notice-icon" viewBox="0 0 20 20"><circle cx="10" cy="11" r="5.8"></circle><path d="M10 7.7v3.65l2.35 1.4M7.6 2.8h4.8M10 2.8v2.1"></path></svg>
+          <span id="tomorrowNoticeText"></span>
+        </div>
+        <div class="upcoming-chips" id="upcomingChips" aria-label="Yaklaşan görev günleri"></div>
+      </div>
+    </div>
+    <button class="nav" id="next" aria-label="Sonraki gün">›</button>
+  </div>
+  <div class="sub-row">
+    <p class="sub" id="daySub"></p>
+    <div class="sub-actions">
       <button class="jump-notice today-inline" id="todayNotice" type="button" hidden>
         <svg viewBox="0 0 20 20" aria-hidden="true">
           <rect x="3.4" y="3.1" width="12.8" height="9.7" rx="2"></rect><path d="M6.3 1.9v2.8M13.7 1.9v2.8M3.4 6.3h12.8"></path>
@@ -561,10 +607,6 @@ body.journal-open{overflow:hidden}
         <span>Bugün</span>
       </button>
     </div>
-    <button class="nav" id="next" aria-label="Sonraki gün">›</button>
-  </div>
-  <div class="sub-row">
-    <p class="sub" id="daySub"></p>
   </div>
 
   <div class="tally" aria-live="polite">
@@ -828,7 +870,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v75-cakili-unread", CENTIK_EXPECTED_SERVER_BUILD="v28-cakili-unread";
+const CENTIK_CLIENT_BUILD="v76-drawer-hierarchy-layout", CENTIK_EXPECTED_SERVER_BUILD="v28-cakili-unread";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -1185,34 +1227,11 @@ function renderTomorrowNotice(){
     const key=addDays(today,i),count=(days[key]||[]).filter(x=>!x.done).length;
     if(count>0)upcoming.push({key,count,offset:i});
   }
-  notice.classList.remove("simple","multi");
-  notice.onclick=null;
-  if(chips)chips.innerHTML="";
-  if(!upcoming.length){
-    notice.hidden=true;
-    if(text)text.textContent="";
-    notice.removeAttribute("aria-label");
-    return;
-  }
+  notice.classList.remove("simple");notice.classList.add("multi");notice.onclick=null;notice.onkeydown=null;
+  notice.removeAttribute("role");notice.removeAttribute("tabindex");notice.removeAttribute("aria-label");
+  if(chips)chips.innerHTML="";if(text)text.textContent="";
+  if(!upcoming.length){notice.hidden=true;return}
   notice.hidden=false;
-  if(upcoming.length===1&&upcoming[0].offset===1){
-    const item=upcoming[0];
-    notice.classList.add("simple");
-    if(text)text.textContent=`Yarın: Bekleyen ${item.count} görev`;
-    notice.setAttribute("role","button");
-    notice.setAttribute("tabindex","0");
-    notice.setAttribute("aria-label",`Yarına git. Bekleyen ${item.count} görev var.`);
-    const activate=()=>goDayAnimated(item.key);
-    notice.onclick=activate;
-    notice.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();activate()}};
-    return;
-  }
-  notice.classList.add("multi");
-  notice.removeAttribute("role");
-  notice.removeAttribute("tabindex");
-  notice.removeAttribute("aria-label");
-  notice.onkeydown=null;
-  if(text)text.textContent="Yaklaşan";
   const shortDays=["Paz","Pzt","Sal","Çar","Per","Cum","Cmt"];
   if(chips){
     upcoming.forEach(item=>{
@@ -1335,7 +1354,8 @@ function pinnedShowOverview(){
   stopPinnedLive();pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;$("pinnedOverview").hidden=false;$("pinnedEditor").hidden=true;$("pinnedOwnerTools").hidden=true;$("pinnedTitle").textContent="Çakılı";$("pinnedSubtitle").textContent="Tarihten bağımsız listelerin.";renderPinnedOverview();
 }
 function openPinnedPanel(){
-  if(!requireLocalSession()||document.body.classList.contains("journal-open")||document.body.classList.contains("pinned-open"))return;
+  if(!requireLocalSession()||document.body.classList.contains("pinned-open"))return;
+  if(document.body.classList.contains("journal-open")&&!closeJournalView(false))return;
   setCalendarOpen(false);clearTimeout(pinnedPanelHideTimer);pinnedPanelHideTimer=null;
   const panel=$("pinnedPanel");if(!panel)return;panel.hidden=false;pinnedShowOverview();
   // Çetele ile aynı açılma davranışı: panel önce kapalı konumda çizilir, ardından açık sınıfı bir sonraki karede eklenir.
@@ -1343,11 +1363,11 @@ function openPinnedPanel(){
   setPinnedUnreadCount(0);markPinnedUnreadRead();loadPinnedLists();startPinnedListsRefresh();
 }
 function closePinnedPanel(force=false){
-  if($("pinnedShareDialog")?.open)$("pinnedShareDialog").close();stopPinnedLive();stopPinnedListsRefresh();clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;const panel=$("pinnedPanel");panel?.classList.remove("panel-dragging");panel?.style.removeProperty("transform");document.body.classList.remove("pinned-open");pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;clearTimeout(pinnedPanelHideTimer);if(force){if(panel)panel.hidden=true}else pinnedPanelHideTimer=setTimeout(()=>{if(panel&&!document.body.classList.contains("pinned-open"))panel.hidden=true},300);if(!force)setTimeout(()=>refreshPinnedUnread({force:true}),350);return true
+  if($("pinnedShareDialog")?.open)$("pinnedShareDialog").close();stopPinnedLive();stopPinnedListsRefresh();clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;const panel=$("pinnedPanel");panel?.classList.remove("panel-dragging");panel?.style.removeProperty("transform");document.body.classList.remove("pinned-open");pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;clearTimeout(pinnedPanelHideTimer);if(force){if(panel)panel.hidden=true}else pinnedPanelHideTimer=setTimeout(()=>{if(panel&&!document.body.classList.contains("pinned-open"))panel.hidden=true},340);if(!force)setTimeout(()=>refreshPinnedUnread({force:true}),350);return true
 }
 function startPinnedListsRefresh(){stopPinnedListsRefresh();pinnedListsTimer=setInterval(()=>{if(document.visibilityState==="visible"&&document.body.classList.contains("pinned-open")&&!pinnedActiveList)loadPinnedLists({silent:true})},12000)}
 function stopPinnedListsRefresh(){if(pinnedListsTimer){clearInterval(pinnedListsTimer);pinnedListsTimer=null}}
-function startPinnedLive(){stopPinnedLive();pinnedLiveTimer=setInterval(()=>{if(document.visibilityState==="visible"&&document.body.classList.contains("pinned-open")&&pinnedActiveList&&!$("pinnedTaskList")?.querySelector(".editing")&&!pinnedPendingDelete)syncPinnedActive({silent:true})},3500)}
+function startPinnedLive(){stopPinnedLive();pinnedLiveTimer=setInterval(()=>{if(document.visibilityState==="visible"&&document.body.classList.contains("pinned-open")&&pinnedActiveList&&!$("pinnedTaskList")?.querySelector(".editing")&&!pinnedPendingDelete&&!pinnedTaskReorder)syncPinnedActive({silent:true})},3500)}
 function stopPinnedLive(){if(pinnedLiveTimer){clearInterval(pinnedLiveTimer);pinnedLiveTimer=null}}
 async function openPinnedList(id){
   const list=pinnedListById(id);if(!list)return;pinnedActiveList=list;pinnedTasks=[];pinnedRevision=null;$("pinnedOverview").hidden=true;$("pinnedEditor").hidden=false;$("pinnedTitle").textContent=list.title;$("pinnedSubtitle").textContent=list.sharedUser?"Ortak Çakılı liste":"Çakılı görev listesi";$("pinnedOwnerTools").hidden=false;$("sharePinnedList").hidden=!list.isOwner;pinnedSetStatus("pinnedEditorStatus","Liste yükleniyor…");renderPinnedTasks();await syncPinnedActive({force:true});startPinnedLive();
@@ -1367,7 +1387,7 @@ function renderPinnedTasks(){
   updatePinnedHeader();const items=normalizeItems(pinnedTasks);pinnedTasks=items;const done=items.filter(x=>x.done).length;$("pinnedDoneCount").textContent=done;$("pinnedTotalCount").textContent=items.length;$("pinnedOpenCount").textContent=items.length-done;
   const ul=$("pinnedTaskList");ul.innerHTML="";if(!items.length){const li=document.createElement("li");li.className="empty";li.textContent="Bu liste boş. İlk görevi ekleyin.";ul.appendChild(li);return}
   items.forEach(it=>{const li=document.createElement("li"),isDeleting=pinnedDeleteHas(it.id),isRoot=pinnedPendingDelete?.id===it.id;li.className="task-row";li.dataset.taskId=it.id;li.dataset.parentId=it.parentId||"";if(it.parentId)li.classList.add("subtask");if(it.done)li.classList.add("done");if(isDeleting)li.classList.add("deleting");
-    const slot=document.createElement("span");slot.className="check-slot";const c=document.createElement("button");c.className="check";c.disabled=isDeleting;c.setAttribute("aria-pressed",String(it.done));c.setAttribute("aria-label",it.done?"Tamamlandı işaretini kaldır":"Tamamlandı olarak işaretle");c.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3L13 4.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';c.onclick=()=>pinnedToggleTask(it.id);slot.appendChild(c);
+    const slot=document.createElement("span");slot.className="check-slot";const c=document.createElement("button");c.className="check";c.disabled=isDeleting;c.setAttribute("aria-pressed",String(it.done));c.setAttribute("aria-label",it.done?"Tamamlandı işaretini kaldır":"Tamamlandı olarak işaretle");c.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3L13 4.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';c.onclick=()=>pinnedToggleTask(it.id);const cue=document.createElement("span");cue.className="drag-cue";cue.setAttribute("aria-hidden","true");cue.innerHTML='<svg viewBox="0 0 20 20"><path d="M7.7 6.2 10 3l2.3 3.2Z"/><path d="M7.7 13.8 10 17l2.3-3.2Z"/><path d="M6.2 7.7 3 10l3.2 2.3Z"/><path d="M13.8 7.7 17 10l-3.2 2.3Z"/></svg>';slot.append(c,cue);
     const span=document.createElement("span");span.className="txt";span.textContent=it.t;const hint=document.createElement("span");hint.className="hierarchy-hint";hint.textContent="Alt görev";const actions=document.createElement("div");actions.className="task-actions";
     const edit=document.createElement("button");edit.className="edit";edit.type="button";edit.disabled=isDeleting;edit.innerHTML='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M12.146.854a.5.5 0 0 1 .708 0l2.292 2.292a.5.5 0 0 1 0 .708l-9.5 9.5a.5.5 0 0 1-.168.11l-4 1.5a.5.5 0 0 1-.642-.642l1.5-4a.5.5 0 0 1 .11-.168zM11.207 2.5 3.342 10.365l-.823 2.195 2.195-.823L12.58 3.872z"/></svg>';edit.setAttribute("aria-label","Görevi düzenle");edit.title="Düzenle";edit.onclick=()=>editPinnedTask(it.id,li);
     const x=document.createElement("button");x.type="button";if(isRoot){x.className="undo-inline";x.textContent="Geri al";x.onclick=undoPinnedDelete}else{x.className="del";x.textContent="×";x.disabled=isDeleting;if(!isDeleting)x.onclick=()=>queuePinnedDelete(it.id)}actions.append(edit,x);li.append(slot,span,hint,actions);ul.append(li)});
@@ -1488,7 +1508,8 @@ async function fetchJournalForOpen(date,pin=""){
   return api("journalGet",{token:getToken(),date,pin},{timeout:30000});
 }
 async function openJournalForCurrent(){
-  if(!requireLocalSession()||journalContext||document.body.classList.contains("journal-open")||document.body.classList.contains("pinned-open"))return;
+  if(!requireLocalSession()||journalContext||document.body.classList.contains("journal-open"))return;
+  if(document.body.classList.contains("pinned-open"))closePinnedPanel(true);
   setCalendarOpen(false);
   const date=current,b=$("journalButton"),seq=++journalOpenSeq;if(!setBackendActionBusy(b,true,"Açılıyor…"))return;
   let pin="",j=null,needsPin=!!currentUser?.journalPinEnabled;
@@ -1525,7 +1546,7 @@ function closeJournalView(force=false){
   if(!force&&journalContext&&journalDirty&&!confirm("Çetele’de kaydedilmemiş değişiklikler var. Kapatılsın mı?"))return false;
   journalOpenSeq++;if(journalUnlockResolver)finishJournalUnlock(null);
   const panel=$("journalPanel");panel?.classList.remove("panel-dragging");panel?.style.removeProperty("transform");journalContext=null;journalActivePin="";journalDirty=false;$("journalText").value="";clearJournalLimitWarning();$("journalSaveStatus").textContent="";document.body.classList.remove("journal-open");renderJournalButton();
-  clearTimeout(journalPanelHideTimer);if(force){if(panel)panel.hidden=true}else journalPanelHideTimer=setTimeout(()=>{if(panel&&!document.body.classList.contains("journal-open"))panel.hidden=true},300);
+  clearTimeout(journalPanelHideTimer);if(force){if(panel)panel.hidden=true}else journalPanelHideTimer=setTimeout(()=>{if(panel&&!document.body.classList.contains("journal-open"))panel.hidden=true},340);
   return true;
 }
 function clearJournalLimitWarning(){const el=$("journalLimitStatus");if(el){el.hidden=true;el.textContent="Çetele sınıra ulaştı"}}
@@ -1840,7 +1861,7 @@ globalDaySwipeSurface.addEventListener("pointercancel",resetGlobalDayGesture);
 // Yalnız uygulama yüzeyinde çalışır; form/menü/takvim gibi etkileşimli alanları dışarıda bırakır.
 let trackpadDayAccumX=0,trackpadDayResetTimer=null,trackpadDayCooldownUntil=0;
 const TRACKPAD_DAY_SWIPE_EXCLUDE=[
-  "#calendarDrawer","#calendarBackdrop",".upcoming-chips","dialog",".account-menu-wrap",".journal-panel",
+  "#calendarDrawer","#calendarBackdrop",".upcoming-chips","dialog",".account-menu-wrap",".journal-panel",".pinned-panel",
   "button","input","textarea","select","a","[contenteditable='true']"
 ].join(",");
 function resetTrackpadDaySwipe(){trackpadDayAccumX=0;clearTimeout(trackpadDayResetTimer);trackpadDayResetTimer=null}
@@ -2031,6 +2052,70 @@ taskList.addEventListener("contextmenu",e=>{if(taskReorder?.active&&taskReorderR
 
 $("refresh").onclick=()=>withBackendAction($("refresh"),"Yenileniyor…",()=>connect({force:true,silent:false,reason:"manual"}));
 
+// V76: tepe bar yüksekliğini çekmecelerin üst sınırı için dinamik tut.
+function syncUtilityDrawerTop(){const bar=document.querySelector(".ust-cubuk");if(!bar)return;document.documentElement.style.setProperty("--centik-topbar-h",`${Math.ceil(bar.getBoundingClientRect().height)}px`)}
+syncUtilityDrawerTop();window.addEventListener("resize",syncUtilityDrawerTop,{passive:true});
+
+// Çakılı görevler: günlük görevlerle aynı dikey sıralama + yatay alt görev/ana görev hareketi.
+const pinnedTaskList=$("pinnedTaskList");
+let pinnedTaskReorder=null,pinnedTaskReorderHoldTimer=null,lastPinnedTaskFlipAt=0;
+const pinnedTaskFlipAnimations=new WeakMap();
+function clearPinnedTaskReorderHold(){if(pinnedTaskReorderHoldTimer){clearTimeout(pinnedTaskReorderHoldTimer);pinnedTaskReorderHoldTimer=null}}
+function pinnedReorderRow(target){return target?.closest?.("#pinnedTaskList li.task-row[data-task-id]")||null}
+function pinnedReorderBlocked(target){return !target||!!target.closest("button,input,textarea,select,a,[contenteditable='true'],.editing,.deleting")}
+function pinnedTaskRowsDom(){return [...pinnedTaskList.querySelectorAll("li.task-row[data-task-id]")]}
+function pinnedRowParentId(row){return String(row?.dataset?.parentId||"")}
+function pinnedRowHasChildren(row){const id=row?.dataset?.taskId||"";return !!id&&pinnedTaskRowsDom().some(x=>pinnedRowParentId(x)===id)}
+function pinnedTopLevelBlocks(){
+  const rows=pinnedTaskRowsDom(),blocks=[];let currentBlock=null;
+  rows.forEach(row=>{const pid=pinnedRowParentId(row);if(!pid){currentBlock={root:row,rows:[row]};blocks.push(currentBlock)}else if(currentBlock&&currentBlock.root.dataset.taskId===pid)currentBlock.rows.push(row);else{row.dataset.parentId="";row.classList.remove("subtask");currentBlock={root:row,rows:[row]};blocks.push(currentBlock)}});
+  return blocks;
+}
+function pinnedSiblingRows(parentId,excludeRow){return pinnedTaskRowsDom().filter(r=>r!==excludeRow&&pinnedRowParentId(r)===parentId)}
+function clearPinnedHierarchyPreview(){
+  pinnedTaskRowsDom().forEach(r=>{r.classList.remove("nest-preview","outdent-preview","nest-parent-candidate");const h=r.querySelector(".hierarchy-hint");if(h)h.textContent="Alt görev"});
+  if(pinnedTaskReorder?.row)pinnedTaskReorder.row.style.setProperty("--drag-x","0px");
+}
+function pinnedPreviousTopLevelRow(row){let p=row?.previousElementSibling;while(p){if(p.matches?.("li.task-row[data-task-id]")&&!pinnedRowParentId(p)&&!p.classList.contains("deleting"))return p;p=p.previousElementSibling}return null}
+function beginPinnedTaskReorder(row,clientX,clientY){
+  if(!requireLocalSession()||!pinnedActiveList)return;if(!pinnedTaskReorder||pinnedTaskReorder.active||!row||pinnedTaskReorder.listId!==pinnedActiveList.id)return;
+  pinnedTaskReorder.active=true;pinnedTaskReorder.lastX=clientX;pinnedTaskReorder.lastY=clientY;pinnedTaskReorder.intent="";pinnedTaskReorder.nestParentId="";lastPinnedTaskFlipAt=0;
+  pinnedTaskReorder.originalParentId=pinnedRowParentId(row);pinnedTaskReorder.hasChildren=pinnedRowHasChildren(row);row.classList.add("dragging");row.setAttribute("aria-grabbed","true");
+  if(!pinnedTaskReorder.originalParentId){const id=row.dataset.taskId;pinnedTaskRowsDom().filter(x=>pinnedRowParentId(x)===id).forEach(x=>x.classList.add("dragging-companion"))}
+  pinnedTaskList.classList.add("reordering");document.body.classList.add("task-reordering");
+}
+function animatePinnedTaskReorder(mutator){
+  const rows=pinnedTaskRowsDom(),first=new Map(rows.map(el=>[el,el.getBoundingClientRect()]));mutator();const last=new Map(rows.map(el=>[el,el.getBoundingClientRect()]));
+  rows.forEach(el=>{const a=pinnedTaskFlipAnimations.get(el);if(a){try{a.cancel()}catch(_){ }pinnedTaskFlipAnimations.delete(el)}const f=first.get(el),l=last.get(el);if(!f||!l)return;const dx=f.left-l.left,dy=f.top-l.top;if(Math.abs(dx)<.5&&Math.abs(dy)<.5)return;const dragging=el===pinnedTaskReorder?.row,dragX=dragging?Number(pinnedTaskReorder?.dragVisualX||0):0;const from=dragging?`translate(${dx+dragX}px, ${dy}px) scale(1.012)`:`translate(${dx}px, ${dy}px)`;const to=dragging?`translate(${dragX}px, 0) scale(1.012)`:"translate(0, 0)";const anim=el.animate([{transform:from},{transform:to}],{duration:TASK_REORDER_FLIP_MS,easing:"cubic-bezier(.22,.61,.36,1)",fill:"none"});pinnedTaskFlipAnimations.set(el,anim);const clear=()=>{if(pinnedTaskFlipAnimations.get(el)===anim)pinnedTaskFlipAnimations.delete(el)};anim.onfinish=clear;anim.oncancel=clear});
+}
+function movePinnedTopLevelBlock(clientY){
+  const d=pinnedTaskReorder,row=d.row,blocks=pinnedTopLevelBlocks(),own=blocks.find(b=>b.root===row);if(!own)return;const others=blocks.filter(b=>b!==own);let beforeBlock=null;for(const b of others){const r=b.root.getBoundingClientRect();if(clientY<r.top+r.height/2){beforeBlock=b;break}}const ownRows=own.rows,firstOwn=ownRows[0],lastOwn=ownRows[ownRows.length-1],ref=beforeBlock?.root||null,already=ref?lastOwn.nextElementSibling===ref:pinnedTaskList.lastElementChild===lastOwn;if(already)return;animatePinnedTaskReorder(()=>{const frag=document.createDocumentFragment();ownRows.forEach(x=>frag.appendChild(x));if(ref)pinnedTaskList.insertBefore(frag,ref);else pinnedTaskList.appendChild(frag)});
+}
+function movePinnedChildWithinSiblings(clientY){
+  const d=pinnedTaskReorder,row=d.row,pid=d.originalParentId,sibs=pinnedSiblingRows(pid,row);if(!sibs.length)return;let before=null;for(const el of sibs){const r=el.getBoundingClientRect();if(clientY<r.top+r.height/2){before=el;break}}const shouldMove=before?row.nextElementSibling!==before:sibs[sibs.length-1].nextElementSibling!==row&&pinnedTaskList.lastElementChild!==row;if(!shouldMove)return;animatePinnedTaskReorder(()=>{if(before)pinnedTaskList.insertBefore(row,before);else{sibs[sibs.length-1].insertAdjacentElement("afterend",row)}});
+}
+function updatePinnedHierarchyIntent(clientX){
+  const d=pinnedTaskReorder;if(!d?.active)return false;const dx=clientX-d.startX;d.dragVisualX=Math.max(-34,Math.min(34,dx*.55));d.row.style.setProperty("--drag-x",`${d.dragVisualX}px`);let next="";if(d.originalParentId&&dx<=-TASK_NEST_THRESHOLD)next="outdent";else if(!d.originalParentId&&!d.hasChildren&&dx>=TASK_NEST_THRESHOLD)next="nest";else if(Math.abs(dx)<=TASK_NEST_RELEASE)next="";else next=d.intent||"";if(next===d.intent&&next!=="nest")return !!next;clearPinnedHierarchyPreview();d.intent=next;d.nestParentId="";d.row.style.setProperty("--drag-x",`${d.dragVisualX}px`);if(next==="nest"){const candidate=pinnedPreviousTopLevelRow(d.row);if(candidate){d.nestParentId=candidate.dataset.taskId;candidate.classList.add("nest-parent-candidate");d.row.classList.add("nest-preview");const h=d.row.querySelector(".hierarchy-hint");if(h)h.textContent="Alt görev"}else{d.intent="";d.row.style.setProperty("--drag-x",`${d.dragVisualX}px`)}}else if(next==="outdent"){d.row.classList.add("outdent-preview");const h=d.row.querySelector(".hierarchy-hint");if(h)h.textContent="Ana görev"}return !!d.intent;
+}
+function movePinnedTaskReorder(clientX,clientY){
+  const d=pinnedTaskReorder;if(!d?.active||!pinnedActiveList||pinnedActiveList.id!==d.listId)return;d.lastX=clientX;d.lastY=clientY;const hierarchyMode=updatePinnedHierarchyIntent(clientX);if(!hierarchyMode&&Date.now()-lastPinnedTaskFlipAt>55){lastPinnedTaskFlipAt=Date.now();if(d.originalParentId)movePinnedChildWithinSiblings(clientY);else movePinnedTopLevelBlock(clientY)}const panel=$("pinnedPanel"),r=panel?.getBoundingClientRect();if(r){const edge=72;if(clientY<r.top+edge)panel.scrollBy({top:-10,behavior:"auto"});else if(clientY>r.bottom-edge)panel.scrollBy({top:10,behavior:"auto"})}
+}
+function commitPinnedHierarchyIntent(d,byId){
+  const row=d.row,item=byId.get(row.dataset.taskId);if(!item)return false;let changed=false;if(d.intent==="nest"&&d.nestParentId&&d.nestParentId!==item.id){item.parentId=d.nestParentId;row.dataset.parentId=d.nestParentId;row.classList.add("subtask");changed=true;const candidate=pinnedTaskRowsDom().find(x=>x.dataset.taskId===d.nestParentId);if(candidate){const children=pinnedTaskRowsDom().filter(x=>x!==row&&pinnedRowParentId(x)===d.nestParentId),last=children.length?children[children.length-1]:candidate;animatePinnedTaskReorder(()=>last.insertAdjacentElement("afterend",row))}}else if(d.intent==="outdent"&&item.parentId){const oldPid=item.parentId,oldParent=pinnedTaskRowsDom().find(x=>x.dataset.taskId===oldPid);item.parentId="";row.dataset.parentId="";row.classList.remove("subtask");changed=true;if(oldParent){const remaining=pinnedTaskRowsDom().filter(x=>x!==row&&pinnedRowParentId(x)===oldPid),last=remaining.length?remaining[remaining.length-1]:oldParent;animatePinnedTaskReorder(()=>last.insertAdjacentElement("afterend",row))}}return changed;
+}
+function finishPinnedTaskReorder(commit=true){
+  clearPinnedTaskReorderHold();const d=pinnedTaskReorder;if(!d)return;pinnedTaskRowsDom().forEach(el=>{const a=pinnedTaskFlipAnimations.get(el);if(a){try{a.finish()}catch(_){ }pinnedTaskFlipAnimations.delete(el)}});const wasActive=d.active;pinnedTaskReorder=null;clearPinnedHierarchyPreview();d.row?.classList.remove("dragging","nest-preview","outdent-preview");d.row?.removeAttribute("aria-grabbed");d.row?.style.removeProperty("--drag-x");pinnedTaskRowsDom().forEach(x=>x.classList.remove("dragging-companion","nest-parent-candidate"));pinnedTaskList.classList.remove("reordering");document.body.classList.remove("task-reordering");if(!commit||!wasActive||!pinnedActiveList||pinnedActiveList.id!==d.listId)return;const existing=normalizeItems(pinnedTasks),byId=new Map(existing.map(it=>[it.id,{...it}])),hierarchyChanged=commitPinnedHierarchyIntent(d,byId),ids=pinnedTaskRowsDom().map(li=>li.dataset.taskId).filter(id=>byId.has(id));if(ids.length!==existing.length){renderPinnedTasks();return}const normalized=normalizeItems(ids.map(id=>byId.get(id))),oldSig=existing.map(it=>`${it.id}|${it.parentId||""}`).join("\u001f"),newSig=normalized.map(it=>`${it.id}|${it.parentId||""}`).join("\u001f");if(!hierarchyChanged&&oldSig===newSig)return;pinnedTasks=normalized;const rowMap=new Map(pinnedTaskRowsDom().map(r=>[r.dataset.taskId,r]));normalized.forEach(it=>{const r=rowMap.get(it.id);if(!r)return;r.dataset.parentId=it.parentId||"";r.classList.toggle("subtask",!!it.parentId)});const normalizedIds=normalized.map(it=>it.id),domIds=pinnedTaskRowsDom().map(r=>r.dataset.taskId);if(normalizedIds.some((id,i)=>id!==domIds[i]))animatePinnedTaskReorder(()=>normalizedIds.forEach(id=>{const r=rowMap.get(id);if(r)pinnedTaskList.appendChild(r)}));pinnedMutate("reorder",{items:normalized.map((it,i)=>({id:it.id,parentId:it.parentId||"",order:i+1}))},{silent:false});
+}
+pinnedTaskList.addEventListener("mousedown",e=>{if(e.button!==0||pinnedReorderBlocked(e.target))return;const row=pinnedReorderRow(e.target);if(!row||!pinnedActiveList)return;pinnedTaskReorder={mode:"mouse",active:false,row,listId:pinnedActiveList.id,startX:e.clientX,startY:e.clientY,lastX:e.clientX,lastY:e.clientY}});
+window.addEventListener("mousemove",e=>{const d=pinnedTaskReorder;if(!d||d.mode!=="mouse")return;if(!d.active){const dx=e.clientX-d.startX,dy=e.clientY-d.startY;if(Math.hypot(dx,dy)<5)return;beginPinnedTaskReorder(d.row,e.clientX,e.clientY)}if(pinnedTaskReorder?.active){e.preventDefault();movePinnedTaskReorder(e.clientX,e.clientY)}});
+window.addEventListener("mouseup",()=>{if(pinnedTaskReorder?.mode==="mouse")finishPinnedTaskReorder(true)});
+pinnedTaskList.addEventListener("touchstart",e=>{if(e.touches.length!==1||pinnedReorderBlocked(e.target))return;const row=pinnedReorderRow(e.target);if(!row||!pinnedActiveList)return;const t=e.touches[0];clearPinnedTaskReorderHold();pinnedTaskReorder={mode:"touch",active:false,row,listId:pinnedActiveList.id,startX:t.clientX,startY:t.clientY,lastX:t.clientX,lastY:t.clientY};pinnedTaskReorderHoldTimer=setTimeout(()=>{if(pinnedTaskReorder?.mode==="touch"&&!pinnedTaskReorder.active){beginPinnedTaskReorder(pinnedTaskReorder.row,pinnedTaskReorder.lastX,pinnedTaskReorder.lastY);try{navigator.vibrate?.(8)}catch(_){}}},TASK_REORDER_HOLD_MS)},{passive:true});
+document.addEventListener("touchmove",e=>{if(pinnedTaskReorder?.mode==="touch"&&pinnedTaskReorder.active&&e.touches.length===1&&e.cancelable)e.preventDefault()},{passive:false,capture:true});
+pinnedTaskList.addEventListener("touchmove",e=>{const d=pinnedTaskReorder;if(!d||d.mode!=="touch"||e.touches.length!==1)return;const t=e.touches[0];d.lastX=t.clientX;d.lastY=t.clientY;if(!d.active){if(Math.hypot(t.clientX-d.startX,t.clientY-d.startY)>9){clearPinnedTaskReorderHold();pinnedTaskReorder=null}return}e.preventDefault();movePinnedTaskReorder(t.clientX,t.clientY)},{passive:false});
+pinnedTaskList.addEventListener("touchend",()=>{if(pinnedTaskReorder?.mode==="touch")finishPinnedTaskReorder(true)});
+pinnedTaskList.addEventListener("touchcancel",()=>{if(pinnedTaskReorder?.mode==="touch")finishPinnedTaskReorder(false)});
+pinnedTaskList.addEventListener("contextmenu",e=>{if(pinnedTaskReorder?.active&&pinnedReorderRow(e.target))e.preventDefault()});
+
 let calendarOpen=false,calendarAnimating=false,drawerGesture=null,suppressCalendarClickUntil=0;
 const prefersReducedMotion=()=>window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const calendarSvg='<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3.2" y="4.8" width="13.6" height="11.8" rx="2.2"></rect><path d="M6.3 2.9v3.4M13.7 2.9v3.4M3.2 8.1h13.6"></path></svg>';
@@ -2049,7 +2134,12 @@ function setCalendarOpen(open){
   refreshCalendarHead();
   if(calendarOpen)queueJournalMonthStatus(journalViewMonthKey());
 }
-function toggleCalendar(){if(Date.now()<suppressCalendarClickUntil)return;setCalendarOpen(!calendarOpen)}
+function closeUtilityDrawerForCalendar(){
+  if(document.body.classList.contains("pinned-open"))closePinnedPanel(true);
+  if(document.body.classList.contains("journal-open")&&!closeJournalView(false))return false;
+  return true;
+}
+function toggleCalendar(){if(Date.now()<suppressCalendarClickUntil)return;if(!closeUtilityDrawerForCalendar())return;setCalendarOpen(!calendarOpen)}
 function shiftMonth(dir,{animate=true}={}){
   if(calendarAnimating||!dir)return;
   const body=$("calendarBody"),title=$("monthToggle");
@@ -2065,8 +2155,8 @@ function shiftMonth(dir,{animate=true}={}){
   }).finally(()=>{calendarAnimating=false});
 }
 $("monthToggle").onclick=toggleCalendar;
-$("mPrev").onclick=e=>{e.stopPropagation();if(Date.now()<suppressCalendarClickUntil)return;calendarOpen?shiftMonth(-1):setCalendarOpen(true)};
-$("mNext").onclick=e=>{e.stopPropagation();if(Date.now()<suppressCalendarClickUntil)return;calendarOpen?shiftMonth(1):setCalendarOpen(true)};
+$("mPrev").onclick=e=>{e.stopPropagation();if(Date.now()<suppressCalendarClickUntil||!closeUtilityDrawerForCalendar())return;calendarOpen?shiftMonth(-1):setCalendarOpen(true)};
+$("mNext").onclick=e=>{e.stopPropagation();if(Date.now()<suppressCalendarClickUntil||!closeUtilityDrawerForCalendar())return;calendarOpen?shiftMonth(1):setCalendarOpen(true)};
 
 function resetDrawerDragVisual(){
   const drawer=$("calendarDrawer");
@@ -2099,9 +2189,10 @@ function endDrawerGesture(e){
   if(g.zone==="handle"&&ay>ax*1.05){
     if(g.section==="pinned"&&dy<0){openPinnedPanel();return}
     if(g.section==="journal"&&dy<0){openJournalForCurrent();return}
+    if(g.section==="calendar"&&dy<0&&!closeUtilityDrawerForCalendar())return;
     setCalendarOpen(dy<0);return
   }
-  if(g.zone==="handle"&&g.section==="calendar"&&ax>ay*1.15&&calendarOpen)shiftMonth(dx<0?1:-1);
+  if(g.zone==="handle"&&g.section==="calendar"&&ax>ay*1.15){if(!closeUtilityDrawerForCalendar())return;if(calendarOpen)shiftMonth(dx<0?1:-1);else setCalendarOpen(true)}
 }
 [["calendarHandle","handle"],["calendarBody","body"]].forEach(([id,zone])=>{
   const el=$(id);

@@ -1,6 +1,6 @@
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
-// v75: Çakılı yeni-görev bildirim rozeti ve hafif okunmamış sayaç kontrolü eklendi.
-const SURUM = "centik-v75-cakili-unread";
+// v76: Çakılı/Çetele ortak alt çekmece yüzeyi, Çakılı alt görev taşıma ve ana ekran yerleşimi güncellendi.
+const SURUM = "centik-v76-drawer-hierarchy-layout";
 const KABUK = [
   "./",
   "./index.html",
