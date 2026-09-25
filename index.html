@@ -938,6 +938,16 @@ body.keyboard-open .utility-body-clip{
 
 
 /* r32 — VirtualKeyboard API varsa boundingRect/geometrychange; aksi halde VisualViewport + baseline fallback. */
+
+
+/* r33 — mobil klavye açıkken ortak alt bar içerik üstüne binmez.
+   Barın layout payı korunur; yalnız görseli ve etkileşimi geçici olarak kapatılır.
+   Böylece çekmece yüksekliği/animasyon mimarisi değişmez. */
+body.keyboard-open .cal-head{
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
 </style>
 </head>
 <body class="auth-locked">

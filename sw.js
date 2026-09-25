@@ -1,8 +1,8 @@
-// v94-ui-r32: VirtualKeyboard API birinci katman; VisualViewport+baseline fallback korunur.
+// v94-ui-r33: klavye açıkken ortak cal-head görünmez/tıklanamaz; layout payı korunur.
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v94-ideal-shared-drawer-r32";
+const SURUM = "centik-v94-ideal-shared-drawer-r33";
 const KABUK = [
   "./",
   "./index.html",
