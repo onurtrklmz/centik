@@ -1,8 +1,8 @@
-// v94-ui-r29: görev ikonları kutulu; çöp kutusu belirgin; mobil klavye baseline + visual/layout viewport fallback.
+// v94-ui-r31: görev eylemleri #1 çizgi tasarımı; hover yalnız fine-pointer cihazlarda, touch için geçici active.
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v94-ideal-shared-drawer-r29";
+const SURUM = "centik-v94-ideal-shared-drawer-r31";
 const KABUK = [
   "./",
   "./index.html",
