@@ -330,14 +330,28 @@ li.done .txt{color:var(--muted)}
 body.task-reordering{user-select:none;-webkit-user-select:none;cursor:grabbing}
 body.task-reordering .task-list li.task-row{cursor:grabbing}
 .task-actions{display:flex;align-items:center;gap:2px;flex:none}
-.edit,.del{border:0;background:none;color:var(--muted);width:32px;height:32px;border-radius:6px;display:grid;place-items:center;padding:0}
-.edit{font-size:1rem}.edit svg,.del svg{width:16px;height:16px}.edit svg{fill:currentColor}.edit:focus-visible{color:var(--focus);background:var(--bg)}
-@media (hover:hover) and (pointer:fine){.edit:hover{color:var(--focus);background:var(--bg)}}
-.del{font-size:1.15rem}.del svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.task-delete:focus-visible{color:#b42318;background:var(--bg)}
-@media (hover:hover) and (pointer:fine){.task-delete:hover{color:#b42318;background:var(--bg)}}
-.task-cancel:focus-visible{color:var(--focus);background:var(--bg)}
-@media (hover:hover) and (pointer:fine){.task-cancel:hover{color:var(--focus);background:var(--bg)}}
+.edit,.del{
+  border:1px solid color-mix(in srgb,var(--line) 88%,var(--muted));
+  background:color-mix(in srgb,var(--paper) 94%,var(--focus) 6%);
+  color:var(--muted);
+  width:34px;height:34px;border-radius:9px;
+  display:grid;place-items:center;padding:0;
+  box-shadow:0 1px 2px rgba(0,0,0,.08);
+  transition:border-color .14s ease,background .14s ease,color .14s ease,transform .14s ease
+}
+.edit{font-size:1rem}.edit svg{width:16px;height:16px;fill:currentColor}.edit:focus-visible{color:var(--focus);border-color:color-mix(in srgb,var(--focus) 42%,var(--line));background:color-mix(in srgb,var(--focus) 9%,var(--paper))}
+@media (hover:hover) and (pointer:fine){.edit:hover{color:var(--focus);border-color:color-mix(in srgb,var(--focus) 42%,var(--line));background:color-mix(in srgb,var(--focus) 9%,var(--paper));transform:translateY(-1px)}}
+.del{font-size:1.15rem}.del svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.task-delete{
+  color:color-mix(in srgb,#b42318 68%,var(--muted));
+  border-color:color-mix(in srgb,#b42318 24%,var(--line));
+  background:color-mix(in srgb,#b42318 4%,var(--paper))
+}
+.task-delete svg{width:19px;height:19px;stroke-width:1.95}
+.task-delete:focus-visible{color:#b42318;border-color:color-mix(in srgb,#b42318 48%,var(--line));background:color-mix(in srgb,#b42318 9%,var(--paper))}
+@media (hover:hover) and (pointer:fine){.task-delete:hover{color:#b42318;border-color:color-mix(in srgb,#b42318 48%,var(--line));background:color-mix(in srgb,#b42318 9%,var(--paper));transform:translateY(-1px)}}
+.task-cancel:focus-visible{color:var(--focus);border-color:color-mix(in srgb,var(--focus) 42%,var(--line));background:color-mix(in srgb,var(--focus) 9%,var(--paper))}
+@media (hover:hover) and (pointer:fine){.task-cancel:hover{color:var(--focus);border-color:color-mix(in srgb,var(--focus) 42%,var(--line));background:color-mix(in srgb,var(--focus) 9%,var(--paper));transform:translateY(-1px)}}
 .edit-input{flex:1;min-width:0;border:1px solid var(--focus);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;padding:7px 9px;outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--focus) 16%,transparent)}
 li.editing .check{opacity:.55}
 .empty{padding:18px 14px;color:var(--muted)}
@@ -848,6 +862,11 @@ body.keyboard-open .utility-body-clip{
 /* r28 — görev eylem semantiği:
    normal: düzenle + çöp kutusu; düzenleme: kaydet + iptal.
    Çentik ve Çakılı aynı ortak task-action motorunu kullanır. */
+
+
+/* r29 — görev eylem ikonları ortak kutulu görünüme alındı;
+   silme çöp kutusu daha büyük/kontrastlı. Klavye görünürlüğü tarayıcıdan bağımsız
+   kararlı viewport baseline + visual/layout viewport fallback ile güçlendirildi. */
 </style>
 </head>
 <body class="auth-locked">
@@ -1598,11 +1617,14 @@ async function connectNow({silent=false,force=false,reason=""}={}){
 
 function expireSession(expectedToken=""){if(expectedToken&&expectedToken!==getToken())return false;sessionVerifyPromise=null;sessionVerifyToken="";resetPinnedState();closePinnedPanel(true);clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pinnedPendingDelete=null;pendingDelete=null;hideUndoToast();closeJournalView(true);journalStatusCache.clear();journalStatusSeenAt.clear();journalStatusPending.clear();journalMonthCache.clear();journalMonthPending.clear();setSession("",null);days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);setAuthStatus("Oturum süresi doldu. Yeniden giriş yapın.",true);return true}
 
-// V94 r27 — Evrensel mobil klavye / odak görünürlük yöneticisi.
-// visualViewport ile gerçek klavye yüksekliğini hesaplar, ortak scroll yüzeylerine
-// geçici alt boşluk verir ve odaktaki editörü görünür alana taşır.
-// Ana liste / Çakılı / Çetele için ayrı kurallar yoktur.
-let keyboardVisibilityRaf=0,keyboardVisibilityTimer=null;
+// V94 r29 — Evrensel mobil klavye / odak görünürlük yöneticisi.
+// Bazı Chromium türevleri klavye açıldığında visualViewport ve layout viewport'u
+// birlikte küçültür. Bu yüzden yalnız anlık iki değerin farkına güvenilmez:
+// klavye açılmadan önceki kararlı viewport yüksekliği korunur ve visualViewport,
+// innerHeight ve documentElement.clientHeight ölçümlerinden en dar görünür alan seçilir.
+// Tarayıcı/UA ayrımı yoktur; Çentik + Çakılı + Çetele ortak mekanizmayı kullanır.
+let keyboardVisibilityRaf=0;
+const keyboardVisibilityTimers=new Set();
 const KEYBOARD_VISIBILITY_TOP_GAP=14;
 const KEYBOARD_VISIBILITY_BOTTOM_GAP=18;
 const KEYBOARD_MIN_INSET=80;
@@ -1626,12 +1648,31 @@ function keyboardScrollContainer(el){
   }
   return document.scrollingElement||document.documentElement;
 }
-function keyboardViewportInset(){
+function currentViewportMeasurements(){
   const vv=window.visualViewport;
-  if(!vv)return 0;
-  const layoutH=Math.max(window.innerHeight,document.documentElement?.clientHeight||0);
-  const visibleBottom=(Number(vv.offsetTop)||0)+(Number(vv.height)||layoutH);
-  return Math.max(0,Math.round(layoutH-visibleBottom));
+  const inner=Number(window.innerHeight)||0;
+  const client=Number(document.documentElement?.clientHeight)||0;
+  const visual=vv?(Number(vv.height)||0):0;
+  const visualTop=vv?(Number(vv.offsetTop)||0):0;
+  const usable=[inner,client,visual].filter(v=>Number.isFinite(v)&&v>0);
+  return {
+    inner,client,visual,visualTop,
+    visibleHeight:usable.length?Math.min(...usable):Math.max(inner,client,visual,1),
+    restingCandidate:Math.max(inner,client,visual+visualTop,1)
+  };
+}
+let keyboardViewportBaseline=currentViewportMeasurements().restingCandidate;
+function refreshKeyboardViewportBaseline(){
+  if(keyboardEditableTarget(document.activeElement))return keyboardViewportBaseline;
+  const now=currentViewportMeasurements().restingCandidate;
+  if(now>0)keyboardViewportBaseline=Math.max(now,keyboardViewportBaseline||0);
+  return keyboardViewportBaseline;
+}
+function keyboardViewportInset(){
+  const m=currentViewportMeasurements();
+  const baseline=Math.max(keyboardViewportBaseline||0,m.restingCandidate);
+  const visibleBottom=m.visualTop+m.visibleHeight;
+  return Math.max(0,Math.round(baseline-visibleBottom));
 }
 function syncKeyboardInset(){
   const inset=keyboardViewportInset();
@@ -1642,12 +1683,10 @@ function syncKeyboardInset(){
   return applied;
 }
 function keyboardVisibleBounds(){
-  const vv=window.visualViewport;
-  const top=vv?Number(vv.offsetTop)||0:0;
-  const height=vv?Number(vv.height)||window.innerHeight:window.innerHeight;
+  const m=currentViewportMeasurements();
   return {
-    top:top+KEYBOARD_VISIBILITY_TOP_GAP,
-    bottom:top+height-KEYBOARD_VISIBILITY_BOTTOM_GAP
+    top:m.visualTop+KEYBOARD_VISIBILITY_TOP_GAP,
+    bottom:m.visualTop+m.visibleHeight-KEYBOARD_VISIBILITY_BOTTOM_GAP
   };
 }
 function keepFocusedEditorVisible({smooth=true}={}){
@@ -1672,7 +1711,6 @@ function keepFocusedEditorVisible({smooth=true}={}){
   }
 }
 function scheduleFocusedEditorVisibility({smooth=true,delay=0}={}){
-  clearTimeout(keyboardVisibilityTimer);
   const run=()=>{
     cancelAnimationFrame(keyboardVisibilityRaf);
     keyboardVisibilityRaf=requestAnimationFrame(()=>{
@@ -1680,35 +1718,66 @@ function scheduleFocusedEditorVisibility({smooth=true,delay=0}={}){
       keepFocusedEditorVisible({smooth});
     });
   };
-  if(delay>0)keyboardVisibilityTimer=setTimeout(run,delay);
-  else run();
+  if(delay<=0){run();return}
+  const timer=setTimeout(()=>{
+    keyboardVisibilityTimers.delete(timer);
+    run();
+  },delay);
+  keyboardVisibilityTimers.add(timer);
+}
+function clearKeyboardVisibilityTimers(){
+  keyboardVisibilityTimers.forEach(t=>clearTimeout(t));
+  keyboardVisibilityTimers.clear();
 }
 document.addEventListener("focusin",e=>{
   if(!keyboardEditableTarget(e.target))return;
+  // Baseline daha önce, klavye kapalıyken tutulmuştur. Aynı odak olayının farklı
+  // Chromium zamanlamalarında tamamlanmasını birkaç ölçümle yakala.
+  clearKeyboardVisibilityTimers();
   scheduleFocusedEditorVisibility({smooth:false});
-  // Android/iOS klavye animasyonu focus'tan sonra tamamlanabilir.
-  scheduleFocusedEditorVisibility({smooth:false,delay:120});
-  scheduleFocusedEditorVisibility({smooth:true,delay:320});
+  scheduleFocusedEditorVisibility({smooth:false,delay:140});
+  scheduleFocusedEditorVisibility({smooth:false,delay:320});
+  scheduleFocusedEditorVisibility({smooth:true,delay:520});
 });
 document.addEventListener("focusout",()=>{
   setTimeout(()=>{
     if(!keyboardEditableTarget(document.activeElement)){
+      clearKeyboardVisibilityTimers();
       document.documentElement.style.setProperty("--keyboard-inset","0px");
       document.body.classList.remove("keyboard-open");
+      refreshKeyboardViewportBaseline();
     }
-  },80);
+  },100);
 });
-if(window.visualViewport){
-  visualViewport.addEventListener("resize",()=>{
+function handleKeyboardViewportChange(){
+  if(keyboardEditableTarget(document.activeElement)){
     syncKeyboardInset();
     scheduleFocusedEditorVisibility({smooth:false});
-  },{passive:true});
+  }else{
+    refreshKeyboardViewportBaseline();
+  }
+}
+if(window.visualViewport){
+  visualViewport.addEventListener("resize",handleKeyboardViewportChange,{passive:true});
   visualViewport.addEventListener("scroll",()=>scheduleFocusedEditorVisibility({smooth:false}),{passive:true});
 }
+// Bazı mobil tarayıcılar klavye değişimini yalnız layout viewport resize olarak bildirir.
+window.addEventListener("resize",handleKeyboardViewportChange,{passive:true});
 window.addEventListener("orientationchange",()=>{
+  clearKeyboardVisibilityTimers();
+  keyboardViewportBaseline=0;
   document.documentElement.style.setProperty("--keyboard-inset","0px");
   document.body.classList.remove("keyboard-open");
+  setTimeout(()=>{
+    keyboardViewportBaseline=currentViewportMeasurements().restingCandidate;
+  },320);
 },{passive:true});
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible"&&!keyboardEditableTarget(document.activeElement)){
+    refreshKeyboardViewportBaseline();
+  }
+});
+refreshKeyboardViewportBaseline();
 
 // V94 r28 — Görev satırı eylemleri için ortak durum motoru.
 // Çentik ve Çakılı aynı ikon/anlam eşlemesini kullanır:
