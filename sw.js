@@ -1,8 +1,8 @@
-// v94-ui-r38: Çakılı cache-first açılış; loading yalnız ilk/bilinmeyen yüklemede, sonraki açılışlar anlık + sessiz senkron.
+// v94-ui-r41: r36 typing-anchor stabilizer r38'e taşındı; edit-input + #newTask + #pinnedNewTask ortak auto-pan düzeltmesi.
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v94-ideal-shared-drawer-r38";
+const SURUM = "centik-v94-ideal-shared-drawer-r41";
 const KABUK = [
   "./",
   "./index.html",

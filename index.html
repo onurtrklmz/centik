@@ -982,6 +982,15 @@ body.keyboard-open:not(.pinned-open):not(.journal-open) .cal{
    yalnız ilk/verisi bilinmeyen açılışta "Çakılı açılıyor…" gösterilir.
    Başarılı ilk yüklemeden sonra boş sonuç dahil cache anında gösterilir,
    backend kontrolü sessizce arkada devam eder. */
+
+
+/* r41 — r36 typing-anchor motoru artık mevcut görev düzenleme ile birlikte
+   ana/Çakılı Yeni Görev alanlarını da kapsar. KeyboardManager tek konum sahibidir. */
+body.keyboard-open .task-list,
+body.keyboard-open .task-row,
+body.keyboard-open form.add{
+  overflow-anchor:none;
+}
 </style>
 </head>
 <body class="auth-locked">
@@ -1756,6 +1765,7 @@ const KeyboardManager=(()=>{
   let sessionId=0;
   let session=null;
   let viewportBaseline=0;
+  let typingAnchor=null;
 
   function editable(el){
     if(!(el instanceof HTMLElement))return false;
@@ -1956,6 +1966,61 @@ const KeyboardManager=(()=>{
     lockProvider("baseline");
   }
 
+  // r41 — r36'da çalışan typing-anchor mekanizmasının genelleştirilmiş hali.
+  // VirtualKeyboard overlay modunda bazı mobil tarayıcılar ilk/sonraki karakter girişinde
+  // odaklı alanı kendi başına yeniden kaydırabiliyor. Provider hesabı değişmez;
+  // yalnız tarayıcının beklenmeyen caret auto-pan hareketi aynı manager içinde geri alınır.
+  function typingAnchorEligible(el){
+    return !!(
+      session?.provider==="virtual" &&
+      session?.lastState?.open &&
+      el instanceof HTMLElement &&
+      (
+        el.matches("input.edit-input") ||
+        el.id==="newTask" ||
+        el.id==="pinnedNewTask"
+      )
+    );
+  }
+
+  function typingAnchorTarget(el){
+    if(el.matches("input.edit-input"))return subject(el);
+    return el.closest("form.add")||el;
+  }
+
+  function captureTypingAnchor(el){
+    if(!typingAnchorEligible(el)){typingAnchor=null;return}
+    const target=typingAnchorTarget(el),scroller=scrollContainer(el);
+    typingAnchor={
+      sessionId:session.id,
+      el,
+      target,
+      scroller,
+      top:target.getBoundingClientRect().top
+    };
+  }
+
+  function restoreTypingAnchor(){
+    const a=typingAnchor;
+    typingAnchor=null;
+    if(!a||!session||session.id!==a.sessionId||session.provider!=="virtual")return;
+    if(document.activeElement!==a.el||!a.el.isConnected||!a.target.isConnected)return;
+
+    // r36 ile aynı eşik: küçük yerleşim farklarına dokunma; yalnız belirgin auto-pan'i düzelt.
+    const nowTop=a.target.getBoundingClientRect().top;
+    const delta=nowTop-a.top;
+    if(Math.abs(delta)<20)return;
+
+    if(a.scroller===document.scrollingElement||a.scroller===document.documentElement||a.scroller===document.body){
+      window.scrollBy({top:delta,behavior:"auto"});
+    }else{
+      a.scroller.scrollBy({top:delta,behavior:"auto"});
+    }
+
+    // Düzeltmeden sonra mevcut KeyboardManager görünür alan kuralını bir kez doğrular.
+    schedule({smooth:false,delay:0});
+  }
+
   function startSession(){
     clearTimers();
     refreshBaseline({force:true});
@@ -1990,6 +2055,7 @@ const KeyboardManager=(()=>{
   function endSession(){
     clearTimers();
     cancelAnimationFrame(raf);
+    typingAnchor=null;
     session=null;
     applyState({open:false,inset:0,top:0,bottom:0,provider:""});
     setTimeout(()=>refreshBaseline({force:true}),80);
@@ -2013,6 +2079,16 @@ const KeyboardManager=(()=>{
     }
     schedule({smooth:false});
   }
+
+  document.addEventListener("beforeinput",e=>{
+    if(typingAnchorEligible(e.target))captureTypingAnchor(e.target);
+  },true);
+
+  document.addEventListener("input",e=>{
+    if(!typingAnchor||typingAnchor.el!==e.target)return;
+    // r36'daki davranış: auto-pan çoğunlukla input sonrası paint'te oluştuğu için çift RAF.
+    requestAnimationFrame(()=>requestAnimationFrame(restoreTypingAnchor));
+  },true);
 
   document.addEventListener("focusin",e=>{
     if(!editable(e.target))return;
@@ -2110,7 +2186,7 @@ function collectDeleteIds(list,rootId){
 }
 function toggle(id){if(!requireLocalSession())return;if(pendingDeleteHas(current,id))return;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id);if(!it)return;it.done=!it.done;lastPop=it.done?id:null;persist(current);render()}
 function updateTask(id,text){if(!requireLocalSession())return false;if(pendingDeleteHas(current,id))return false;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id),t=String(text||'').trim();if(!it||!t)return false;it.t=t.slice(0,1000);persist(current);render();return true}
-function editTask(id,li){if(!requireLocalSession())return;const it=normalizeItems(days[current]||[]).find(x=>x.id===id);if(!it||li.classList.contains("editing")||pendingDeleteHas(current,id))return;li.classList.add("editing");const span=li.querySelector(".txt"),input=document.createElement("input");input.className="edit-input";input.type="text";input.maxLength=1000;input.value=it.t;input.setAttribute("aria-label","Görevi düzenle");span.replaceWith(input);const cancel=()=>render();const save=()=>{if(!updateTask(id,input.value)){input.focus();input.select()}};setTaskEditingActions(li,{save,cancel});input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();save()}else if(e.key==="Escape"){e.preventDefault();cancel()}});requestAnimationFrame(()=>{input.focus();input.setSelectionRange(input.value.length,input.value.length)})}
+function editTask(id,li){if(!requireLocalSession())return;const it=normalizeItems(days[current]||[]).find(x=>x.id===id);if(!it||li.classList.contains("editing")||pendingDeleteHas(current,id))return;li.classList.add("editing");const span=li.querySelector(".txt"),input=document.createElement("input");input.className="edit-input";input.type="text";input.maxLength=1000;input.value=it.t;input.setAttribute("aria-label","Görevi düzenle");span.replaceWith(input);const cancel=()=>render();const save=()=>{if(!updateTask(id,input.value)){input.focus();input.select()}};setTaskEditingActions(li,{save,cancel});input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();save()}else if(e.key==="Escape"){e.preventDefault();cancel()}});requestAnimationFrame(()=>{try{input.focus({preventScroll:true})}catch(_){input.focus()}input.setSelectionRange(input.value.length,input.value.length)})}
 function hideUndoToast(){}
 function finalizeDelete(){
   if(!pendingDelete)return;clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;
