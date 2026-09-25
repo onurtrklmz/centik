@@ -516,7 +516,7 @@ body.journal-open{overflow:hidden}
 .pinned-back,.pinned-icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--paper);display:grid;place-items:center;color:var(--focus);box-shadow:var(--shadow);flex:none}
 .pinned-back svg,.pinned-icon-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .pinned-head-copy{min-width:0;flex:1}.pinned-head-copy h2{font-size:1.7rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#pinnedBack:not([hidden]) + .pinned-head-copy h2{font-size:1.45rem}.pinned-head-copy p{margin:2px 0 0;color:var(--muted);font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pinnedBack:not([hidden]) + .pinned-head-copy h2{font-size:clamp(1.08rem,5vw,1.45rem);line-height:1.1}.pinned-head-copy p{margin:2px 0 0;color:var(--muted);font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .panel-title-line{display:flex;align-items:center;gap:10px;min-width:0}
 .panel-title-line h2{min-width:0}
 .panel-title-icon{width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;color:var(--focus)}
@@ -821,8 +821,8 @@ html,body{overscroll-behavior-y:none}
    :focus-visible kuralları dokunmatik/klavye erişilebilirliği için korunur. */
 
 
-/* r24 — Çakılı liste detayında uzun liste adları için başlık puntosu azaltıldı.
-   Ana "Çakılı" başlığı değişmedi; yalnız geri butonu görünürken 1.45rem kullanılır. */
+/* r25 — Çakılı liste detay başlığı ekran genişliğine göre esnek ölçeklenir.
+   Ana "Çakılı" başlığı değişmez; detay başlığı clamp(1.08rem,5vw,1.45rem) kullanır. */
 </style>
 </head>
 <body class="auth-locked">

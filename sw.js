@@ -1,8 +1,8 @@
-// v94-ui-r24: Çakılı liste detay başlığı 1.45rem; ana Çakılı başlığı korunur.
+// v94-ui-r25: Çakılı liste detay başlığı clamp(1.08rem,5vw,1.45rem) ile esnek ölçeklenir.
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v94-ideal-shared-drawer-r24";
+const SURUM = "centik-v94-ideal-shared-drawer-r25";
 const KABUK = [
   "./",
   "./index.html",
