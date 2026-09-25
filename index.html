@@ -984,20 +984,15 @@ body.keyboard-open:not(.pinned-open):not(.journal-open) .cal{
    backend kontrolü sessizce arkada devam eder. */
 
 
-/* r43 — r42 document/VisualViewport telafisi kaldırıldı; ana ekran kontrollü main-scroll kullanır. */
+/* r44 — r42 document/VisualViewport telafisi kaldırıldı; ana ekran kontrollü main-scroll kullanır. */
 body.keyboard-open .task-list,
 body.keyboard-open .task-row,
 body.keyboard-open form.add{
   overflow-anchor:none;
 }
-</style>
-</head>
-<body class="auth-locked">
 
-<div class="ust-cubuk"><div class="wrap">
-  <div class="brand" id=
 
-/* r43 — Ana Çentik için ayrı klavye yerleşim politikası.
+/* r44 — Ana Çentik için ayrı klavye yerleşim politikası.
    Çakılı/Çetele .utility-body-clip davranışına dokunulmaz.
    Ana ekranda document sabitlenir; görev alanı klavyenin üstünde kendi içinde scroll eder. */
 :root{--main-keyboard-height:0px}
@@ -1022,14 +1017,18 @@ body.main-keyboard-open main{
   -webkit-overflow-scrolling:touch;
   padding-bottom:28px;
 }
-/* main kendi scroll yüzeyi olduğunda browser anchoring ikinci bir kaydırma yapmasın. */
 body.main-keyboard-open main,
 body.main-keyboard-open .task-list,
 body.main-keyboard-open .task-row,
 body.main-keyboard-open form.add{
   overflow-anchor:none;
 }
-"brand" role="button" tabindex="0" aria-label="Bugüne dön">
+</style>
+</head>
+<body class="auth-locked">
+
+<div class="ust-cubuk"><div class="wrap">
+  <div class="brand" id="brand" role="button" tabindex="0" aria-label="Bugüne dön">
     <img class="brand-logo" src="icon-192.png" alt="">
     <h1>Çentik</h1>
   </div>
@@ -2003,9 +2002,9 @@ const KeyboardManager=(()=>{
     lockProvider("baseline");
   }
 
-  // r43 — tek KeyboardManager, iki yerleşim politikası.
-  // Utility (Çakılı/Çetele) mevcut iç-scroll yapısını aynen kullanır.
-  // Ana Çentik ise klavye açıkken document-scroll yerine kontrollü main-scroll kullanır.
+  // r44 — tek KeyboardManager, iki yerleşim politikası.
+  // Utility (Çakılı/Çetele): mevcut iç-scroll yapısı aynen korunur.
+  // Ana Çentik: klavye açıkken document-scroll yerine kontrollü main-scroll kullanır.
   function keyboardLayoutContext(el=document.activeElement){
     if(!(el instanceof HTMLElement))return "other";
     if(el.id==="newTask"||(el.matches("input.edit-input")&&el.closest("#list")))return "main";
@@ -2039,7 +2038,6 @@ const KeyboardManager=(()=>{
       const seed=Math.max(0,Number(session.mainScrollSeed)||0);
       mainKeyboardLayout={restoreY:seed};
       document.body.classList.add("main-keyboard-open");
-      // Yeni layout hesaplandıktan sonra önceki document konumunu main.scrollTop'a aktar.
       void main.offsetHeight;
       main.scrollTop=seed;
     }else{
@@ -2059,7 +2057,6 @@ const KeyboardManager=(()=>{
     }
   }
 
-  // r36 typing-anchor davranışı kontrollü scroll yüzeylerinde ortak kalır.
   function typingAnchorEligible(el){
     return !!(
       session?.provider==="virtual" &&
