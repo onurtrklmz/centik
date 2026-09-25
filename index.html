@@ -1027,6 +1027,11 @@ body.main-keyboard-open form.add{
 
 /* r45 — main→utility klavye geçişinde bekleyen document-scroll restore iptal edilir.
    Çakılı/Çetele utility-body-clip geometri/scroll kuralları değiştirilmemiştir. */
+
+
+/* r46 — Utility klavye politikası:
+   Çakılı/Çetele aktif alanı yalnız keyboard-open/focus değişiminde .utility-body-clip içinde konumlandırılır.
+   İlk harf/geometrychange document veya utility scroll'unu tekrar tetiklemez. */
 </style>
 </head>
 <body class="auth-locked">
@@ -1804,6 +1809,8 @@ const KeyboardManager=(()=>{
   let typingAnchor=null;
   let mainKeyboardLayout=null;
   let mainKeyboardRestoreRaf=0;
+  let utilityKeyboardPositioned=false;
+  let utilityKeyboardBottom=null;
 
   function editable(el){
     if(!(el instanceof HTMLElement))return false;
@@ -1929,6 +1936,43 @@ const KeyboardManager=(()=>{
     else if(mainKeyboardLayout)deactivateMainKeyboardLayout({restore:!open});
   }
 
+  function utilityScrollContainer(el){
+    return el?.closest?.(".utility-body-clip")||null;
+  }
+
+  function moveUtilityEditor(state,{force=false}={}){
+    const active=document.activeElement;
+    if(!editable(active)||session?.context!=="utility"||!state?.open)return;
+
+    const scroller=utilityScrollContainer(active);
+    if(!scroller)return; // Utility hiçbir koşulda document-scroll'a düşmez.
+
+    const rect=active.getBoundingClientRect();
+    const scrollerRect=scroller.getBoundingClientRect();
+    const top=Math.max(Number(state.top)||0,scrollerRect.top+10);
+    const bottom=Math.min(Number(state.bottom)||Infinity,scrollerRect.bottom-10);
+
+    let delta=0;
+    if(rect.bottom>bottom)delta=rect.bottom-bottom;
+    else if(rect.top<top)delta=rect.top-top;
+
+    if(Math.abs(delta)>=2){
+      scroller.scrollBy({top:delta,behavior:"auto"});
+    }
+
+    utilityKeyboardPositioned=true;
+    utilityKeyboardBottom=Number(state.bottom)||null;
+  }
+
+  function utilityNeedsPosition(state){
+    if(session?.context!=="utility"||!state?.open)return false;
+    if(!utilityKeyboardPositioned)return true;
+    const next=Number(state.bottom),prev=Number(utilityKeyboardBottom);
+    // Harf girişinde tekrarlanan aynı geometri scroll üretmez.
+    // Yalnız klavye sınırı gerçekten değişirse (örn. klavye modu/orientation) tekrar konumlandır.
+    return Number.isFinite(next)&&Number.isFinite(prev)&&Math.abs(next-prev)>=28;
+  }
+
   function moveFocusedEditor(state,{smooth=true}={}){
     const active=document.activeElement;
     if(!editable(active)||!state?.open)return;
@@ -1953,7 +1997,14 @@ const KeyboardManager=(()=>{
     if(!session||!editable(document.activeElement))return;
     const state=providerState(session.provider);
     applyState(state);
-    if(state.open)moveFocusedEditor(state,{smooth});
+    if(!state.open)return;
+
+    if(session.context==="utility"){
+      if(utilityNeedsPosition(state))moveUtilityEditor(state,{force:!utilityKeyboardPositioned});
+      return;
+    }
+
+    moveFocusedEditor(state,{smooth});
   }
 
   function schedule({smooth=false,delay=0}={}){
@@ -2014,6 +2065,10 @@ const KeyboardManager=(()=>{
     if(!(el instanceof HTMLElement))return "other";
     if(el.id==="newTask"||(el.matches("input.edit-input")&&el.closest("#list")))return "main";
     if(el.closest("#pinnedPanel,#journalPanel"))return "utility";
+    if(
+      (document.body.classList.contains("pinned-open")||document.body.classList.contains("journal-open")) &&
+      !el.closest("main")
+    )return "utility";
     return "other";
   }
 
@@ -2078,13 +2133,13 @@ const KeyboardManager=(()=>{
 
   function typingAnchorEligible(el){
     return !!(
+      session?.context==="main" &&
       session?.provider==="virtual" &&
       session?.lastState?.open &&
       el instanceof HTMLElement &&
       (
-        el.matches("input.edit-input") ||
         el.id==="newTask" ||
-        el.id==="pinnedNewTask"
+        (el.matches("input.edit-input")&&el.closest("#list"))
       )
     );
   }
@@ -2128,6 +2183,8 @@ const KeyboardManager=(()=>{
   function startSession(){
     clearTimers();
     refreshBaseline({force:true});
+    utilityKeyboardPositioned=false;
+    utilityKeyboardBottom=null;
     const context=keyboardLayoutContext(document.activeElement);
 
     // Context handoff is synchronous: utility input should never inherit a pending
@@ -2173,6 +2230,8 @@ const KeyboardManager=(()=>{
     clearTimers();
     cancelAnimationFrame(raf);
     typingAnchor=null;
+    utilityKeyboardPositioned=false;
+    utilityKeyboardBottom=null;
     if(mainKeyboardLayout)deactivateMainKeyboardLayout({restore:true});
     session=null;
     applyState({open:false,inset:0,top:0,bottom:0,provider:""});
