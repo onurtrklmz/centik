@@ -974,12 +974,8 @@ body.keyboard-open:not(.pinned-open):not(.journal-open) .cal{
    state'inden türeyen --centik-active-drawer-bar-h ile davranır. Ek JS yolu yoktur. */
 
 
-/* r36 — klavye oturumunda tarayıcı scroll-anchoring'in görev satırını
-   kendiliğinden yeniden konumlandırmasını engelle. Konumu KeyboardManager yönetir. */
-body.keyboard-open .task-list,
-body.keyboard-open .task-row{
-  overflow-anchor:none;
-}
+/* r37 — Çakılı açılışında Çetele'nin mevcut loading-card/dot animasyonu yeniden kullanılır.
+   Ayrı loading CSS'i yoktur; veri geldikten sonra overview/boş durum mevcut renderer ile gösterilir. */
 </style>
 </head>
 <body class="auth-locked">
@@ -1149,6 +1145,13 @@ body.keyboard-open .task-row{
       <button class="pinned-icon-btn" id="deletePinnedList" type="button" aria-label="Listeyi sil" title="Listeyi sil"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 5.8h11M8 5.8V4h4v1.8M6 5.8l.7 10h6.6l.7-10"></path></svg></button>
     </div>
   </div>
+
+  <section class="journal-slide-view journal-loading-view" id="pinnedLoadingView" hidden aria-live="polite">
+    <div class="journal-card journal-loading-card">
+      <span class="journal-loading-dot" aria-hidden="true"></span>
+      <p id="pinnedLoadingText">Çakılı açılıyor…</p>
+    </div>
+  </section>
 
   <section id="pinnedOverview">
     <form class="pinned-create" id="pinnedCreateForm">
@@ -1747,7 +1750,6 @@ const KeyboardManager=(()=>{
   let sessionId=0;
   let session=null;
   let viewportBaseline=0;
-  let typingAnchor=null;
 
   function editable(el){
     if(!(el instanceof HTMLElement))return false;
@@ -1948,53 +1950,6 @@ const KeyboardManager=(()=>{
     lockProvider("baseline");
   }
 
-  // Bazı mobil tarayıcılar virtual overlay modunda yazı girerken odaklı input'u
-  // yeniden kaydırabiliyor. Provider/keyboard hesabı değişmez; yalnız beklenmeyen
-  // caret auto-pan hareketi aynı klavye oturumunda geri dengelenir.
-  function typingAnchorEligible(el){
-    return !!(
-      session?.provider==="virtual" &&
-      session?.lastState?.open &&
-      el instanceof HTMLElement &&
-      el.matches("input.edit-input") &&
-      el.closest(".task-row")
-    );
-  }
-
-  function captureTypingAnchor(el){
-    if(!typingAnchorEligible(el)){typingAnchor=null;return}
-    const row=subject(el),scroller=scrollContainer(el);
-    typingAnchor={
-      sessionId:session.id,
-      el,
-      row,
-      scroller,
-      top:row.getBoundingClientRect().top
-    };
-  }
-
-  function restoreTypingAnchor(){
-    const a=typingAnchor;
-    typingAnchor=null;
-    if(!a||!session||session.id!==a.sessionId||session.provider!=="virtual")return;
-    if(document.activeElement!==a.el||!a.el.isConnected||!a.row.isConnected)return;
-
-    // Tarayıcının input/caret nedeniyle yaptığı büyük dikey sıçramayı ayıkla.
-    // Küçük (<20px) değişimler klavye/satır yuvarlaması sayılır ve bırakılır.
-    const nowTop=a.row.getBoundingClientRect().top;
-    const delta=nowTop-a.top;
-    if(Math.abs(delta)<20)return;
-
-    if(a.scroller===document.scrollingElement||a.scroller===document.documentElement||a.scroller===document.body){
-      window.scrollBy({top:delta,behavior:"auto"});
-    }else{
-      a.scroller.scrollBy({top:delta,behavior:"auto"});
-    }
-
-    // Geri dengelemeden sonra güvenli görünür alan kuralını bir kez doğrula.
-    schedule({smooth:false,delay:0});
-  }
-
   function startSession(){
     clearTimers();
     refreshBaseline({force:true});
@@ -2029,7 +1984,6 @@ const KeyboardManager=(()=>{
   function endSession(){
     clearTimers();
     cancelAnimationFrame(raf);
-    typingAnchor=null;
     session=null;
     applyState({open:false,inset:0,top:0,bottom:0,provider:""});
     setTimeout(()=>refreshBaseline({force:true}),80);
@@ -2053,16 +2007,6 @@ const KeyboardManager=(()=>{
     }
     schedule({smooth:false});
   }
-
-  document.addEventListener("beforeinput",e=>{
-    if(typingAnchorEligible(e.target))captureTypingAnchor(e.target);
-  },true);
-
-  document.addEventListener("input",e=>{
-    if(!typingAnchor||typingAnchor.el!==e.target)return;
-    // Opera/Chromium auto-pan çoğunlukla input işlendikten sonraki paint'te oluşur.
-    requestAnimationFrame(()=>requestAnimationFrame(restoreTypingAnchor));
-  },true);
 
   document.addEventListener("focusin",e=>{
     if(!editable(e.target))return;
@@ -2160,7 +2104,7 @@ function collectDeleteIds(list,rootId){
 }
 function toggle(id){if(!requireLocalSession())return;if(pendingDeleteHas(current,id))return;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id);if(!it)return;it.done=!it.done;lastPop=it.done?id:null;persist(current);render()}
 function updateTask(id,text){if(!requireLocalSession())return false;if(pendingDeleteHas(current,id))return false;const list=normalizeItems(days[current]||[]);days[current]=list;const it=list.find(x=>x.id===id),t=String(text||'').trim();if(!it||!t)return false;it.t=t.slice(0,1000);persist(current);render();return true}
-function editTask(id,li){if(!requireLocalSession())return;const it=normalizeItems(days[current]||[]).find(x=>x.id===id);if(!it||li.classList.contains("editing")||pendingDeleteHas(current,id))return;li.classList.add("editing");const span=li.querySelector(".txt"),input=document.createElement("input");input.className="edit-input";input.type="text";input.maxLength=1000;input.value=it.t;input.setAttribute("aria-label","Görevi düzenle");span.replaceWith(input);const cancel=()=>render();const save=()=>{if(!updateTask(id,input.value)){input.focus();input.select()}};setTaskEditingActions(li,{save,cancel});input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();save()}else if(e.key==="Escape"){e.preventDefault();cancel()}});requestAnimationFrame(()=>{try{input.focus({preventScroll:true})}catch(_){input.focus()}input.setSelectionRange(input.value.length,input.value.length)})}
+function editTask(id,li){if(!requireLocalSession())return;const it=normalizeItems(days[current]||[]).find(x=>x.id===id);if(!it||li.classList.contains("editing")||pendingDeleteHas(current,id))return;li.classList.add("editing");const span=li.querySelector(".txt"),input=document.createElement("input");input.className="edit-input";input.type="text";input.maxLength=1000;input.value=it.t;input.setAttribute("aria-label","Görevi düzenle");span.replaceWith(input);const cancel=()=>render();const save=()=>{if(!updateTask(id,input.value)){input.focus();input.select()}};setTaskEditingActions(li,{save,cancel});input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();save()}else if(e.key==="Escape"){e.preventDefault();cancel()}});requestAnimationFrame(()=>{input.focus();input.setSelectionRange(input.value.length,input.value.length)})}
 function hideUndoToast(){}
 function finalizeDelete(){
   if(!pendingDelete)return;clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;
@@ -2262,7 +2206,10 @@ function renderCal(){
 
 
 
+let pinnedOpenSeq=0;
+
 function resetPinnedState(){
+  pinnedOpenSeq++;
   if($("pinnedShareDialog")?.open)$("pinnedShareDialog").close();
   clearTimeout(pinnedPanelHideTimer);pinnedPanelHideTimer=null;
   clearInterval(pinnedLiveTimer);clearInterval(pinnedListsTimer);pinnedLiveTimer=null;pinnedListsTimer=null;
@@ -2300,6 +2247,13 @@ function startPinnedUnreadWatch(){
 }
 function stopPinnedUnreadWatch(){if(pinnedUnreadTimer){clearInterval(pinnedUnreadTimer);pinnedUnreadTimer=null}pinnedUnreadSeq++;pinnedUnreadPromise=null;lastPinnedUnreadCheckAt=0}
 function ensurePinnedUnreadWatch(){if(!pinnedUnreadTimer&&hasLocalSession())startPinnedUnreadWatch()}
+function setPinnedPanelMode(mode,message=""){
+  const loading=$("pinnedLoadingView"),overview=$("pinnedOverview"),editor=$("pinnedEditor");
+  if(loading)loading.hidden=mode!=="loading";
+  if(overview)overview.hidden=mode!=="overview";
+  if(editor)editor.hidden=mode!=="editor";
+  if(mode==="loading"&&$("pinnedLoadingText"))$("pinnedLoadingText").textContent=message||"Çakılı açılıyor…";
+}
 function renderPinnedOverview(){
   const box=$("pinnedLists");if(!box)return;box.innerHTML="";
   if(!pinnedLists.length){box.innerHTML='<div class="pinned-empty">Henüz Çakılı listen yok. Alışveriş, ödemeler veya sürekli hatırlamak istediğin işler için bir liste oluştur.</div>';return}
@@ -2318,18 +2272,25 @@ async function loadPinnedLists({silent=false}={}){
   catch(e){if(!silent)pinnedSetStatus("pinnedOverviewStatus","Çakılı listeler alınamadı. Bağlantınızı kontrol edin.");return false}
 }
 function pinnedShowOverview(){
-  stopPinnedLive();pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;$("pinnedOverview").hidden=false;$("pinnedEditor").hidden=true;$("pinnedOwnerTools").hidden=true;$("pinnedBack").hidden=true;$("pinnedTitle").textContent="Çakılı";$("pinnedSubtitle").textContent="Tarihten bağımsız listelerin.";renderPinnedOverview();
+  stopPinnedLive();pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;setPinnedPanelMode("overview");$("pinnedOwnerTools").hidden=true;$("pinnedBack").hidden=true;$("pinnedTitle").textContent="Çakılı";$("pinnedSubtitle").textContent="Tarihten bağımsız listelerin.";renderPinnedOverview();
 }
-function openPinnedPanel(){
+async function openPinnedPanel(){
   if(!requireLocalSession()||document.body.classList.contains("pinned-open"))return;
   if(document.body.classList.contains("journal-open")&&!closeJournalView(false))return;
   setCalendarOpen(false);
   clearTimeout(pinnedPanelHideTimer);pinnedPanelHideTimer=null;
-  pinnedShowOverview();
+  stopPinnedLive();pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;
+  $("pinnedOwnerTools").hidden=true;$("pinnedBack").hidden=true;$("pinnedTitle").textContent="Çakılı";$("pinnedSubtitle").textContent="Tarihten bağımsız listelerin.";
+  setPinnedPanelMode("loading","Çakılı açılıyor…");
   setUtilityDrawerState("pinned",true);
-  loadPinnedLists();startPinnedListsRefresh();
+  const seq=++pinnedOpenSeq,ok=await loadPinnedLists();
+  if(seq!==pinnedOpenSeq||!document.body.classList.contains("pinned-open"))return;
+  if(ok)pinnedShowOverview();
+  else setPinnedPanelMode("loading","Çakılı açılamadı. Bağlantınızı kontrol edip yeniden deneyin.");
+  startPinnedListsRefresh();
 }
 function closePinnedPanel(force=false){
+  pinnedOpenSeq++;
   if($("pinnedShareDialog")?.open)$("pinnedShareDialog").close();
   stopPinnedLive();stopPinnedListsRefresh();
   clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;
@@ -2345,7 +2306,7 @@ function stopPinnedListsRefresh(){if(pinnedListsTimer){clearInterval(pinnedLists
 function startPinnedLive(){stopPinnedLive();pinnedLiveTimer=setInterval(()=>{if(document.visibilityState==="visible"&&document.body.classList.contains("pinned-open")&&pinnedActiveList&&!$("pinnedTaskList")?.querySelector(".editing")&&!pinnedPendingDelete&&!pinnedTaskReorder)syncPinnedActive({silent:true})},3500)}
 function stopPinnedLive(){if(pinnedLiveTimer){clearInterval(pinnedLiveTimer);pinnedLiveTimer=null}}
 async function openPinnedList(id){
-  const list=pinnedListById(id);if(!list)return;pinnedActiveList=list;pinnedTasks=[];pinnedRevision=null;$("pinnedOverview").hidden=true;$("pinnedEditor").hidden=false;$("pinnedBack").hidden=false;$("pinnedTitle").textContent=list.title;$("pinnedSubtitle").textContent=list.sharedUser?"Ortak Çakılı liste":"Çakılı görev listesi";$("pinnedOwnerTools").hidden=false;$("sharePinnedList").hidden=!list.isOwner;pinnedSetStatus("pinnedEditorStatus","Liste yükleniyor…");renderPinnedTasks();await syncPinnedActive({force:true});startPinnedLive();
+  const list=pinnedListById(id);if(!list)return;pinnedActiveList=list;pinnedTasks=[];pinnedRevision=null;setPinnedPanelMode("editor");$("pinnedBack").hidden=false;$("pinnedTitle").textContent=list.title;$("pinnedSubtitle").textContent=list.sharedUser?"Ortak Çakılı liste":"Çakılı görev listesi";$("pinnedOwnerTools").hidden=false;$("sharePinnedList").hidden=!list.isOwner;pinnedSetStatus("pinnedEditorStatus","Liste yükleniyor…");renderPinnedTasks();await syncPinnedActive({force:true});startPinnedLive();
 }
 async function syncPinnedActive({force=false,silent=false}={}){
   if(!pinnedActiveList||!currentUser?.id)return false;const listId=pinnedActiveList.id,known=force?null:pinnedRevision;
