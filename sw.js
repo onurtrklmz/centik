@@ -1,8 +1,8 @@
-// v94-ui-r23: Tüm hover stilleri gerçek hover/fine-pointer cihazlarla sınırlandı; mobil sticky-hover izi kaldırıldı.
+// v94-ui-r24: Çakılı liste detay başlığı 1.45rem; ana Çakılı başlığı korunur.
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v94-ideal-shared-drawer-r23";
+const SURUM = "centik-v94-ideal-shared-drawer-r24";
 const KABUK = [
   "./",
   "./index.html",
