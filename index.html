@@ -1379,7 +1379,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v94-beni-durt", CENTIK_EXPECTED_SERVER_BUILD="v33-beni-durt";
+const CENTIK_CLIENT_BUILD="v95-cekmece-textbox-siçrama-r48", CENTIK_EXPECTED_SERVER_BUILD="v33-beni-durt";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -1788,6 +1788,14 @@ const KeyboardManager=(()=>{
   const TOP_GAP=14;
   const BOTTOM_GAP=18;
   const VIRTUAL_WAIT_MS=280;
+  // r48: klavye geometrisi (özellikle sanal klavyenin öneri/tahmin şeridi
+  // yüzünden) her tuş vuruşunda ufak-hatalı geçici değerler üretebiliyor.
+  // Tek bir düzeltmede uygulanacak kaydırma miktarını sınırlayarak, geçici
+  // yanlış ölçümlerin çekmece içeriğini en üste "sıçratmasını" engelliyoruz.
+  const MAX_SCROLL_CORRECTION=420;
+  function clampScrollDelta(delta){
+    return Math.max(-MAX_SCROLL_CORRECTION,Math.min(MAX_SCROLL_CORRECTION,delta));
+  }
   const timers=new Set();
 
   const vk=("virtualKeyboard" in navigator)?navigator.virtualKeyboard:null;
@@ -1981,6 +1989,7 @@ const KeyboardManager=(()=>{
       let delta=0;
       if(rect.bottom>state.bottom)delta=rect.bottom-state.bottom;
       else if(rect.top<state.top)delta=rect.top-state.top;
+      delta=clampScrollDelta(delta);
       if(Math.abs(delta)<2)return;
 
       const scroller=mainScrollContainer(active);
@@ -2093,6 +2102,7 @@ const KeyboardManager=(()=>{
       let delta=0;
       if(rect.bottom>state.bottom)delta=rect.bottom-state.bottom;
       else if(rect.top<state.top)delta=rect.top-state.top;
+      delta=clampScrollDelta(delta);
       if(Math.abs(delta)<2)return;
 
       const scroller=utilityScrollContainer(active);
@@ -2105,13 +2115,18 @@ const KeyboardManager=(()=>{
     }
 
     function anchorEligible(el){
+      // r48: eskiden yalnız "#pinnedPanel"içindeki .edit-input ve pinnedNewTask
+      // çıpalanıyordu; Çetele editörü (contenteditable), liste adı ve PIN alanı gibi
+      // diğer tüm çekmece textbox'ları korumasızdı — sanal klavyenin geçici hatalı
+      // geometri okumaları bu alanlarda telafi edilmeden doğrudan uygulanıyor ve
+      // en üste sıçramaya yol açıyordu. Artık iki çekmecedeki (#pinnedPanel,
+      // #journalPanel) her düzenlenebilir alan çıpalanıyor.
       return !!(
         session?.provider==="virtual" &&
         session?.lastState?.open &&
         el instanceof HTMLElement &&
         (
-          (el.matches("input.edit-input")&&el.closest("#pinnedPanel")) ||
-          el.id==="pinnedNewTask"
+          el.closest("#pinnedPanel,#journalPanel")
         )
       );
     }
@@ -2189,6 +2204,7 @@ const KeyboardManager=(()=>{
       let delta=0;
       if(rect.bottom>state.bottom)delta=rect.bottom-state.bottom;
       else if(rect.top<state.top)delta=rect.top-state.top;
+      delta=clampScrollDelta(delta);
       if(Math.abs(delta)<2)return;
       const scroller=legacyScrollContainer(active);
       const behavior=smooth&&!prefersReducedMotion()?"smooth":"auto";
