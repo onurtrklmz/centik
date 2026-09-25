@@ -984,9 +984,7 @@ body.keyboard-open:not(.pinned-open):not(.journal-open) .cal{
    backend kontrolü sessizce arkada devam eder. */
 
 
-/* r42 — Çakılı'daki r36 rect-anchor davranışı korunur.
-   Ana Çentik inputlarında aynı KeyboardManager document + VisualViewport
-   konumunu pre-keydown anchor ile sabitler; ayrı scroll/provider motoru yoktur. */
+/* r43 — r42 document/VisualViewport telafisi kaldırıldı; ana ekran kontrollü main-scroll kullanır. */
 body.keyboard-open .task-list,
 body.keyboard-open .task-row,
 body.keyboard-open form.add{
@@ -997,7 +995,41 @@ body.keyboard-open form.add{
 <body class="auth-locked">
 
 <div class="ust-cubuk"><div class="wrap">
-  <div class="brand" id="brand" role="button" tabindex="0" aria-label="Bugüne dön">
+  <div class="brand" id=
+
+/* r43 — Ana Çentik için ayrı klavye yerleşim politikası.
+   Çakılı/Çetele .utility-body-clip davranışına dokunulmaz.
+   Ana ekranda document sabitlenir; görev alanı klavyenin üstünde kendi içinde scroll eder. */
+:root{--main-keyboard-height:0px}
+body.main-keyboard-open{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  overflow:hidden!important;
+}
+body.main-keyboard-open .app-stage{
+  height:var(--main-keyboard-height);
+  min-height:0;
+  overflow:hidden;
+}
+body.main-keyboard-open main{
+  height:100%;
+  min-height:0!important;
+  max-height:100%;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:28px;
+}
+/* main kendi scroll yüzeyi olduğunda browser anchoring ikinci bir kaydırma yapmasın. */
+body.main-keyboard-open main,
+body.main-keyboard-open .task-list,
+body.main-keyboard-open .task-row,
+body.main-keyboard-open form.add{
+  overflow-anchor:none;
+}
+"brand" role="button" tabindex="0" aria-label="Bugüne dön">
     <img class="brand-logo" src="icon-192.png" alt="">
     <h1>Çentik</h1>
   </div>
@@ -1767,6 +1799,7 @@ const KeyboardManager=(()=>{
   let session=null;
   let viewportBaseline=0;
   let typingAnchor=null;
+  let mainKeyboardLayout=null;
 
   function editable(el){
     if(!(el instanceof HTMLElement))return false;
@@ -1887,6 +1920,9 @@ const KeyboardManager=(()=>{
     document.body.classList.toggle("virtual-keyboard-open",open&&state?.provider==="virtual");
     document.documentElement.dataset.keyboardProvider=open?String(state?.provider||""):"";
     if(session)session.lastState={...state,inset,open};
+
+    if(open&&session?.context==="main")activateMainKeyboardLayout({...state,inset,open});
+    else if(mainKeyboardLayout)deactivateMainKeyboardLayout({restore:!open});
   }
 
   function moveFocusedEditor(state,{smooth=true}={}){
@@ -1967,10 +2003,63 @@ const KeyboardManager=(()=>{
     lockProvider("baseline");
   }
 
-  // r42 — tek typing-anchor, iki scroll bağlamı:
-  // 1) Çakılı/iç scroll yüzeylerinde r36'nın çalışan rect-delta davranışı aynen sürer.
-  // 2) Ana Çentik ekranında document + VisualViewport birlikte izlenir; Opera'nın
-  //    ilk karakterde yaptığı erken auto-pan keydown öncesi konuma geri dengelenir.
+  // r43 — tek KeyboardManager, iki yerleşim politikası.
+  // Utility (Çakılı/Çetele) mevcut iç-scroll yapısını aynen kullanır.
+  // Ana Çentik ise klavye açıkken document-scroll yerine kontrollü main-scroll kullanır.
+  function keyboardLayoutContext(el=document.activeElement){
+    if(!(el instanceof HTMLElement))return "other";
+    if(el.id==="newTask"||(el.matches("input.edit-input")&&el.closest("#list")))return "main";
+    if(el.closest("#pinnedPanel,#journalPanel"))return "utility";
+    return "other";
+  }
+
+  function mainScrollElement(){
+    return document.querySelector("main");
+  }
+
+  function documentScrollTop(){
+    return Math.max(
+      0,
+      Number(window.scrollY)||0,
+      Number(document.documentElement?.scrollTop)||0,
+      Number(document.body?.scrollTop)||0
+    );
+  }
+
+  function activateMainKeyboardLayout(state){
+    if(!session||session.context!=="main"||!state?.open)return;
+    const main=mainScrollElement(),bar=document.querySelector(".ust-cubuk");
+    if(!main)return;
+
+    const barBottom=Math.max(0,Number(bar?.getBoundingClientRect?.().bottom)||0);
+    const visibleHeight=Math.max(160,Math.floor(Number(state.bottom||0)-barBottom));
+    document.documentElement.style.setProperty("--main-keyboard-height",`${visibleHeight}px`);
+
+    if(!mainKeyboardLayout){
+      const seed=Math.max(0,Number(session.mainScrollSeed)||0);
+      mainKeyboardLayout={restoreY:seed};
+      document.body.classList.add("main-keyboard-open");
+      // Yeni layout hesaplandıktan sonra önceki document konumunu main.scrollTop'a aktar.
+      void main.offsetHeight;
+      main.scrollTop=seed;
+    }else{
+      document.body.classList.add("main-keyboard-open");
+    }
+  }
+
+  function deactivateMainKeyboardLayout({restore=true}={}){
+    const main=mainScrollElement();
+    if(!mainKeyboardLayout&&!document.body.classList.contains("main-keyboard-open"))return;
+    const y=Math.max(0,Number(main?.scrollTop)||Number(mainKeyboardLayout?.restoreY)||0);
+    document.body.classList.remove("main-keyboard-open");
+    document.documentElement.style.removeProperty("--main-keyboard-height");
+    mainKeyboardLayout=null;
+    if(restore){
+      requestAnimationFrame(()=>window.scrollTo({top:y,behavior:"auto"}));
+    }
+  }
+
+  // r36 typing-anchor davranışı kontrollü scroll yüzeylerinde ortak kalır.
   function typingAnchorEligible(el){
     return !!(
       session?.provider==="virtual" &&
@@ -1984,44 +2073,20 @@ const KeyboardManager=(()=>{
     );
   }
 
-  function typingAnchorIsMain(el){
-    return !!(
-      el?.id==="newTask" ||
-      (el?.matches?.("input.edit-input") && el.closest("#list"))
-    );
-  }
-
   function typingAnchorTarget(el){
     if(el.matches("input.edit-input"))return subject(el);
     return el.closest("form.add")||el;
   }
 
-  function documentScrollTop(){
-    return Math.max(
-      0,
-      Number(window.scrollY)||0,
-      Number(document.documentElement?.scrollTop)||0,
-      Number(document.body?.scrollTop)||0
-    );
-  }
-
-  function visualViewportTop(){
-    return Math.max(0,Number(window.visualViewport?.offsetTop)||0);
-  }
-
-  function captureTypingAnchor(el,phase="beforeinput"){
+  function captureTypingAnchor(el){
     if(!typingAnchorEligible(el)){typingAnchor=null;return}
-    const target=typingAnchorTarget(el),scroller=scrollContainer(el),main=typingAnchorIsMain(el);
+    const target=typingAnchorTarget(el),scroller=scrollContainer(el);
     typingAnchor={
       sessionId:session.id,
       el,
       target,
       scroller,
-      main,
-      phase,
-      top:target.getBoundingClientRect().top,
-      scrollTop:main?documentScrollTop():null,
-      visualTop:main?visualViewportTop():null
+      top:target.getBoundingClientRect().top
     };
   }
 
@@ -2031,50 +2096,28 @@ const KeyboardManager=(()=>{
     if(!a||!session||session.id!==a.sessionId||session.provider!=="virtual")return;
     if(document.activeElement!==a.el||!a.el.isConnected||!a.target.isConnected)return;
 
-    if(a.main){
-      // Ana ekran document-scroll kullanır. Opera bazen keydown ile beforeinput arasında
-      // hem layout scroll'u hem VisualViewport pan'ini değiştirebildiği için sadece
-      // getBoundingClientRect farkı yeterli değildir. Ekrandaki eski konumu koruyan
-      // hedef scroll: eskiScroll + eskiVisualTop - yeniVisualTop.
-      const wanted=Math.max(0,Math.round(
-        Number(a.scrollTop||0) + Number(a.visualTop||0) - visualViewportTop()
-      ));
-      const now=documentScrollTop();
-      if(Math.abs(now-wanted)>=2){
-        window.scrollTo({top:wanted,behavior:"auto"});
-      }
+    const nowTop=a.target.getBoundingClientRect().top;
+    const delta=nowTop-a.top;
+    if(Math.abs(delta)<20)return;
+
+    if(a.scroller===document.scrollingElement||a.scroller===document.documentElement||a.scroller===document.body){
+      window.scrollBy({top:delta,behavior:"auto"});
     }else{
-      // Çakılı ve diğer iç scroll alanlarında r36 davranışını değiştirmiyoruz.
-      const nowTop=a.target.getBoundingClientRect().top;
-      const delta=nowTop-a.top;
-      if(Math.abs(delta)>=20){
-        a.scroller.scrollBy({top:delta,behavior:"auto"});
-      }
+      a.scroller.scrollBy({top:delta,behavior:"auto"});
     }
 
-    // Son söz yine aynı KeyboardManager'da: geometri gerçekten değişmişse yalnız
-    // görünürlük için gereken kadar düzeltme yapar.
     schedule({smooth:false,delay:0});
-  }
-
-  function typingKeyCanMutate(e){
-    if(e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey)return false;
-    const k=String(e.key||"");
-    return k.length===1 ||
-      k==="Backspace" ||
-      k==="Delete" ||
-      k==="Process" ||
-      k==="Unidentified" ||
-      e.isComposing ||
-      e.keyCode===229;
   }
 
   function startSession(){
     clearTimers();
     refreshBaseline({force:true});
+    const context=keyboardLayoutContext(document.activeElement);
     session={
       id:++sessionId,
       provider:null,
+      context,
+      mainScrollSeed:context==="main"?documentScrollTop():null,
       baseline:Math.max(viewportBaseline||0,viewport().restingCandidate),
       virtualDeadlinePassed:!vk,
       lastState:null
@@ -2104,6 +2147,7 @@ const KeyboardManager=(()=>{
     clearTimers();
     cancelAnimationFrame(raf);
     typingAnchor=null;
+    if(mainKeyboardLayout)deactivateMainKeyboardLayout({restore:true});
     session=null;
     applyState({open:false,inset:0,top:0,bottom:0,provider:""});
     setTimeout(()=>refreshBaseline({force:true}),80);
@@ -2128,28 +2172,12 @@ const KeyboardManager=(()=>{
     schedule({smooth:false});
   }
 
-  // Ana ekran için pre-default keydown yakalaması: beforeinput geldiğinde Opera'nın
-  // document auto-pan'i başlamış olabileceğinden eski sayfa konumunu daha erken saklarız.
-  document.addEventListener("keydown",e=>{
-    if(!typingAnchorEligible(e.target)||!typingAnchorIsMain(e.target)||!typingKeyCanMutate(e))return;
-    captureTypingAnchor(e.target,"keydown");
-  },true);
-
   document.addEventListener("beforeinput",e=>{
-    if(!typingAnchorEligible(e.target))return;
-    // Aynı main input için keydown anchor'ı varsa onu daha geç bir beforeinput ölçümüyle ezme.
-    if(
-      typingAnchor &&
-      typingAnchor.el===e.target &&
-      typingAnchor.main &&
-      typingAnchor.phase==="keydown"
-    )return;
-    captureTypingAnchor(e.target,"beforeinput");
+    if(typingAnchorEligible(e.target))captureTypingAnchor(e.target);
   },true);
 
   document.addEventListener("input",e=>{
     if(!typingAnchor||typingAnchor.el!==e.target)return;
-    // r36 ile aynı zamanlama: tarayıcı auto-pan'i input sonrası paint'te tamamlanır.
     requestAnimationFrame(()=>requestAnimationFrame(restoreTypingAnchor));
   },true);
 

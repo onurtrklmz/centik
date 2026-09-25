@@ -1,8 +1,8 @@
-// v94-ui-r42: ana Çentik inputlarında pre-keydown document+VisualViewport typing-anchor; Çakılı r36 anchor davranışı korunur.
+// v94-ui-r43: tek KeyboardManager + iki layout politikası; utility korunur, ana Çentik keyboard'da kontrollü main-scroll kullanır.
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v94-ideal-shared-drawer-r42";
+const SURUM = "centik-v94-ideal-shared-drawer-r43";
 const KABUK = [
   "./",
   "./index.html",
