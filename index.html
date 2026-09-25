@@ -640,7 +640,7 @@ body.journal-open{overflow:hidden}
    .cal her zaman panelin üstündedir; bu yüzden açılış/kapanışta içerik çubuğun içinden
    çıkar ve tekrar çubuğun içine gömülür. ——— */
 /* ——— V76 ortak alt çekmece yüzeyi + kompakt yaklaşan görevler ——— */
-:root{--centik-topbar-h:60px;--centik-drawer-bar-h:58px}
+:root{--centik-topbar-h:60px;--centik-drawer-bar-h:58px;--centik-active-drawer-bar-h:var(--centik-drawer-bar-h)}
 .day-head-actions{max-width:min(48vw,230px)}
 .day-head-actions .upcoming-notice{margin:0;height:38px;min-height:38px;width:auto;max-width:100%;padding:3px 6px 3px 8px;border:1px solid var(--notice-tomorrow-border);border-radius:999px;background:var(--notice-tomorrow-bg);box-shadow:var(--shadow);display:flex;align-items:center;gap:6px;overflow:hidden}
 .day-head-actions .upcoming-notice::after{display:none}
@@ -731,7 +731,7 @@ body.pinned-open .cal-body-wrap,body.journal-open .cal-body-wrap{grid-template-r
 }
 body.pinned-open #pinnedBodyWrap,
 body.journal-open #journalBodyWrap{
-  height:calc(100dvh - var(--centik-topbar-h) - var(--centik-drawer-bar-h) - max(12px,env(safe-area-inset-bottom)) - 6px);
+  height:calc(100dvh - var(--centik-topbar-h) - var(--centik-active-drawer-bar-h) - max(12px,env(safe-area-inset-bottom)) - 6px);
   opacity:1;
   transform:translateY(0);
   pointer-events:auto;
@@ -939,10 +939,25 @@ body.keyboard-open .utility-body-clip{
 
 
 
-/* r33 — mobil klavye açıkken ortak alt bar içerik üstüne binmez.
-   Barın layout payı korunur; yalnız görseli ve etkileşimi geçici olarak kapatılır.
-   Böylece çekmece yüksekliği/animasyon mimarisi değişmez. */
+/* r35 — klavye açıkken ortak alt barın efektif yüksekliği sıfırdır.
+   KeyboardManager yalnız body.keyboard-open state'ini üretir; bar/geometri CSS'te
+   tek değişken üzerinden çözülür. Ana ekranda boş .cal kabuğu da tamamen gizlenir. */
+body.keyboard-open{
+  --centik-active-drawer-bar-h:0px;
+}
 body.keyboard-open .cal-head{
+  min-height:0!important;
+  height:0!important;
+  padding-block:0!important;
+  margin:0!important;
+  border:0!important;
+  overflow:hidden!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+/* Ana görev ekranında çekmece gövdesi açık değilse boş sabit kabuk da görünmesin. */
+body.keyboard-open:not(.pinned-open):not(.journal-open) .cal{
   opacity:0!important;
   visibility:hidden!important;
   pointer-events:none!important;
@@ -952,6 +967,11 @@ body.keyboard-open .cal-head{
 /* r34 — klavye mimarisi tek KeyboardManager altında toplandı.
    Her klavye oturumunda tek provider seçilir ve blur'a kadar kilitlenir:
    VirtualKeyboard → VisualViewport → baseline. Olay kaynakları artık paralel state yazmaz. */
+
+
+/* r35 mimari notu:
+   KeyboardManager provider/state yönetir; çekmece barı yalnız body.keyboard-open
+   state'inden türeyen --centik-active-drawer-bar-h ile davranır. Ek JS yolu yoktur. */
 </style>
 </head>
 <body class="auth-locked">

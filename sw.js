@@ -1,8 +1,8 @@
-// v94-ui-r34: tek KeyboardManager; klavye oturumu başına tek provider kilidi (VirtualKeyboard→VisualViewport→baseline).
+// v94-ui-r35: keyboard-open durumunda efektif drawer bar yüksekliği 0; ana ekranda boş .cal kabuğu gizlenir.
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v94-ideal-shared-drawer-r34";
+const SURUM = "centik-v94-ideal-shared-drawer-r35";
 const KABUK = [
   "./",
   "./index.html",
