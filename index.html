@@ -937,7 +937,6 @@ body.keyboard-open .utility-body-clip{
    dokunmatikte yalnız geçici :active geri bildirimi kullanılır. */
 
 
-/* r32 — VirtualKeyboard API varsa boundingRect/geometrychange; aksi halde VisualViewport + baseline fallback. */
 
 
 /* r33 — mobil klavye açıkken ortak alt bar içerik üstüne binmez.
@@ -948,6 +947,11 @@ body.keyboard-open .cal-head{
   visibility:hidden!important;
   pointer-events:none!important;
 }
+
+
+/* r34 — klavye mimarisi tek KeyboardManager altında toplandı.
+   Her klavye oturumunda tek provider seçilir ve blur'a kadar kilitlenir:
+   VirtualKeyboard → VisualViewport → baseline. Olay kaynakları artık paralel state yazmaz. */
 </style>
 </head>
 <body class="auth-locked">
@@ -1698,177 +1702,332 @@ async function connectNow({silent=false,force=false,reason=""}={}){
 
 function expireSession(expectedToken=""){if(expectedToken&&expectedToken!==getToken())return false;sessionVerifyPromise=null;sessionVerifyToken="";resetPinnedState();closePinnedPanel(true);clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pinnedPendingDelete=null;pendingDelete=null;hideUndoToast();closeJournalView(true);journalStatusCache.clear();journalStatusSeenAt.clear();journalStatusPending.clear();journalMonthCache.clear();journalMonthPending.clear();setSession("",null);days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);setAuthStatus("Oturum süresi doldu. Yeniden giriş yapın.",true);return true}
 
-// V94 r32 — Evrensel mobil klavye görünürlük yöneticisi.
-// Öncelik: VirtualKeyboard API → VisualViewport → viewport baseline fallback.
-// Tarayıcı/UA ayrımı yoktur; Çentik + Çakılı + Çetele ortak motoru kullanır.
-let keyboardVisibilityRaf=0;
-const keyboardVisibilityTimers=new Set();
-const KEYBOARD_VISIBILITY_TOP_GAP=14;
-const KEYBOARD_VISIBILITY_BOTTOM_GAP=18;
-const KEYBOARD_MIN_INSET=80;
+// V94 r34 — Tek KeyboardManager / tek aktif provider.
+// Her klavye oturumunda yalnız bir ölçüm sağlayıcısı seçilir ve blur'a kadar kilitlenir.
+// Öncelik: VirtualKeyboard → VisualViewport → baseline.
+// geometrychange / visualViewport.resize / window.resize yalnız yöneticiyi uyandırır;
+// provider seçimini veya state'i kendi başına değiştirmez.
+const KeyboardManager=(()=>{
+  const MIN_INSET=80;
+  const TOP_GAP=14;
+  const BOTTOM_GAP=18;
+  const VIRTUAL_WAIT_MS=280;
+  const timers=new Set();
 
-const centikVirtualKeyboard=("virtualKeyboard" in navigator)?navigator.virtualKeyboard:null;
-let centikVirtualKeyboardOverlay=false;
-if(centikVirtualKeyboard){
-  try{
-    centikVirtualKeyboard.overlaysContent=true;
-    centikVirtualKeyboardOverlay=centikVirtualKeyboard.overlaysContent===true;
-  }catch(_){centikVirtualKeyboardOverlay=false}
-}
+  const vk=("virtualKeyboard" in navigator)?navigator.virtualKeyboard:null;
+  let raf=0;
+  let sessionId=0;
+  let session=null;
+  let viewportBaseline=0;
 
-function keyboardEditableTarget(el){
-  if(!(el instanceof HTMLElement))return false;
-  if(el.matches("textarea,[contenteditable='true']"))return true;
-  if(!el.matches("input"))return false;
-  const type=String(el.type||"text").toLowerCase();
-  return !["button","checkbox","radio","range","color","file","submit","reset","image","hidden"].includes(type);
-}
-function keyboardVisibilitySubject(el){
-  return el.closest?.(".task-row,.journal-card,.modal-box,.auth-card")||el;
-}
-function keyboardScrollContainer(el){
-  let p=el?.parentElement;
-  while(p&&p!==document.body&&p!==document.documentElement){
-    const oy=getComputedStyle(p).overflowY;
-    if((oy==="auto"||oy==="scroll")&&p.scrollHeight>p.clientHeight+2)return p;
-    p=p.parentElement;
+  function editable(el){
+    if(!(el instanceof HTMLElement))return false;
+    if(el.matches("textarea,[contenteditable='true']"))return true;
+    if(!el.matches("input"))return false;
+    const type=String(el.type||"text").toLowerCase();
+    return !["button","checkbox","radio","range","color","file","submit","reset","image","hidden"].includes(type);
   }
-  return document.scrollingElement||document.documentElement;
-}
-function virtualKeyboardGeometry(){
-  if(!centikVirtualKeyboard)return null;
-  try{
-    const r=centikVirtualKeyboard.boundingRect;
-    if(!r)return null;
-    const h=Math.max(0,Number(r.height)||0),t=Number(r.top);
-    return {height:h,top:Number.isFinite(t)?t:null};
-  }catch(_){return null}
-}
-function currentViewportMeasurements(){
-  const vv=window.visualViewport;
-  const inner=Number(window.innerHeight)||0;
-  const client=Number(document.documentElement?.clientHeight)||0;
-  const visual=vv?(Number(vv.height)||0):0;
-  const visualTop=vv?(Number(vv.offsetTop)||0):0;
-  const usable=[inner,client,visual].filter(v=>Number.isFinite(v)&&v>0);
-  return {
-    inner,client,visual,visualTop,
-    visibleHeight:usable.length?Math.min(...usable):Math.max(inner,client,visual,1),
-    restingCandidate:Math.max(inner,client,visual+visualTop,1)
-  };
-}
-let keyboardViewportBaseline=currentViewportMeasurements().restingCandidate;
-function refreshKeyboardViewportBaseline(){
-  if(keyboardEditableTarget(document.activeElement))return keyboardViewportBaseline;
-  const now=currentViewportMeasurements().restingCandidate;
-  if(now>0)keyboardViewportBaseline=Math.max(now,keyboardViewportBaseline||0);
-  return keyboardViewportBaseline;
-}
-function fallbackKeyboardViewportInset(){
-  const m=currentViewportMeasurements();
-  const baseline=Math.max(keyboardViewportBaseline||0,m.restingCandidate);
-  return Math.max(0,Math.round(baseline-(m.visualTop+m.visibleHeight)));
-}
-function keyboardViewportInset(){
-  const vk=virtualKeyboardGeometry();
-  if(vk&&vk.height>=KEYBOARD_MIN_INSET&&keyboardEditableTarget(document.activeElement))return Math.round(vk.height);
-  return fallbackKeyboardViewportInset();
-}
-function syncKeyboardInset(){
-  const inset=keyboardViewportInset();
-  const open=inset>=KEYBOARD_MIN_INSET&&keyboardEditableTarget(document.activeElement);
-  document.documentElement.style.setProperty("--keyboard-inset",`${open?inset:0}px`);
-  document.body.classList.toggle("keyboard-open",open);
-  document.body.classList.toggle("virtual-keyboard-open",!!(open&&virtualKeyboardGeometry()?.height>=KEYBOARD_MIN_INSET));
-  return open?inset:0;
-}
-function keyboardVisibleBounds(){
-  const vk=virtualKeyboardGeometry();
-  if(vk&&vk.height>=KEYBOARD_MIN_INSET&&keyboardEditableTarget(document.activeElement)){
-    const layoutBottom=Math.max(Number(window.innerHeight)||0,Number(document.documentElement?.clientHeight)||0);
-    const top=Number.isFinite(vk.top)&&vk.top>0?vk.top:Math.max(0,layoutBottom-vk.height);
-    return {top:KEYBOARD_VISIBILITY_TOP_GAP,bottom:top-KEYBOARD_VISIBILITY_BOTTOM_GAP};
+
+  function subject(el){
+    return el.closest?.(".task-row,.journal-card,.modal-box,.auth-card")||el;
   }
-  const m=currentViewportMeasurements();
-  return {top:m.visualTop+KEYBOARD_VISIBILITY_TOP_GAP,bottom:m.visualTop+m.visibleHeight-KEYBOARD_VISIBILITY_BOTTOM_GAP};
-}
-function keepFocusedEditorVisible({smooth=true}={}){
-  const active=document.activeElement;
-  if(!keyboardEditableTarget(active))return;
-  syncKeyboardInset();
-  const subject=keyboardVisibilitySubject(active),rect=subject.getBoundingClientRect(),bounds=keyboardVisibleBounds();
-  let delta=0;
-  if(rect.bottom>bounds.bottom)delta=rect.bottom-bounds.bottom;
-  else if(rect.top<bounds.top)delta=rect.top-bounds.top;
-  if(Math.abs(delta)<2)return;
-  const scroller=keyboardScrollContainer(active),behavior=smooth&&!prefersReducedMotion()?"smooth":"auto";
-  if(scroller===document.scrollingElement||scroller===document.documentElement||scroller===document.body)window.scrollBy({top:delta,behavior});
-  else scroller.scrollBy({top:delta,behavior});
-}
-function scheduleFocusedEditorVisibility({smooth=true,delay=0}={}){
-  const run=()=>{
-    cancelAnimationFrame(keyboardVisibilityRaf);
-    keyboardVisibilityRaf=requestAnimationFrame(()=>{syncKeyboardInset();keepFocusedEditorVisible({smooth})});
-  };
-  if(delay<=0){run();return}
-  const timer=setTimeout(()=>{keyboardVisibilityTimers.delete(timer);run()},delay);
-  keyboardVisibilityTimers.add(timer);
-}
-function clearKeyboardVisibilityTimers(){
-  keyboardVisibilityTimers.forEach(clearTimeout);
-  keyboardVisibilityTimers.clear();
-}
-document.addEventListener("focusin",e=>{
-  if(!keyboardEditableTarget(e.target))return;
-  clearKeyboardVisibilityTimers();
-  scheduleFocusedEditorVisibility({smooth:false});
-  scheduleFocusedEditorVisibility({smooth:false,delay:120});
-  scheduleFocusedEditorVisibility({smooth:false,delay:280});
-  scheduleFocusedEditorVisibility({smooth:true,delay:480});
-});
-document.addEventListener("focusout",()=>{
-  setTimeout(()=>{
-    if(!keyboardEditableTarget(document.activeElement)){
-      clearKeyboardVisibilityTimers();
-      document.documentElement.style.setProperty("--keyboard-inset","0px");
-      document.body.classList.remove("keyboard-open","virtual-keyboard-open");
-      refreshKeyboardViewportBaseline();
+
+  function scrollContainer(el){
+    let p=el?.parentElement;
+    while(p&&p!==document.body&&p!==document.documentElement){
+      const oy=getComputedStyle(p).overflowY;
+      if((oy==="auto"||oy==="scroll")&&p.scrollHeight>p.clientHeight+2)return p;
+      p=p.parentElement;
     }
-  },100);
-});
-function handleKeyboardViewportChange(){
-  if(keyboardEditableTarget(document.activeElement)){
-    syncKeyboardInset();
-    scheduleFocusedEditorVisibility({smooth:false});
-  }else refreshKeyboardViewportBaseline();
-}
-if(centikVirtualKeyboard){
-  try{
-    centikVirtualKeyboard.addEventListener("geometrychange",()=>{
-      if(keyboardEditableTarget(document.activeElement)){
-        syncKeyboardInset();
-        scheduleFocusedEditorVisibility({smooth:false});
-        scheduleFocusedEditorVisibility({smooth:true,delay:80});
-      }
-    });
-  }catch(_){}
-}
-if(window.visualViewport){
-  visualViewport.addEventListener("resize",handleKeyboardViewportChange,{passive:true});
-  visualViewport.addEventListener("scroll",()=>scheduleFocusedEditorVisibility({smooth:false}),{passive:true});
-}
-window.addEventListener("resize",handleKeyboardViewportChange,{passive:true});
-window.addEventListener("orientationchange",()=>{
-  clearKeyboardVisibilityTimers();
-  keyboardViewportBaseline=0;
-  document.documentElement.style.setProperty("--keyboard-inset","0px");
-  document.body.classList.remove("keyboard-open","virtual-keyboard-open");
-  setTimeout(()=>{keyboardViewportBaseline=currentViewportMeasurements().restingCandidate},320);
-},{passive:true});
-document.addEventListener("visibilitychange",()=>{
-  if(document.visibilityState==="visible"&&!keyboardEditableTarget(document.activeElement))refreshKeyboardViewportBaseline();
-});
-refreshKeyboardViewportBaseline();
+    return document.scrollingElement||document.documentElement;
+  }
+
+  function viewport(){
+    const vv=window.visualViewport;
+    const inner=Number(window.innerHeight)||0;
+    const client=Number(document.documentElement?.clientHeight)||0;
+    const visual=vv?(Number(vv.height)||0):0;
+    const visualTop=vv?(Number(vv.offsetTop)||0):0;
+    const usable=[inner,client,visual].filter(v=>Number.isFinite(v)&&v>0);
+    return {
+      inner,client,visual,visualTop,
+      visibleHeight:usable.length?Math.min(...usable):Math.max(inner,client,visual,1),
+      restingCandidate:Math.max(inner,client,visual+visualTop,1)
+    };
+  }
+
+  function virtualGeometry(){
+    if(!vk)return null;
+    try{
+      const r=vk.boundingRect;
+      if(!r)return null;
+      const height=Math.max(0,Number(r.height)||0);
+      const top=Number(r.top);
+      return {height,top:Number.isFinite(top)?top:null};
+    }catch(_){return null}
+  }
+
+  function refreshBaseline({force=false}={}){
+    if(!force&&editable(document.activeElement))return viewportBaseline;
+    const now=viewport().restingCandidate;
+    if(now>0)viewportBaseline=Math.max(now,viewportBaseline||0);
+    return viewportBaseline;
+  }
+
+  function fallbackInset(){
+    const m=viewport();
+    const base=Math.max(session?.baseline||viewportBaseline||0,m.restingCandidate);
+    return Math.max(0,Math.round(base-(m.visualTop+m.visibleHeight)));
+  }
+
+  function visualViewportInset(){
+    const m=viewport();
+    const base=Math.max(session?.baseline||viewportBaseline||0,m.restingCandidate);
+    return Math.max(0,Math.round(base-(m.visualTop+m.visibleHeight)));
+  }
+
+  function providerState(provider){
+    const active=editable(document.activeElement);
+    if(!active)return {open:false,inset:0,top:0,bottom:0,provider};
+
+    if(provider==="virtual"){
+      const g=virtualGeometry();
+      if(!g||g.height<MIN_INSET)return {open:false,inset:0,top:0,bottom:0,provider};
+      const layoutBottom=Math.max(
+        Number(window.innerHeight)||0,
+        Number(document.documentElement?.clientHeight)||0,
+        Number(window.visualViewport?.height)||0
+      );
+      const keyboardTop=Number.isFinite(g.top)&&g.top>0?g.top:Math.max(0,layoutBottom-g.height);
+      return {
+        open:true,
+        inset:Math.round(g.height),
+        top:TOP_GAP,
+        bottom:keyboardTop-BOTTOM_GAP,
+        provider
+      };
+    }
+
+    if(provider==="viewport"){
+      const m=viewport();
+      const inset=visualViewportInset();
+      return {
+        open:inset>=MIN_INSET,
+        inset:inset>=MIN_INSET?inset:0,
+        top:m.visualTop+TOP_GAP,
+        bottom:m.visualTop+m.visibleHeight-BOTTOM_GAP,
+        provider
+      };
+    }
+
+    const m=viewport();
+    const inset=fallbackInset();
+    return {
+      open:inset>=MIN_INSET,
+      inset:inset>=MIN_INSET?inset:0,
+      top:m.visualTop+TOP_GAP,
+      bottom:m.visualTop+m.visibleHeight-BOTTOM_GAP,
+      provider:"baseline"
+    };
+  }
+
+  function applyState(state){
+    const open=!!state?.open;
+    const inset=open?Math.max(0,Math.round(Number(state.inset)||0)):0;
+    document.documentElement.style.setProperty("--keyboard-inset",`${inset}px`);
+    document.body.classList.toggle("keyboard-open",open);
+    document.body.classList.toggle("virtual-keyboard-open",open&&state?.provider==="virtual");
+    document.documentElement.dataset.keyboardProvider=open?String(state?.provider||""):"";
+    if(session)session.lastState={...state,inset,open};
+  }
+
+  function moveFocusedEditor(state,{smooth=true}={}){
+    const active=document.activeElement;
+    if(!editable(active)||!state?.open)return;
+
+    const el=subject(active);
+    const rect=el.getBoundingClientRect();
+    let delta=0;
+    if(rect.bottom>state.bottom)delta=rect.bottom-state.bottom;
+    else if(rect.top<state.top)delta=rect.top-state.top;
+    if(Math.abs(delta)<2)return;
+
+    const scroller=scrollContainer(active);
+    const behavior=smooth&&!prefersReducedMotion()?"smooth":"auto";
+    if(scroller===document.scrollingElement||scroller===document.documentElement||scroller===document.body){
+      window.scrollBy({top:delta,behavior});
+    }else{
+      scroller.scrollBy({top:delta,behavior});
+    }
+  }
+
+  function render({smooth=false}={}){
+    if(!session||!editable(document.activeElement))return;
+    const state=providerState(session.provider);
+    applyState(state);
+    if(state.open)moveFocusedEditor(state,{smooth});
+  }
+
+  function schedule({smooth=false,delay=0}={}){
+    const expected=session?.id;
+    const run=()=>{
+      if(!session||session.id!==expected)return;
+      cancelAnimationFrame(raf);
+      raf=requestAnimationFrame(()=>render({smooth}));
+    };
+    if(delay<=0){run();return}
+    const t=setTimeout(()=>{
+      timers.delete(t);
+      run();
+    },delay);
+    timers.add(t);
+  }
+
+  function clearTimers(){
+    timers.forEach(clearTimeout);
+    timers.clear();
+  }
+
+  function canUseVirtual(){
+    const g=virtualGeometry();
+    return !!(g&&g.height>=MIN_INSET);
+  }
+
+  function canUseViewport(){
+    if(!window.visualViewport)return false;
+    return visualViewportInset()>=MIN_INSET;
+  }
+
+  function lockProvider(provider){
+    if(!session||session.provider)return;
+    session.provider=provider;
+    render({smooth:false});
+    schedule({smooth:true,delay:80});
+  }
+
+  function chooseProvider(){
+    if(!session||session.provider)return;
+
+    // VirtualKeyboard gerçek geometriyi hemen veriyorsa doğrudan kilitle.
+    if(canUseVirtual()){lockProvider("virtual");return}
+
+    // API mevcutsa kısa bir süre gerçek geometrychange bekle; bu süre boyunca
+    // viewport sinyalleri yalnız ölçüm günceller, provider seçmez.
+    if(vk&&!session.virtualDeadlinePassed)return;
+
+    if(canUseViewport()){lockProvider("viewport");return}
+    lockProvider("baseline");
+  }
+
+  function startSession(){
+    clearTimers();
+    refreshBaseline({force:true});
+    session={
+      id:++sessionId,
+      provider:null,
+      baseline:Math.max(viewportBaseline||0,viewport().restingCandidate),
+      virtualDeadlinePassed:!vk,
+      lastState:null
+    };
+
+    if(vk){
+      try{vk.overlaysContent=true}catch(_){}
+      const t=setTimeout(()=>{
+        timers.delete(t);
+        if(!session)return;
+        session.virtualDeadlinePassed=true;
+        chooseProvider();
+        schedule({smooth:false});
+        schedule({smooth:true,delay:120});
+      },VIRTUAL_WAIT_MS);
+      timers.add(t);
+    }
+
+    // Farklı Chromium klavye animasyon zamanlamalarını aynı manager içinde ölç.
+    schedule({smooth:false});
+    schedule({smooth:false,delay:120});
+    schedule({smooth:true,delay:420});
+    chooseProvider();
+  }
+
+  function endSession(){
+    clearTimers();
+    cancelAnimationFrame(raf);
+    session=null;
+    applyState({open:false,inset:0,top:0,bottom:0,provider:""});
+    setTimeout(()=>refreshBaseline({force:true}),80);
+  }
+
+  function signal(source){
+    if(!session){
+      refreshBaseline();
+      return;
+    }
+
+    // Aktif provider yalnız kendi sinyalini kullanır.
+    if(session.provider==="virtual"&&source!=="virtual")return;
+    if(session.provider==="viewport"&&source!=="viewport")return;
+    if(session.provider==="baseline"&&source!=="baseline"&&source!=="window")return;
+
+    // Provider henüz seçilmediyse sinyal yalnız seçim koşullarını günceller.
+    if(!session.provider){
+      chooseProvider();
+      if(!session.provider)return;
+    }
+    schedule({smooth:false});
+  }
+
+  document.addEventListener("focusin",e=>{
+    if(!editable(e.target))return;
+    if(session)endSession();
+    startSession();
+  });
+
+  document.addEventListener("focusout",()=>{
+    setTimeout(()=>{
+      if(!editable(document.activeElement))endSession();
+    },100);
+  });
+
+  if(vk){
+    try{
+      vk.addEventListener("geometrychange",()=>{
+        if(!session)return;
+        if(!session.provider&&canUseVirtual())lockProvider("virtual");
+        signal("virtual");
+      });
+    }catch(_){}
+  }
+
+  if(window.visualViewport){
+    visualViewport.addEventListener("resize",()=>signal("viewport"),{passive:true});
+    visualViewport.addEventListener("scroll",()=>signal("viewport"),{passive:true});
+  }
+
+  window.addEventListener("resize",()=>{
+    if(session?.provider==="baseline")signal("baseline");
+    else if(!session?.provider)chooseProvider();
+    else signal("window");
+  },{passive:true});
+
+  window.addEventListener("orientationchange",()=>{
+    endSession();
+    viewportBaseline=0;
+    setTimeout(()=>refreshBaseline({force:true}),320);
+  },{passive:true});
+
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible"&&!editable(document.activeElement))refreshBaseline({force:true});
+  });
+
+  refreshBaseline({force:true});
+
+  return {
+    getProvider:()=>session?.provider||null,
+    getState:()=>session?.lastState||null,
+    refresh:()=>schedule({smooth:false})
+  };
+})();
 
 // V94 r28 — Görev satırı eylemleri için ortak durum motoru.
 // Çentik ve Çakılı aynı ikon/anlam eşlemesini kullanır:
