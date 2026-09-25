@@ -984,8 +984,9 @@ body.keyboard-open:not(.pinned-open):not(.journal-open) .cal{
    backend kontrolü sessizce arkada devam eder. */
 
 
-/* r41 — r36 typing-anchor motoru artık mevcut görev düzenleme ile birlikte
-   ana/Çakılı Yeni Görev alanlarını da kapsar. KeyboardManager tek konum sahibidir. */
+/* r42 — Çakılı'daki r36 rect-anchor davranışı korunur.
+   Ana Çentik inputlarında aynı KeyboardManager document + VisualViewport
+   konumunu pre-keydown anchor ile sabitler; ayrı scroll/provider motoru yoktur. */
 body.keyboard-open .task-list,
 body.keyboard-open .task-row,
 body.keyboard-open form.add{
@@ -1966,10 +1967,10 @@ const KeyboardManager=(()=>{
     lockProvider("baseline");
   }
 
-  // r41 — r36'da çalışan typing-anchor mekanizmasının genelleştirilmiş hali.
-  // VirtualKeyboard overlay modunda bazı mobil tarayıcılar ilk/sonraki karakter girişinde
-  // odaklı alanı kendi başına yeniden kaydırabiliyor. Provider hesabı değişmez;
-  // yalnız tarayıcının beklenmeyen caret auto-pan hareketi aynı manager içinde geri alınır.
+  // r42 — tek typing-anchor, iki scroll bağlamı:
+  // 1) Çakılı/iç scroll yüzeylerinde r36'nın çalışan rect-delta davranışı aynen sürer.
+  // 2) Ana Çentik ekranında document + VisualViewport birlikte izlenir; Opera'nın
+  //    ilk karakterde yaptığı erken auto-pan keydown öncesi konuma geri dengelenir.
   function typingAnchorEligible(el){
     return !!(
       session?.provider==="virtual" &&
@@ -1983,20 +1984,44 @@ const KeyboardManager=(()=>{
     );
   }
 
+  function typingAnchorIsMain(el){
+    return !!(
+      el?.id==="newTask" ||
+      (el?.matches?.("input.edit-input") && el.closest("#list"))
+    );
+  }
+
   function typingAnchorTarget(el){
     if(el.matches("input.edit-input"))return subject(el);
     return el.closest("form.add")||el;
   }
 
-  function captureTypingAnchor(el){
+  function documentScrollTop(){
+    return Math.max(
+      0,
+      Number(window.scrollY)||0,
+      Number(document.documentElement?.scrollTop)||0,
+      Number(document.body?.scrollTop)||0
+    );
+  }
+
+  function visualViewportTop(){
+    return Math.max(0,Number(window.visualViewport?.offsetTop)||0);
+  }
+
+  function captureTypingAnchor(el,phase="beforeinput"){
     if(!typingAnchorEligible(el)){typingAnchor=null;return}
-    const target=typingAnchorTarget(el),scroller=scrollContainer(el);
+    const target=typingAnchorTarget(el),scroller=scrollContainer(el),main=typingAnchorIsMain(el);
     typingAnchor={
       sessionId:session.id,
       el,
       target,
       scroller,
-      top:target.getBoundingClientRect().top
+      main,
+      phase,
+      top:target.getBoundingClientRect().top,
+      scrollTop:main?documentScrollTop():null,
+      visualTop:main?visualViewportTop():null
     };
   }
 
@@ -2006,19 +2031,42 @@ const KeyboardManager=(()=>{
     if(!a||!session||session.id!==a.sessionId||session.provider!=="virtual")return;
     if(document.activeElement!==a.el||!a.el.isConnected||!a.target.isConnected)return;
 
-    // r36 ile aynı eşik: küçük yerleşim farklarına dokunma; yalnız belirgin auto-pan'i düzelt.
-    const nowTop=a.target.getBoundingClientRect().top;
-    const delta=nowTop-a.top;
-    if(Math.abs(delta)<20)return;
-
-    if(a.scroller===document.scrollingElement||a.scroller===document.documentElement||a.scroller===document.body){
-      window.scrollBy({top:delta,behavior:"auto"});
+    if(a.main){
+      // Ana ekran document-scroll kullanır. Opera bazen keydown ile beforeinput arasında
+      // hem layout scroll'u hem VisualViewport pan'ini değiştirebildiği için sadece
+      // getBoundingClientRect farkı yeterli değildir. Ekrandaki eski konumu koruyan
+      // hedef scroll: eskiScroll + eskiVisualTop - yeniVisualTop.
+      const wanted=Math.max(0,Math.round(
+        Number(a.scrollTop||0) + Number(a.visualTop||0) - visualViewportTop()
+      ));
+      const now=documentScrollTop();
+      if(Math.abs(now-wanted)>=2){
+        window.scrollTo({top:wanted,behavior:"auto"});
+      }
     }else{
-      a.scroller.scrollBy({top:delta,behavior:"auto"});
+      // Çakılı ve diğer iç scroll alanlarında r36 davranışını değiştirmiyoruz.
+      const nowTop=a.target.getBoundingClientRect().top;
+      const delta=nowTop-a.top;
+      if(Math.abs(delta)>=20){
+        a.scroller.scrollBy({top:delta,behavior:"auto"});
+      }
     }
 
-    // Düzeltmeden sonra mevcut KeyboardManager görünür alan kuralını bir kez doğrular.
+    // Son söz yine aynı KeyboardManager'da: geometri gerçekten değişmişse yalnız
+    // görünürlük için gereken kadar düzeltme yapar.
     schedule({smooth:false,delay:0});
+  }
+
+  function typingKeyCanMutate(e){
+    if(e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey)return false;
+    const k=String(e.key||"");
+    return k.length===1 ||
+      k==="Backspace" ||
+      k==="Delete" ||
+      k==="Process" ||
+      k==="Unidentified" ||
+      e.isComposing ||
+      e.keyCode===229;
   }
 
   function startSession(){
@@ -2080,13 +2128,28 @@ const KeyboardManager=(()=>{
     schedule({smooth:false});
   }
 
+  // Ana ekran için pre-default keydown yakalaması: beforeinput geldiğinde Opera'nın
+  // document auto-pan'i başlamış olabileceğinden eski sayfa konumunu daha erken saklarız.
+  document.addEventListener("keydown",e=>{
+    if(!typingAnchorEligible(e.target)||!typingAnchorIsMain(e.target)||!typingKeyCanMutate(e))return;
+    captureTypingAnchor(e.target,"keydown");
+  },true);
+
   document.addEventListener("beforeinput",e=>{
-    if(typingAnchorEligible(e.target))captureTypingAnchor(e.target);
+    if(!typingAnchorEligible(e.target))return;
+    // Aynı main input için keydown anchor'ı varsa onu daha geç bir beforeinput ölçümüyle ezme.
+    if(
+      typingAnchor &&
+      typingAnchor.el===e.target &&
+      typingAnchor.main &&
+      typingAnchor.phase==="keydown"
+    )return;
+    captureTypingAnchor(e.target,"beforeinput");
   },true);
 
   document.addEventListener("input",e=>{
     if(!typingAnchor||typingAnchor.el!==e.target)return;
-    // r36'daki davranış: auto-pan çoğunlukla input sonrası paint'te oluştuğu için çift RAF.
+    // r36 ile aynı zamanlama: tarayıcı auto-pan'i input sonrası paint'te tamamlanır.
     requestAnimationFrame(()=>requestAnimationFrame(restoreTypingAnchor));
   },true);
 
