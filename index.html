@@ -1023,6 +1023,10 @@ body.main-keyboard-open .task-row,
 body.main-keyboard-open form.add{
   overflow-anchor:none;
 }
+
+
+/* r45 — main→utility klavye geçişinde bekleyen document-scroll restore iptal edilir.
+   Çakılı/Çetele utility-body-clip geometri/scroll kuralları değiştirilmemiştir. */
 </style>
 </head>
 <body class="auth-locked">
@@ -1799,6 +1803,7 @@ const KeyboardManager=(()=>{
   let viewportBaseline=0;
   let typingAnchor=null;
   let mainKeyboardLayout=null;
+  let mainKeyboardRestoreRaf=0;
 
   function editable(el){
     if(!(el instanceof HTMLElement))return false;
@@ -2025,8 +2030,16 @@ const KeyboardManager=(()=>{
     );
   }
 
+  function cancelMainKeyboardRestore(){
+    if(mainKeyboardRestoreRaf){
+      cancelAnimationFrame(mainKeyboardRestoreRaf);
+      mainKeyboardRestoreRaf=0;
+    }
+  }
+
   function activateMainKeyboardLayout(state){
     if(!session||session.context!=="main"||!state?.open)return;
+    cancelMainKeyboardRestore();
     const main=mainScrollElement(),bar=document.querySelector(".ust-cubuk");
     if(!main)return;
 
@@ -2046,6 +2059,7 @@ const KeyboardManager=(()=>{
   }
 
   function deactivateMainKeyboardLayout({restore=true}={}){
+    cancelMainKeyboardRestore();
     const main=mainScrollElement();
     if(!mainKeyboardLayout&&!document.body.classList.contains("main-keyboard-open"))return;
     const y=Math.max(0,Number(main?.scrollTop)||Number(mainKeyboardLayout?.restoreY)||0);
@@ -2053,7 +2067,12 @@ const KeyboardManager=(()=>{
     document.documentElement.style.removeProperty("--main-keyboard-height");
     mainKeyboardLayout=null;
     if(restore){
-      requestAnimationFrame(()=>window.scrollTo({top:y,behavior:"auto"}));
+      mainKeyboardRestoreRaf=requestAnimationFrame(()=>{
+        mainKeyboardRestoreRaf=0;
+        // Utility çekmecesi bu arada açıldıysa document scroll'una artık dokunma.
+        if(document.body.classList.contains("pinned-open")||document.body.classList.contains("journal-open"))return;
+        window.scrollTo({top:y,behavior:"auto"});
+      });
     }
   }
 
@@ -2110,6 +2129,16 @@ const KeyboardManager=(()=>{
     clearTimers();
     refreshBaseline({force:true});
     const context=keyboardLayoutContext(document.activeElement);
+
+    // Context handoff is synchronous: utility input should never inherit a pending
+    // document restore or main-keyboard-open class from the previous main input.
+    if(context!=="main"){
+      cancelMainKeyboardRestore();
+      if(mainKeyboardLayout||document.body.classList.contains("main-keyboard-open")){
+        deactivateMainKeyboardLayout({restore:false});
+      }
+    }
+
     session={
       id:++sessionId,
       provider:null,
@@ -2180,7 +2209,10 @@ const KeyboardManager=(()=>{
 
   document.addEventListener("focusin",e=>{
     if(!editable(e.target))return;
+    const nextContext=keyboardLayoutContext(e.target);
+    if(nextContext!=="main")cancelMainKeyboardRestore();
     if(session)endSession();
+    if(nextContext!=="main")cancelMainKeyboardRestore();
     startSession();
   });
 

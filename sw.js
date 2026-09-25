@@ -1,8 +1,8 @@
-// v94-ui-r44: r43 CSS yerleştirme hatası düzeltildi; ana keyboard layout doğru style bloğunda, utility korunur.
+// v94-ui-r45: main→utility keyboard context handoff; pending document-scroll restore utility fokusundan önce iptal edilir.
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v94-ideal-shared-drawer-r44";
+const SURUM = "centik-v94-ideal-shared-drawer-r45";
 const KABUK = [
   "./",
   "./index.html",
