@@ -984,7 +984,7 @@ body.keyboard-open:not(.pinned-open):not(.journal-open) .cal{
    backend kontrolü sessizce arkada devam eder. */
 
 
-/* r44 — r42 document/VisualViewport telafisi kaldırıldı; ana ekran kontrollü main-scroll kullanır. */
+/* r47 — r41 utility overflow-anchor kuralı korunur; main davranışı bağımsız policy içindedir. */
 body.keyboard-open .task-list,
 body.keyboard-open .task-row,
 body.keyboard-open form.add{
@@ -1023,15 +1023,6 @@ body.main-keyboard-open .task-row,
 body.main-keyboard-open form.add{
   overflow-anchor:none;
 }
-
-
-/* r45 — main→utility klavye geçişinde bekleyen document-scroll restore iptal edilir.
-   Çakılı/Çetele utility-body-clip geometri/scroll kuralları değiştirilmemiştir. */
-
-
-/* r46 — Utility klavye politikası:
-   Çakılı/Çetele aktif alanı yalnız keyboard-open/focus değişiminde .utility-body-clip içinde konumlandırılır.
-   İlk harf/geometrychange document veya utility scroll'unu tekrar tetiklemez. */
 </style>
 </head>
 <body class="auth-locked">
@@ -1789,11 +1780,9 @@ async function connectNow({silent=false,force=false,reason=""}={}){
 
 function expireSession(expectedToken=""){if(expectedToken&&expectedToken!==getToken())return false;sessionVerifyPromise=null;sessionVerifyToken="";resetPinnedState();closePinnedPanel(true);clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pinnedPendingDelete=null;pendingDelete=null;hideUndoToast();closeJournalView(true);journalStatusCache.clear();journalStatusSeenAt.clear();journalStatusPending.clear();journalMonthCache.clear();journalMonthPending.clear();setSession("",null);days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);setAuthStatus("Oturum süresi doldu. Yeniden giriş yapın.",true);return true}
 
-// V94 r34 — Tek KeyboardManager / tek aktif provider.
-// Her klavye oturumunda yalnız bir ölçüm sağlayıcısı seçilir ve blur'a kadar kilitlenir.
-// Öncelik: VirtualKeyboard → VisualViewport → baseline.
-// geometrychange / visualViewport.resize / window.resize yalnız yöneticiyi uyandırır;
-// provider seçimini veya state'i kendi başına değiştirmez.
+// V94 r47 — KeyboardCore + fiziksel olarak yalıtılmış davranış politikaları.
+// ORTAK KATMAN yalnız klavyeyi ölçer, provider seçer ve global keyboard state'i yayınlar.
+// MAIN ve UTILITY birbirlerinin scroll/anchor/focus-positioning fonksiyonlarını veya state'ini kullanmaz.
 const KeyboardManager=(()=>{
   const MIN_INSET=80;
   const TOP_GAP=14;
@@ -1806,11 +1795,6 @@ const KeyboardManager=(()=>{
   let sessionId=0;
   let session=null;
   let viewportBaseline=0;
-  let typingAnchor=null;
-  let mainKeyboardLayout=null;
-  let mainKeyboardRestoreRaf=0;
-  let utilityKeyboardPositioned=false;
-  let utilityKeyboardBottom=null;
 
   function editable(el){
     if(!(el instanceof HTMLElement))return false;
@@ -1820,20 +1804,7 @@ const KeyboardManager=(()=>{
     return !["button","checkbox","radio","range","color","file","submit","reset","image","hidden"].includes(type);
   }
 
-  function subject(el){
-    return el.closest?.(".task-row,.journal-card,.modal-box,.auth-card")||el;
-  }
-
-  function scrollContainer(el){
-    let p=el?.parentElement;
-    while(p&&p!==document.body&&p!==document.documentElement){
-      const oy=getComputedStyle(p).overflowY;
-      if((oy==="auto"||oy==="scroll")&&p.scrollHeight>p.clientHeight+2)return p;
-      p=p.parentElement;
-    }
-    return document.scrollingElement||document.documentElement;
-  }
-
+  // ------------------------ KeyboardCore: ölçüm/provider ------------------------
   function viewport(){
     const vv=window.visualViewport;
     const inner=Number(window.innerHeight)||0;
@@ -1923,7 +1894,7 @@ const KeyboardManager=(()=>{
     };
   }
 
-  function applyState(state){
+  function applyGlobalState(state){
     const open=!!state?.open;
     const inset=open?Math.max(0,Math.round(Number(state.inset)||0)):0;
     document.documentElement.style.setProperty("--keyboard-inset",`${inset}px`);
@@ -1931,80 +1902,332 @@ const KeyboardManager=(()=>{
     document.body.classList.toggle("virtual-keyboard-open",open&&state?.provider==="virtual");
     document.documentElement.dataset.keyboardProvider=open?String(state?.provider||""):"";
     if(session)session.lastState={...state,inset,open};
-
-    if(open&&session?.context==="main")activateMainKeyboardLayout({...state,inset,open});
-    else if(mainKeyboardLayout)deactivateMainKeyboardLayout({restore:!open});
   }
 
-  function utilityScrollContainer(el){
-    return el?.closest?.(".utility-body-clip")||null;
-  }
+  // ------------------------ MAIN policy: r44 davranışı ------------------------
+  function createMainPolicy(){
+    let layout=null;
+    let typingAnchor=null;
 
-  function moveUtilityEditor(state,{force=false}={}){
-    const active=document.activeElement;
-    if(!editable(active)||session?.context!=="utility"||!state?.open)return;
-
-    const scroller=utilityScrollContainer(active);
-    if(!scroller)return; // Utility hiçbir koşulda document-scroll'a düşmez.
-
-    const rect=active.getBoundingClientRect();
-    const scrollerRect=scroller.getBoundingClientRect();
-    const top=Math.max(Number(state.top)||0,scrollerRect.top+10);
-    const bottom=Math.min(Number(state.bottom)||Infinity,scrollerRect.bottom-10);
-
-    let delta=0;
-    if(rect.bottom>bottom)delta=rect.bottom-bottom;
-    else if(rect.top<top)delta=rect.top-top;
-
-    if(Math.abs(delta)>=2){
-      scroller.scrollBy({top:delta,behavior:"auto"});
+    function mainSubject(el){
+      return el.closest?.(".task-row,.journal-card,.modal-box,.auth-card")||el;
     }
 
-    utilityKeyboardPositioned=true;
-    utilityKeyboardBottom=Number(state.bottom)||null;
-  }
-
-  function utilityNeedsPosition(state){
-    if(session?.context!=="utility"||!state?.open)return false;
-    if(!utilityKeyboardPositioned)return true;
-    const next=Number(state.bottom),prev=Number(utilityKeyboardBottom);
-    // Harf girişinde tekrarlanan aynı geometri scroll üretmez.
-    // Yalnız klavye sınırı gerçekten değişirse (örn. klavye modu/orientation) tekrar konumlandır.
-    return Number.isFinite(next)&&Number.isFinite(prev)&&Math.abs(next-prev)>=28;
-  }
-
-  function moveFocusedEditor(state,{smooth=true}={}){
-    const active=document.activeElement;
-    if(!editable(active)||!state?.open)return;
-
-    const el=subject(active);
-    const rect=el.getBoundingClientRect();
-    let delta=0;
-    if(rect.bottom>state.bottom)delta=rect.bottom-state.bottom;
-    else if(rect.top<state.top)delta=rect.top-state.top;
-    if(Math.abs(delta)<2)return;
-
-    const scroller=scrollContainer(active);
-    const behavior=smooth&&!prefersReducedMotion()?"smooth":"auto";
-    if(scroller===document.scrollingElement||scroller===document.documentElement||scroller===document.body){
-      window.scrollBy({top:delta,behavior});
-    }else{
-      scroller.scrollBy({top:delta,behavior});
+    function mainScrollContainer(el){
+      let p=el?.parentElement;
+      while(p&&p!==document.body&&p!==document.documentElement){
+        const oy=getComputedStyle(p).overflowY;
+        if((oy==="auto"||oy==="scroll")&&p.scrollHeight>p.clientHeight+2)return p;
+        p=p.parentElement;
+      }
+      return document.scrollingElement||document.documentElement;
     }
+
+    function documentScrollTop(){
+      return Math.max(
+        0,
+        Number(window.scrollY)||0,
+        Number(document.documentElement?.scrollTop)||0,
+        Number(document.body?.scrollTop)||0
+      );
+    }
+
+    function mainElement(){
+      return document.querySelector("main");
+    }
+
+    function activate(state){
+      if(!state?.open)return;
+      const main=mainElement(),bar=document.querySelector(".ust-cubuk");
+      if(!main)return;
+      const barBottom=Math.max(0,Number(bar?.getBoundingClientRect?.().bottom)||0);
+      const visibleHeight=Math.max(160,Math.floor(Number(state.bottom||0)-barBottom));
+      document.documentElement.style.setProperty("--main-keyboard-height",`${visibleHeight}px`);
+
+      if(!layout){
+        const seed=Math.max(0,Number(session?.policySeed)||0);
+        layout={restoreY:seed};
+        document.body.classList.add("main-keyboard-open");
+        void main.offsetHeight;
+        main.scrollTop=seed;
+      }else{
+        document.body.classList.add("main-keyboard-open");
+      }
+    }
+
+    function deactivate({restore=true,nextPolicy=""}={}){
+      const main=mainElement();
+      if(!layout&&!document.body.classList.contains("main-keyboard-open"))return;
+      const y=Math.max(0,Number(main?.scrollTop)||Number(layout?.restoreY)||0);
+      document.body.classList.remove("main-keyboard-open");
+      document.documentElement.style.removeProperty("--main-keyboard-height");
+      layout=null;
+
+      if(restore){
+        if(nextPolicy&&nextPolicy!=="main"){
+          void document.body.offsetHeight;
+          window.scrollTo({top:y,behavior:"auto"});
+        }else{
+          requestAnimationFrame(()=>window.scrollTo({top:y,behavior:"auto"}));
+        }
+      }
+    }
+
+    function moveMainFocusedEditor(state,{smooth=true}={}){
+      const active=document.activeElement;
+      if(!editable(active)||!state?.open)return;
+      const el=mainSubject(active);
+      const rect=el.getBoundingClientRect();
+      let delta=0;
+      if(rect.bottom>state.bottom)delta=rect.bottom-state.bottom;
+      else if(rect.top<state.top)delta=rect.top-state.top;
+      if(Math.abs(delta)<2)return;
+
+      const scroller=mainScrollContainer(active);
+      const behavior=smooth&&!prefersReducedMotion()?"smooth":"auto";
+      if(scroller===document.scrollingElement||scroller===document.documentElement||scroller===document.body){
+        window.scrollBy({top:delta,behavior});
+      }else{
+        scroller.scrollBy({top:delta,behavior});
+      }
+    }
+
+    function anchorEligible(el){
+      return !!(
+        session?.provider==="virtual" &&
+        session?.lastState?.open &&
+        el instanceof HTMLElement &&
+        (
+          el.id==="newTask" ||
+          (el.matches("input.edit-input")&&el.closest("#list"))
+        )
+      );
+    }
+
+    function anchorTarget(el){
+      if(el.matches("input.edit-input"))return mainSubject(el);
+      return el.closest("form.add")||el;
+    }
+
+    function captureAnchor(el){
+      if(!anchorEligible(el)){typingAnchor=null;return}
+      const target=anchorTarget(el),scroller=mainScrollContainer(el);
+      typingAnchor={
+        sessionId:session.id,
+        el,target,scroller,
+        top:target.getBoundingClientRect().top
+      };
+    }
+
+    function restoreAnchor(){
+      const a=typingAnchor;
+      typingAnchor=null;
+      if(!a||!session||session.id!==a.sessionId||session.provider!=="virtual")return;
+      if(document.activeElement!==a.el||!a.el.isConnected||!a.target.isConnected)return;
+      const nowTop=a.target.getBoundingClientRect().top;
+      const delta=nowTop-a.top;
+      if(Math.abs(delta)<20)return;
+
+      if(a.scroller===document.scrollingElement||a.scroller===document.documentElement||a.scroller===document.body){
+        window.scrollBy({top:delta,behavior:"auto"});
+      }else{
+        a.scroller.scrollBy({top:delta,behavior:"auto"});
+      }
+      schedule({smooth:false,delay:0});
+    }
+
+    return {
+      name:"main",
+      start(){
+        typingAnchor=null;
+        session.policySeed=documentScrollTop();
+      },
+      onState(state,{smooth=false}={}){
+        if(!state?.open){
+          if(layout)deactivate({restore:true});
+          return;
+        }
+        activate(state);
+        moveMainFocusedEditor(state,{smooth});
+      },
+      beforeInput(e){
+        if(anchorEligible(e.target))captureAnchor(e.target);
+      },
+      input(e){
+        if(!typingAnchor||typingAnchor.el!==e.target)return;
+        requestAnimationFrame(()=>requestAnimationFrame(restoreAnchor));
+      },
+      end({nextPolicy=""}={}){
+        typingAnchor=null;
+        if(layout||document.body.classList.contains("main-keyboard-open")){
+          deactivate({restore:true,nextPolicy});
+        }
+      }
+    };
+  }
+
+  // ------------------------ UTILITY policy: r41 davranışı ------------------------
+  function createUtilityPolicy(){
+    let typingAnchor=null;
+
+    function utilitySubject(el){
+      return el.closest?.(".task-row,.journal-card,.modal-box,.auth-card")||el;
+    }
+
+    function utilityScrollContainer(el){
+      let p=el?.parentElement;
+      while(p&&p!==document.body&&p!==document.documentElement){
+        const oy=getComputedStyle(p).overflowY;
+        if((oy==="auto"||oy==="scroll")&&p.scrollHeight>p.clientHeight+2)return p;
+        p=p.parentElement;
+      }
+      return document.scrollingElement||document.documentElement;
+    }
+
+    function moveUtilityFocusedEditor(state,{smooth=true}={}){
+      const active=document.activeElement;
+      if(!editable(active)||!state?.open)return;
+
+      const el=utilitySubject(active);
+      const rect=el.getBoundingClientRect();
+      let delta=0;
+      if(rect.bottom>state.bottom)delta=rect.bottom-state.bottom;
+      else if(rect.top<state.top)delta=rect.top-state.top;
+      if(Math.abs(delta)<2)return;
+
+      const scroller=utilityScrollContainer(active);
+      const behavior=smooth&&!prefersReducedMotion()?"smooth":"auto";
+      if(scroller===document.scrollingElement||scroller===document.documentElement||scroller===document.body){
+        window.scrollBy({top:delta,behavior});
+      }else{
+        scroller.scrollBy({top:delta,behavior});
+      }
+    }
+
+    function anchorEligible(el){
+      return !!(
+        session?.provider==="virtual" &&
+        session?.lastState?.open &&
+        el instanceof HTMLElement &&
+        (
+          (el.matches("input.edit-input")&&el.closest("#pinnedPanel")) ||
+          el.id==="pinnedNewTask"
+        )
+      );
+    }
+
+    function anchorTarget(el){
+      if(el.matches("input.edit-input"))return utilitySubject(el);
+      return el.closest("form.add")||el;
+    }
+
+    function captureAnchor(el){
+      if(!anchorEligible(el)){typingAnchor=null;return}
+      const target=anchorTarget(el),scroller=utilityScrollContainer(el);
+      typingAnchor={
+        sessionId:session.id,
+        el,target,scroller,
+        top:target.getBoundingClientRect().top
+      };
+    }
+
+    function restoreAnchor(){
+      const a=typingAnchor;
+      typingAnchor=null;
+      if(!a||!session||session.id!==a.sessionId||session.provider!=="virtual")return;
+      if(document.activeElement!==a.el||!a.el.isConnected||!a.target.isConnected)return;
+      const nowTop=a.target.getBoundingClientRect().top;
+      const delta=nowTop-a.top;
+      if(Math.abs(delta)<20)return;
+
+      if(a.scroller===document.scrollingElement||a.scroller===document.documentElement||a.scroller===document.body){
+        window.scrollBy({top:delta,behavior:"auto"});
+      }else{
+        a.scroller.scrollBy({top:delta,behavior:"auto"});
+      }
+      schedule({smooth:false,delay:0});
+    }
+
+    return {
+      name:"utility",
+      start(){typingAnchor=null;},
+      onState(state,{smooth=false}={}){
+        if(state?.open)moveUtilityFocusedEditor(state,{smooth});
+      },
+      beforeInput(e){
+        if(anchorEligible(e.target))captureAnchor(e.target);
+      },
+      input(e){
+        if(!typingAnchor||typingAnchor.el!==e.target)return;
+        requestAnimationFrame(()=>requestAnimationFrame(restoreAnchor));
+      },
+      end(){typingAnchor=null;}
+    };
+  }
+
+  // ------------------------ LEGACY policy: diğer editörler ------------------------
+  function createLegacyPolicy(){
+    function legacySubject(el){
+      return el.closest?.(".task-row,.journal-card,.modal-box,.auth-card")||el;
+    }
+
+    function legacyScrollContainer(el){
+      let p=el?.parentElement;
+      while(p&&p!==document.body&&p!==document.documentElement){
+        const oy=getComputedStyle(p).overflowY;
+        if((oy==="auto"||oy==="scroll")&&p.scrollHeight>p.clientHeight+2)return p;
+        p=p.parentElement;
+      }
+      return document.scrollingElement||document.documentElement;
+    }
+
+    function moveLegacyFocusedEditor(state,{smooth=true}={}){
+      const active=document.activeElement;
+      if(!editable(active)||!state?.open)return;
+      const el=legacySubject(active);
+      const rect=el.getBoundingClientRect();
+      let delta=0;
+      if(rect.bottom>state.bottom)delta=rect.bottom-state.bottom;
+      else if(rect.top<state.top)delta=rect.top-state.top;
+      if(Math.abs(delta)<2)return;
+      const scroller=legacyScrollContainer(active);
+      const behavior=smooth&&!prefersReducedMotion()?"smooth":"auto";
+      if(scroller===document.scrollingElement||scroller===document.documentElement||scroller===document.body){
+        window.scrollBy({top:delta,behavior});
+      }else{
+        scroller.scrollBy({top:delta,behavior});
+      }
+    }
+
+    return {
+      name:"legacy",
+      start(){},
+      onState(state,{smooth=false}={}){
+        if(state?.open)moveLegacyFocusedEditor(state,{smooth});
+      },
+      beforeInput(){},
+      input(){},
+      end(){}
+    };
+  }
+
+  const MainPolicy=createMainPolicy();
+  const UtilityPolicy=createUtilityPolicy();
+  const LegacyPolicy=createLegacyPolicy();
+
+  function policyFor(el){
+    if(!(el instanceof HTMLElement))return LegacyPolicy;
+    if(el.id==="newTask"||(el.matches("input.edit-input")&&el.closest("#list")))return MainPolicy;
+    if(el.closest("#pinnedBodyWrap,#journalBodyWrap,#pinnedPanel,#journalPanel"))return UtilityPolicy;
+    if(el.closest("#pinnedShareDialog,#journalPinDialog"))return UtilityPolicy;
+    return LegacyPolicy;
   }
 
   function render({smooth=false}={}){
     if(!session||!editable(document.activeElement))return;
     const state=providerState(session.provider);
-    applyState(state);
-    if(!state.open)return;
-
-    if(session.context==="utility"){
-      if(utilityNeedsPosition(state))moveUtilityEditor(state,{force:!utilityKeyboardPositioned});
-      return;
-    }
-
-    moveFocusedEditor(state,{smooth});
+    applyGlobalState(state);
+    session.policy.onState(state,{smooth});
   }
 
   function schedule({smooth=false,delay=0}={}){
@@ -2046,165 +2269,26 @@ const KeyboardManager=(()=>{
 
   function chooseProvider(){
     if(!session||session.provider)return;
-
-    // VirtualKeyboard gerçek geometriyi hemen veriyorsa doğrudan kilitle.
     if(canUseVirtual()){lockProvider("virtual");return}
-
-    // API mevcutsa kısa bir süre gerçek geometrychange bekle; bu süre boyunca
-    // viewport sinyalleri yalnız ölçüm günceller, provider seçmez.
     if(vk&&!session.virtualDeadlinePassed)return;
-
     if(canUseViewport()){lockProvider("viewport");return}
     lockProvider("baseline");
   }
 
-  // r44 — tek KeyboardManager, iki yerleşim politikası.
-  // Utility (Çakılı/Çetele): mevcut iç-scroll yapısı aynen korunur.
-  // Ana Çentik: klavye açıkken document-scroll yerine kontrollü main-scroll kullanır.
-  function keyboardLayoutContext(el=document.activeElement){
-    if(!(el instanceof HTMLElement))return "other";
-    if(el.id==="newTask"||(el.matches("input.edit-input")&&el.closest("#list")))return "main";
-    if(el.closest("#pinnedPanel,#journalPanel"))return "utility";
-    if(
-      (document.body.classList.contains("pinned-open")||document.body.classList.contains("journal-open")) &&
-      !el.closest("main")
-    )return "utility";
-    return "other";
-  }
-
-  function mainScrollElement(){
-    return document.querySelector("main");
-  }
-
-  function documentScrollTop(){
-    return Math.max(
-      0,
-      Number(window.scrollY)||0,
-      Number(document.documentElement?.scrollTop)||0,
-      Number(document.body?.scrollTop)||0
-    );
-  }
-
-  function cancelMainKeyboardRestore(){
-    if(mainKeyboardRestoreRaf){
-      cancelAnimationFrame(mainKeyboardRestoreRaf);
-      mainKeyboardRestoreRaf=0;
-    }
-  }
-
-  function activateMainKeyboardLayout(state){
-    if(!session||session.context!=="main"||!state?.open)return;
-    cancelMainKeyboardRestore();
-    const main=mainScrollElement(),bar=document.querySelector(".ust-cubuk");
-    if(!main)return;
-
-    const barBottom=Math.max(0,Number(bar?.getBoundingClientRect?.().bottom)||0);
-    const visibleHeight=Math.max(160,Math.floor(Number(state.bottom||0)-barBottom));
-    document.documentElement.style.setProperty("--main-keyboard-height",`${visibleHeight}px`);
-
-    if(!mainKeyboardLayout){
-      const seed=Math.max(0,Number(session.mainScrollSeed)||0);
-      mainKeyboardLayout={restoreY:seed};
-      document.body.classList.add("main-keyboard-open");
-      void main.offsetHeight;
-      main.scrollTop=seed;
-    }else{
-      document.body.classList.add("main-keyboard-open");
-    }
-  }
-
-  function deactivateMainKeyboardLayout({restore=true}={}){
-    cancelMainKeyboardRestore();
-    const main=mainScrollElement();
-    if(!mainKeyboardLayout&&!document.body.classList.contains("main-keyboard-open"))return;
-    const y=Math.max(0,Number(main?.scrollTop)||Number(mainKeyboardLayout?.restoreY)||0);
-    document.body.classList.remove("main-keyboard-open");
-    document.documentElement.style.removeProperty("--main-keyboard-height");
-    mainKeyboardLayout=null;
-    if(restore){
-      mainKeyboardRestoreRaf=requestAnimationFrame(()=>{
-        mainKeyboardRestoreRaf=0;
-        // Utility çekmecesi bu arada açıldıysa document scroll'una artık dokunma.
-        if(document.body.classList.contains("pinned-open")||document.body.classList.contains("journal-open"))return;
-        window.scrollTo({top:y,behavior:"auto"});
-      });
-    }
-  }
-
-  function typingAnchorEligible(el){
-    return !!(
-      session?.context==="main" &&
-      session?.provider==="virtual" &&
-      session?.lastState?.open &&
-      el instanceof HTMLElement &&
-      (
-        el.id==="newTask" ||
-        (el.matches("input.edit-input")&&el.closest("#list"))
-      )
-    );
-  }
-
-  function typingAnchorTarget(el){
-    if(el.matches("input.edit-input"))return subject(el);
-    return el.closest("form.add")||el;
-  }
-
-  function captureTypingAnchor(el){
-    if(!typingAnchorEligible(el)){typingAnchor=null;return}
-    const target=typingAnchorTarget(el),scroller=scrollContainer(el);
-    typingAnchor={
-      sessionId:session.id,
-      el,
-      target,
-      scroller,
-      top:target.getBoundingClientRect().top
-    };
-  }
-
-  function restoreTypingAnchor(){
-    const a=typingAnchor;
-    typingAnchor=null;
-    if(!a||!session||session.id!==a.sessionId||session.provider!=="virtual")return;
-    if(document.activeElement!==a.el||!a.el.isConnected||!a.target.isConnected)return;
-
-    const nowTop=a.target.getBoundingClientRect().top;
-    const delta=nowTop-a.top;
-    if(Math.abs(delta)<20)return;
-
-    if(a.scroller===document.scrollingElement||a.scroller===document.documentElement||a.scroller===document.body){
-      window.scrollBy({top:delta,behavior:"auto"});
-    }else{
-      a.scroller.scrollBy({top:delta,behavior:"auto"});
-    }
-
-    schedule({smooth:false,delay:0});
-  }
-
-  function startSession(){
+  function startSession(el,policy){
     clearTimers();
+    cancelAnimationFrame(raf);
     refreshBaseline({force:true});
-    utilityKeyboardPositioned=false;
-    utilityKeyboardBottom=null;
-    const context=keyboardLayoutContext(document.activeElement);
-
-    // Context handoff is synchronous: utility input should never inherit a pending
-    // document restore or main-keyboard-open class from the previous main input.
-    if(context!=="main"){
-      cancelMainKeyboardRestore();
-      if(mainKeyboardLayout||document.body.classList.contains("main-keyboard-open")){
-        deactivateMainKeyboardLayout({restore:false});
-      }
-    }
-
     session={
       id:++sessionId,
       provider:null,
-      context,
-      mainScrollSeed:context==="main"?documentScrollTop():null,
+      policy,
+      policySeed:null,
       baseline:Math.max(viewportBaseline||0,viewport().restingCandidate),
       virtualDeadlinePassed:!vk,
       lastState:null
     };
+    policy.start({el});
 
     if(vk){
       try{vk.overlaysContent=true}catch(_){}
@@ -2219,22 +2303,21 @@ const KeyboardManager=(()=>{
       timers.add(t);
     }
 
-    // Farklı Chromium klavye animasyon zamanlamalarını aynı manager içinde ölç.
     schedule({smooth:false});
     schedule({smooth:false,delay:120});
     schedule({smooth:true,delay:420});
     chooseProvider();
   }
 
-  function endSession(){
+  function endSession(nextPolicy=null){
+    if(!session)return;
     clearTimers();
     cancelAnimationFrame(raf);
-    typingAnchor=null;
-    utilityKeyboardPositioned=false;
-    utilityKeyboardBottom=null;
-    if(mainKeyboardLayout)deactivateMainKeyboardLayout({restore:true});
+    const old=session;
+    old.policy.end({nextPolicy:nextPolicy?.name||""});
+    if(session!==old)return;
     session=null;
-    applyState({open:false,inset:0,top:0,bottom:0,provider:""});
+    applyGlobalState({open:false,inset:0,top:0,bottom:0,provider:""});
     setTimeout(()=>refreshBaseline({force:true}),80);
   }
 
@@ -2244,12 +2327,10 @@ const KeyboardManager=(()=>{
       return;
     }
 
-    // Aktif provider yalnız kendi sinyalini kullanır.
     if(session.provider==="virtual"&&source!=="virtual")return;
     if(session.provider==="viewport"&&source!=="viewport")return;
     if(session.provider==="baseline"&&source!=="baseline"&&source!=="window")return;
 
-    // Provider henüz seçilmediyse sinyal yalnız seçim koşullarını günceller.
     if(!session.provider){
       chooseProvider();
       if(!session.provider)return;
@@ -2258,26 +2339,23 @@ const KeyboardManager=(()=>{
   }
 
   document.addEventListener("beforeinput",e=>{
-    if(typingAnchorEligible(e.target))captureTypingAnchor(e.target);
+    session?.policy?.beforeInput(e);
   },true);
 
   document.addEventListener("input",e=>{
-    if(!typingAnchor||typingAnchor.el!==e.target)return;
-    requestAnimationFrame(()=>requestAnimationFrame(restoreTypingAnchor));
+    session?.policy?.input(e);
   },true);
 
   document.addEventListener("focusin",e=>{
     if(!editable(e.target))return;
-    const nextContext=keyboardLayoutContext(e.target);
-    if(nextContext!=="main")cancelMainKeyboardRestore();
-    if(session)endSession();
-    if(nextContext!=="main")cancelMainKeyboardRestore();
-    startSession();
+    const nextPolicy=policyFor(e.target);
+    if(session)endSession(nextPolicy);
+    startSession(e.target,nextPolicy);
   });
 
   document.addEventListener("focusout",()=>{
     setTimeout(()=>{
-      if(!editable(document.activeElement))endSession();
+      if(!editable(document.activeElement))endSession(null);
     },100);
   });
 
@@ -2303,7 +2381,7 @@ const KeyboardManager=(()=>{
   },{passive:true});
 
   window.addEventListener("orientationchange",()=>{
-    endSession();
+    endSession(null);
     viewportBaseline=0;
     setTimeout(()=>refreshBaseline({force:true}),320);
   },{passive:true});
@@ -2317,6 +2395,7 @@ const KeyboardManager=(()=>{
   return {
     getProvider:()=>session?.provider||null,
     getState:()=>session?.lastState||null,
+    getPolicy:()=>session?.policy?.name||null,
     refresh:()=>schedule({smooth:false})
   };
 })();
