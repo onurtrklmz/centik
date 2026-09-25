@@ -1,8 +1,8 @@
-// v94-ui-r37: Çakılı açılışına Çetele ile ortak loading-card/dot görünümü ve güvenli açılış seq akışı eklendi.
+// v94-ui-r38: Çakılı cache-first açılış; loading yalnız ilk/bilinmeyen yüklemede, sonraki açılışlar anlık + sessiz senkron.
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v94-ideal-shared-drawer-r37";
+const SURUM = "centik-v94-ideal-shared-drawer-r38";
 const KABUK = [
   "./",
   "./index.html",

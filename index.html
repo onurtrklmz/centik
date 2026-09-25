@@ -976,6 +976,12 @@ body.keyboard-open:not(.pinned-open):not(.journal-open) .cal{
 
 /* r37 — Çakılı açılışında Çetele'nin mevcut loading-card/dot animasyonu yeniden kullanılır.
    Ayrı loading CSS'i yoktur; veri geldikten sonra overview/boş durum mevcut renderer ile gösterilir. */
+
+
+/* r38 — Çakılı açılışı cache-first:
+   yalnız ilk/verisi bilinmeyen açılışta "Çakılı açılıyor…" gösterilir.
+   Başarılı ilk yüklemeden sonra boş sonuç dahil cache anında gösterilir,
+   backend kontrolü sessizce arkada devam eder. */
 </style>
 </head>
 <body class="auth-locked">
@@ -1340,7 +1346,7 @@ let queuedForceSync=false, queuedForceSilent=true, foregroundSyncTimer=null, set
 let syncBaseStatus="idle",globalLoadingCount=0,sessionVerifyPromise=null,sessionVerifyToken="";
 let pendingDelete=null, pendingDeleteTimer=null;
 let journalStatusCache=new Map(),journalStatusSeenAt=new Map(),journalStatusPending=new Map(),journalMonthCache=new Map(),journalMonthPending=new Map(),journalContext=null,journalActivePin="",journalDirty=false,journalPinMode="set";
-let pinnedLists=[],pinnedActiveList=null,pinnedTasks=[],pinnedRevision=null,pinnedLiveTimer=null,pinnedListsTimer=null,pinnedPendingDelete=null,pinnedPendingDeleteTimer=null,pinnedPanelHideTimer=null,pinnedUnreadCount=0,pinnedUnreadTimer=null,pinnedUnreadPromise=null,lastPinnedUnreadCheckAt=0,pinnedUnreadSeq=0;
+let pinnedLists=[],pinnedListsLoaded=false,pinnedActiveList=null,pinnedTasks=[],pinnedRevision=null,pinnedLiveTimer=null,pinnedListsTimer=null,pinnedPendingDelete=null,pinnedPendingDeleteTimer=null,pinnedPanelHideTimer=null,pinnedUnreadCount=0,pinnedUnreadTimer=null,pinnedUnreadPromise=null,lastPinnedUnreadCheckAt=0,pinnedUnreadSeq=0;
 const JOURNAL_STATUS_FRESH_MS=45000, JOURNAL_MONTH_FRESH_MS=300000, JOURNAL_CHAR_LIMIT=12000;
 let pushQueue=[], pushQueued=new Set(), pushWorker=null;
 const DELETE_UNDO_MS=2000;
@@ -2215,7 +2221,7 @@ function resetPinnedState(){
   clearInterval(pinnedLiveTimer);clearInterval(pinnedListsTimer);pinnedLiveTimer=null;pinnedListsTimer=null;
   clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;
   stopPinnedUnreadWatch();setPinnedUnreadCount(0);
-  pinnedLists=[];pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;
+  pinnedLists=[];pinnedListsLoaded=false;pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;
 }
 function pinnedTaskId(){return `p${Date.now().toString(36)}${Math.random().toString(36).slice(2,8)}`}
 function pinnedSetStatus(id,text=""){
@@ -2268,7 +2274,7 @@ function renderPinnedOverview(){
 }
 async function loadPinnedLists({silent=false}={}){
   if(!currentUser?.id||!getToken())return false;if(!silent)pinnedSetStatus("pinnedOverviewStatus","Listeler yükleniyor…");
-  try{const j=await api("pinnedLists",{token:getToken()},{timeout:30000,globalLoading:!silent});if(!j.ok){if(j.error==="oturum")expireSession();else if(!silent)pinnedSetStatus("pinnedOverviewStatus",authMessage(j.error));return false}pinnedLists=Array.isArray(j.lists)?j.lists:[];if(Number.isFinite(Number(j.unreadTotal)))setPinnedUnreadCount(j.unreadTotal);renderPinnedOverview();pinnedSetStatus("pinnedOverviewStatus","");return true}
+  try{const j=await api("pinnedLists",{token:getToken()},{timeout:30000,globalLoading:!silent});if(!j.ok){if(j.error==="oturum")expireSession();else if(!silent)pinnedSetStatus("pinnedOverviewStatus",authMessage(j.error));return false}pinnedLists=Array.isArray(j.lists)?j.lists:[];pinnedListsLoaded=true;if(Number.isFinite(Number(j.unreadTotal)))setPinnedUnreadCount(j.unreadTotal);renderPinnedOverview();pinnedSetStatus("pinnedOverviewStatus","");return true}
   catch(e){if(!silent)pinnedSetStatus("pinnedOverviewStatus","Çakılı listeler alınamadı. Bağlantınızı kontrol edin.");return false}
 }
 function pinnedShowOverview(){
@@ -2281,9 +2287,22 @@ async function openPinnedPanel(){
   clearTimeout(pinnedPanelHideTimer);pinnedPanelHideTimer=null;
   stopPinnedLive();pinnedActiveList=null;pinnedTasks=[];pinnedRevision=null;
   $("pinnedOwnerTools").hidden=true;$("pinnedBack").hidden=true;$("pinnedTitle").textContent="Çakılı";$("pinnedSubtitle").textContent="Tarihten bağımsız listelerin.";
+  const seq=++pinnedOpenSeq;
+
+  if(pinnedListsLoaded){
+    // Daha önce doğrulanmış veri (boş liste dahil) varsa çekmece anında açılır.
+    // Sunucu kontrolü arkada sessiz yapılır; cevap gelince mevcut renderer görünümü günceller.
+    pinnedShowOverview();
+    setUtilityDrawerState("pinned",true);
+    startPinnedListsRefresh();
+    loadPinnedLists({silent:true});
+    return;
+  }
+
+  // Yalnız ilk/verisi bilinmeyen açılış gerçekten kullanıcıyı bekletir.
   setPinnedPanelMode("loading","Çakılı açılıyor…");
   setUtilityDrawerState("pinned",true);
-  const seq=++pinnedOpenSeq,ok=await loadPinnedLists();
+  const ok=await loadPinnedLists();
   if(seq!==pinnedOpenSeq||!document.body.classList.contains("pinned-open"))return;
   if(ok)pinnedShowOverview();
   else setPinnedPanelMode("loading","Çakılı açılamadı. Bağlantınızı kontrol edip yeniden deneyin.");
@@ -2365,9 +2384,9 @@ function editPinnedTask(id,li){
 function queuePinnedDelete(id){const it=pinnedTasks.find(x=>x.id===id);if(!it)return;if(pinnedPendingDelete)finalizePinnedDelete();pinnedPendingDelete={id,ids:pinnedCollectDeleteIds(id)};pinnedPendingDeleteTimer=setTimeout(finalizePinnedDelete,DELETE_UNDO_MS);renderPinnedTasks()}
 function undoPinnedDelete(){clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;pinnedPendingDelete=null;renderPinnedTasks()}
 async function finalizePinnedDelete(){if(!pinnedPendingDelete)return;clearTimeout(pinnedPendingDeleteTimer);pinnedPendingDeleteTimer=null;const id=pinnedPendingDelete.id,ids=new Set(pinnedPendingDelete.ids||[id]);pinnedPendingDelete=null;pinnedTasks=pinnedTasks.filter(x=>!ids.has(x.id));renderPinnedTasks();await pinnedMutate("delete",{taskId:id})}
-async function createPinnedList(title){title=String(title||"").trim();if(!title)return;try{const j=await api("pinnedCreate",{token:getToken(),title},{timeout:30000});if(!j.ok){pinnedSetStatus("pinnedOverviewStatus",authMessage(j.error));return}pinnedLists.unshift(j.list);renderPinnedOverview();pinnedSetStatus("pinnedOverviewStatus","")}catch(e){pinnedSetStatus("pinnedOverviewStatus","Liste oluşturulamadı.")}}
+async function createPinnedList(title){title=String(title||"").trim();if(!title)return;try{const j=await api("pinnedCreate",{token:getToken(),title},{timeout:30000});if(!j.ok){pinnedSetStatus("pinnedOverviewStatus",authMessage(j.error));return}pinnedLists.unshift(j.list);pinnedListsLoaded=true;renderPinnedOverview();pinnedSetStatus("pinnedOverviewStatus","")}catch(e){pinnedSetStatus("pinnedOverviewStatus","Liste oluşturulamadı.")}}
 async function renamePinnedActive(){if(!pinnedActiveList)return;const title=prompt("Liste adı",pinnedActiveList.title);if(title===null||!String(title).trim())return;pinnedSetStatus("pinnedEditorStatus","Yükleniyor…");try{const j=await api("pinnedRename",{token:getToken(),listId:pinnedActiveList.id,title:String(title).trim()},{timeout:30000});if(!j.ok){pinnedSetStatus("pinnedEditorStatus",authMessage(j.error));return}pinnedActiveList=j.list;const ix=pinnedLists.findIndex(x=>x.id===j.list.id);if(ix>=0)pinnedLists[ix]=j.list;updatePinnedHeader();pinnedSetStatus("pinnedEditorStatus","")}catch(e){pinnedSetStatus("pinnedEditorStatus","Liste adı değiştirilemedi.")}}
-async function deletePinnedActive(){if(!pinnedActiveList)return;if(!confirm(`“${pinnedActiveList.title}” listesi ve içindeki tüm görevler silinsin mi?`))return;pinnedSetStatus("pinnedEditorStatus","Yükleniyor…");try{const id=pinnedActiveList.id,j=await api("pinnedDelete",{token:getToken(),listId:id},{timeout:30000});if(!j.ok){pinnedSetStatus("pinnedEditorStatus",authMessage(j.error));return}pinnedLists=pinnedLists.filter(x=>x.id!==id);pinnedSetStatus("pinnedEditorStatus","");pinnedShowOverview();renderPinnedOverview()}catch(e){pinnedSetStatus("pinnedEditorStatus","Liste silinemedi.")}}
+async function deletePinnedActive(){if(!pinnedActiveList)return;if(!confirm(`“${pinnedActiveList.title}” listesi ve içindeki tüm görevler silinsin mi?`))return;pinnedSetStatus("pinnedEditorStatus","Yükleniyor…");try{const id=pinnedActiveList.id,j=await api("pinnedDelete",{token:getToken(),listId:id},{timeout:30000});if(!j.ok){pinnedSetStatus("pinnedEditorStatus",authMessage(j.error));return}pinnedLists=pinnedLists.filter(x=>x.id!==id);pinnedListsLoaded=true;pinnedSetStatus("pinnedEditorStatus","");pinnedShowOverview();renderPinnedOverview()}catch(e){pinnedSetStatus("pinnedEditorStatus","Liste silinemedi.")}}
 function openPinnedShareDialog(){if(!pinnedActiveList?.isOwner)return;const u=pinnedActiveList.sharedUser;$("pinnedShareEmail").value=u?.email||"";$("pinnedShareCurrent").textContent=u?`Şu anda ${u.name||u.email} ile paylaşılıyor.`:"Bu liste şu anda paylaşılmıyor.";$("removePinnedShare").hidden=!u;pinnedSetStatus("pinnedShareStatus","");$("pinnedShareDialog").showModal()}
 async function savePinnedShare(email){if(!pinnedActiveList?.isOwner)return;const btn=email?$("savePinnedShare"):$("removePinnedShare");if(!setBackendActionBusy(btn,true,email?"Paylaşılıyor…":"Kaldırılıyor…"))return;try{const j=await api("pinnedShare",{token:getToken(),listId:pinnedActiveList.id,email},{timeout:30000});if(!j.ok){pinnedSetStatus("pinnedShareStatus",authMessage(j.error));return}pinnedActiveList=j.list;const ix=pinnedLists.findIndex(x=>x.id===j.list.id);if(ix>=0)pinnedLists[ix]=j.list;updatePinnedHeader();$("pinnedShareDialog").close()}catch(e){pinnedSetStatus("pinnedShareStatus","Paylaşım ayarı kaydedilemedi.")}finally{setBackendActionBusy(btn,false)}}
 function togglePinnedPanel(){
