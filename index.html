@@ -823,6 +823,13 @@ html,body{overscroll-behavior-y:none}
 
 /* r25 — Çakılı liste detay başlığı ekran genişliğine göre esnek ölçeklenir.
    Ana "Çakılı" başlığı değişmez; detay başlığı clamp(1.08rem,5vw,1.45rem) kullanır. */
+
+
+/* r26 — mobil klavye görünürlüğü için ortak scroll güvenlik payı */
+html,.utility-body-clip,.cal-body-clip{
+  scroll-padding-top:14px;
+  scroll-padding-bottom:82px;
+}
 </style>
 </head>
 <body class="auth-locked">
@@ -1572,6 +1579,73 @@ async function connectNow({silent=false,force=false,reason=""}={}){
 }
 
 function expireSession(expectedToken=""){if(expectedToken&&expectedToken!==getToken())return false;sessionVerifyPromise=null;sessionVerifyToken="";resetPinnedState();closePinnedPanel(true);clearTimeout(pendingDeleteTimer);pendingDeleteTimer=null;pinnedPendingDelete=null;pendingDelete=null;hideUndoToast();closeJournalView(true);journalStatusCache.clear();journalStatusSeenAt.clear();journalStatusPending.clear();journalMonthCache.clear();journalMonthPending.clear();setSession("",null);days={};pending=new Set();serverRevision=null;adminApprovals=null;registeredUsers=null;render();setSyncStatus("idle");showGate(true);setAuthStatus("Oturum süresi doldu. Yeniden giriş yapın.",true);return true}
+
+// V94 r26 — Evrensel mobil klavye / odak görünürlük yöneticisi.
+// Metin düzenleme alanı odaktayken visualViewport küçülürse aktif satırı klavyenin
+// ve sabit alt çekmece çubuğunun üstünde görünür tutar. Ana liste / Çakılı ayrımı yapmaz.
+let keyboardVisibilityRaf=0,keyboardVisibilityTimer=null;
+const KEYBOARD_VISIBILITY_TOP_GAP=14;
+const KEYBOARD_VISIBILITY_BOTTOM_GAP=82;
+function keyboardEditableTarget(el){
+  if(!(el instanceof HTMLElement))return false;
+  if(el.matches("textarea,[contenteditable='true']"))return true;
+  if(!el.matches("input"))return false;
+  const type=String(el.type||"text").toLowerCase();
+  return !["button","checkbox","radio","range","color","file","submit","reset","image","hidden"].includes(type);
+}
+function keyboardVisibilitySubject(el){
+  return el.closest?.(".task-row,.journal-card,.modal-box,.auth-card")||el;
+}
+function keyboardScrollContainer(el){
+  let p=el?.parentElement;
+  while(p&&p!==document.body&&p!==document.documentElement){
+    const cs=getComputedStyle(p),oy=cs.overflowY;
+    if((oy==="auto"||oy==="scroll")&&p.scrollHeight>p.clientHeight+2)return p;
+    p=p.parentElement;
+  }
+  return document.scrollingElement||document.documentElement;
+}
+function keyboardVisibleBounds(){
+  const vv=window.visualViewport;
+  const top=vv?Number(vv.offsetTop)||0:0;
+  const height=vv?Number(vv.height)||window.innerHeight:window.innerHeight;
+  return {top:top+KEYBOARD_VISIBILITY_TOP_GAP,bottom:top+height-KEYBOARD_VISIBILITY_BOTTOM_GAP};
+}
+function keepFocusedEditorVisible({smooth=true}={}){
+  const active=document.activeElement;
+  if(!keyboardEditableTarget(active))return;
+  const subject=keyboardVisibilitySubject(active),rect=subject.getBoundingClientRect(),bounds=keyboardVisibleBounds();
+  let delta=0;
+  if(rect.bottom>bounds.bottom)delta=rect.bottom-bounds.bottom;
+  else if(rect.top<bounds.top)delta=rect.top-bounds.top;
+  if(Math.abs(delta)<2)return;
+
+  const scroller=keyboardScrollContainer(active),behavior=smooth&&!prefersReducedMotion()?"smooth":"auto";
+  if(scroller===document.scrollingElement||scroller===document.documentElement||scroller===document.body){
+    window.scrollBy({top:delta,behavior});
+  }else{
+    scroller.scrollBy({top:delta,behavior});
+  }
+}
+function scheduleFocusedEditorVisibility({smooth=true,delay=0}={}){
+  clearTimeout(keyboardVisibilityTimer);
+  const run=()=>{
+    cancelAnimationFrame(keyboardVisibilityRaf);
+    keyboardVisibilityRaf=requestAnimationFrame(()=>keepFocusedEditorVisible({smooth}));
+  };
+  if(delay>0)keyboardVisibilityTimer=setTimeout(run,delay);
+  else run();
+}
+document.addEventListener("focusin",e=>{
+  if(!keyboardEditableTarget(e.target))return;
+  scheduleFocusedEditorVisibility({smooth:false});
+  // Mobil klavye animasyonu focus'tan sonra tamamlanır; son konumu bir kez daha düzelt.
+  scheduleFocusedEditorVisibility({smooth:true,delay:260});
+});
+if(window.visualViewport){
+  visualViewport.addEventListener("resize",()=>scheduleFocusedEditorVisibility({smooth:false}),{passive:true});
+  visualViewport.addEventListener("scroll",()=>scheduleFocusedEditorVisibility({smooth:false}),{passive:true});
+}
 
 function addTask(t){t=t.trim();if(!t||!requireLocalSession())return;(days[current]=normalizeItems(days[current]||[])).push({id:uniqueTaskId(),t:t.slice(0,1000),done:false,parentId:""});persist(current);render()}
 function pendingDeleteHas(date,id){
