@@ -953,7 +953,15 @@ body.keyboard-open .utility-body-clip{
 body.keyboard-open:not(.pinned-open):not(.journal-open){
   --centik-active-drawer-bar-h:0px;
 }
-body.keyboard-open .cal-head{
+/* r50 düzeltmesi: cal-head çöküşü de aynı nedenle bar-h değişkeniyle
+   dengede tutulmalıydı (58px küçülen bar'ı wrap'in 58px büyümesi
+   telafi ediyordu; .cal'in toplam yüksekliği net değişmiyordu). Yalnız
+   değişkeni çekmeceye özgülemek bu dengeyi bozdu: cal-head hâlâ açılıp
+   kapanıyor ama wrap artık tepki vermiyor, .cal (position:fixed +
+   bottom-anchor) net yükseklik değiştikçe üst kenarından "tilt" yapıyor
+   görünüyordu. Artık çekmece açıkken cal-head de klavye durumundan
+   tamamen bağımsız — hiçbiri oynamıyor. */
+body.keyboard-open:not(.pinned-open):not(.journal-open) .cal-head{
   min-height:0!important;
   height:0!important;
   padding-block:0!important;
@@ -1387,7 +1395,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v95-drawer-bar-h-fix-r49", CENTIK_EXPECTED_SERVER_BUILD="v33-beni-durt";
+const CENTIK_CLIENT_BUILD="v95-cal-head-tilt-fix-r50", CENTIK_EXPECTED_SERVER_BUILD="v33-beni-durt";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
