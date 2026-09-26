@@ -2,7 +2,7 @@
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v95-r58-utility-bar-space-fix";
+const SURUM = "centik-v96-tabler-icons";
 const KABUK = [
   "./",
   "./index.html",
@@ -12,7 +12,8 @@ const KABUK = [
   "./apple-touch-icon.png",
   "./icon-192.png",
   "./icon-512.png",
-  "./icon-maskable-512.png"
+  "./icon-maskable-512.png",
+  "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css"
 ];
 
 self.addEventListener("install", e => {
@@ -55,7 +56,7 @@ self.addEventListener("fetch", e => {
   }
 
   // Statik kabuk: cache'ten hızlı aç, arkada ağdan tazele.
-  if (url.origin === location.origin || url.hostname.endsWith("fonts.googleapis.com") || url.hostname.endsWith("fonts.gstatic.com")) {
+  if (url.origin === location.origin || url.hostname.endsWith("fonts.googleapis.com") || url.hostname.endsWith("fonts.gstatic.com") || url.hostname.endsWith("cdn.jsdelivr.net")) {
     e.respondWith(
       caches.match(req).then(hit => {
         const ag = fetch(req,{cache:"no-store"}).then(r => {

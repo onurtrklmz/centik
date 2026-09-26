@@ -44,6 +44,8 @@ try{
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
 <style>
 /* Çentik tema sistemi: renk ailesi kullanıcıya ait, açık/koyu görünüm cihazı izler. */
 :root, :root[data-theme="lacivert"][data-mode="dark"]{
@@ -158,16 +160,16 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 }
 .jump-notice-main{display:flex;align-items:center;gap:9px;min-width:0}
 .jump-notice-main .notice-icon{width:17px;height:17px;flex:0 0 17px;fill:none;stroke:var(--notice-tomorrow-accent);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.jump-notice::after{content:"›";font-size:1.25rem;line-height:1;flex:none}@media (hover:hover) and (pointer:fine){.jump-notice:hover{transform:translateY(-1px)}}
+.jump-notice::after{content:none}@media (hover:hover) and (pointer:fine){.jump-notice:hover{transform:translateY(-1px)}}
 .tomorrow-notice{
   margin:0 0 14px;border:1px solid var(--notice-tomorrow-border);background:var(--notice-tomorrow-bg);
 }
-.tomorrow-notice::after{color:var(--notice-tomorrow-accent)}@media (hover:hover) and (pointer:fine){.tomorrow-notice:hover{background:color-mix(in srgb,var(--notice-tomorrow-accent) 14%,var(--paper))}}
+.tomorrow-notice .jump-notice-arrow{color:var(--notice-tomorrow-accent)}@media (hover:hover) and (pointer:fine){.tomorrow-notice:hover{background:color-mix(in srgb,var(--notice-tomorrow-accent) 14%,var(--paper))}}
 .upcoming-notice{min-width:0;overflow:hidden}
 .upcoming-notice.simple{cursor:pointer}
 .upcoming-notice.simple .upcoming-chips{display:none}
 .upcoming-notice.multi{align-items:center;padding-right:10px}
-.upcoming-notice.multi::after{display:none}
+.upcoming-notice.multi .jump-notice-arrow{display:none}
 .upcoming-notice-main{flex:0 0 auto}
 .upcoming-notice.multi .upcoming-notice-main{font-weight:700}
 .upcoming-chips{display:flex;align-items:center;gap:7px;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:1px 2px 1px 0;touch-action:pan-x}
@@ -301,9 +303,9 @@ ul{list-style:none;margin:0;padding:0}
 li{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--line)}
 li:last-child{border-bottom:0}
 .check{flex:none;width:28px;height:28px;border-radius:8px;border:2px solid var(--line);background:transparent;display:grid;place-items:center;transition:background .15s,border-color .15s}
-.check svg{opacity:0;transition:opacity .15s}
+.check .ti{opacity:0;transition:opacity .15s;color:#fff;font-size:16px;line-height:1}
 li.done .check{background:var(--done);border-color:var(--done)}
-li.done .check svg{opacity:1}
+li.done .check .ti{opacity:1}
 li.done .txt{color:var(--muted)}
 .txt{flex:1;overflow-wrap:anywhere}
 .task-list li.task-row{position:relative;transition:box-shadow .16s ease,background-color .16s ease,transform .16s ease,padding-left .18s ease;user-select:none;-webkit-user-select:none}
@@ -514,7 +516,7 @@ body.auth-locked{overflow:hidden!important}body.auth-locked .ust-cubuk,body.auth
   -webkit-text-security:disc;
   text-security:disc;
 }
-.password-field{position:relative;display:block;margin-top:6px}.auth-pane .password-field input{margin-top:0;padding-right:50px}.password-toggle{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:38px;height:38px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer}@media (hover:hover) and (pointer:fine){.password-toggle:hover{background:color-mix(in srgb,var(--marka) 8%,transparent);color:var(--ink)}}.password-toggle:focus-visible{outline:2px solid var(--focus);outline-offset:1px}.password-toggle svg{width:20px;height:20px;pointer-events:none}.password-toggle .eye-slash{display:none}.password-toggle.is-visible .eye-slash{display:block}.auth-pane small{display:block;color:var(--muted);margin:-6px 0 12px}.auth-primary{width:100%;border:0;border-radius:11px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));color:#fff;font-weight:700;padding:12px 14px;margin-top:7px}.auth-link{display:block;margin:12px auto 0;border:0;background:transparent;color:var(--marka);font-size:.88rem}.auth-status{min-height:1.4em;color:var(--muted);font-size:.86rem;margin:14px 0 0}.auth-status.error{color:#b42318}.account-box{padding:4px}.account-box .row{margin-top:20px}
+.password-field{position:relative;display:block;margin-top:6px}.auth-pane .password-field input{margin-top:0;padding-right:50px}.password-toggle{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:38px;height:38px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer}@media (hover:hover) and (pointer:fine){.password-toggle:hover{background:color-mix(in srgb,var(--marka) 8%,transparent);color:var(--ink)}}.password-toggle:focus-visible{outline:2px solid var(--focus);outline-offset:1px}.password-toggle .ti{font-size:20px;line-height:1;pointer-events:none}.password-toggle .password-eye-off{display:none}.password-toggle.is-visible .password-eye-on{display:none}.password-toggle.is-visible .password-eye-off{display:inline-block}.auth-pane small{display:block;color:var(--muted);margin:-6px 0 12px}.auth-primary{width:100%;border:0;border-radius:11px;background:linear-gradient(135deg,var(--accent-start),var(--accent-end));color:#fff;font-weight:700;padding:12px 14px;margin-top:7px}.auth-link{display:block;margin:12px auto 0;border:0;background:transparent;color:var(--marka);font-size:.88rem}.auth-status{min-height:1.4em;color:var(--muted);font-size:.86rem;margin:14px 0 0}.auth-status.error{color:#b42318}.account-box{padding:4px}.account-box .row{margin-top:20px}
 .admin-panel{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
 .theme-settings{margin:18px 0 4px;padding:14px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--paper) 88%,transparent)}
 .theme-settings h3{margin:0 0 4px;font-size:.96rem}.theme-settings p{margin:0 0 12px;color:var(--muted);font-size:.82rem}
@@ -874,7 +876,7 @@ html,body{overscroll-behavior-y:none}
   pointer-events:none;
   transition:opacity .14s ease,transform .14s ease,border-color .14s ease,background .14s ease;
 }
-.pull-reload-indicator svg{
+.pull-reload-indicator .ti{
   width:18px;
   height:18px;
   fill:none;
@@ -892,13 +894,13 @@ html,body{overscroll-behavior-y:none}
   border-color:color-mix(in srgb,var(--focus) 54%,var(--line));
   background:color-mix(in srgb,var(--focus) 10%,var(--paper));
 }
-.pull-reload-indicator.is-reloading svg{
+.pull-reload-indicator.is-reloading .ti{
   animation:pullReloadSpin .55s linear infinite;
 }
 @keyframes pullReloadSpin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){
   .pull-reload-indicator{transition:none}
-  .pull-reload-indicator.is-reloading svg{animation:none}
+  .pull-reload-indicator.is-reloading .ti{animation:none}
 }
 
 
@@ -1059,6 +1061,46 @@ body.main-keyboard-open .task-row,
 body.main-keyboard-open form.add{
   overflow-anchor:none;
 }
+
+
+/* V96 — Tabler Icons 3.48.0: tüm arayüz ikonları tek outline ailesinden gelir. */
+.ti{display:inline-block;flex:none;line-height:1;font-style:normal;vertical-align:middle}
+.ubtn>.ti{font-size:1.15em}
+.sync-icon{width:19px;height:19px;line-height:19px;font-size:19px}
+.account-menu-item>.ti{width:17px;flex:0 0 17px;font-size:17px;text-align:center}
+.nav>.ti{font-size:20px}
+.jump-notice-main .notice-icon{width:17px;height:17px;flex:0 0 17px;font-size:17px;color:var(--notice-tomorrow-accent)}
+.jump-notice-arrow{margin-left:auto;font-size:18px;line-height:1}
+.today-inline>.ti{font-size:18px;color:var(--notice-today-accent);flex:none}
+.modal-close>.ti{font-size:19px}
+.pinned-back>.ti,.pinned-icon-btn>.ti{font-size:19px}
+.panel-title-icon>.ti{font-size:26px;color:currentColor}
+.journal-field-label>.ti{font-size:17px;color:var(--focus)}
+.journal-toolbar button>.ti{font-size:17px}
+.journal-save>.ti{font-size:19px}
+.drawer-launch>.ti{font-size:20px;color:var(--focus)}
+.pinned-list-pin>.ti{font-size:20px;color:currentColor}
+.pinned-list-arrow{font-size:18px;color:var(--muted)}
+.cal-cetele-mark{font-size:11px;line-height:1;color:#25a865;opacity:.94}
+.cell.sel .cal-cetele-mark{color:#dcffe8;opacity:1}
+.drag-cue>.ti{font-size:18px;line-height:1}
+.edit>.ti,.del>.ti{font-size:18px;line-height:1}
+.task-delete>.ti{font-size:20px}
+.pull-reload-indicator>.ti{font-size:18px;line-height:1;flex:none}
+.journal-launch-state>.ti{font-size:14px;line-height:1}
+
+/* Görev eylem butonları: V95 ölçüleri korunur; yüzey daha sakin ve tutarlı. */
+.edit,.del{
+  border-color:color-mix(in srgb,var(--line) 80%,var(--muted));
+  background:color-mix(in srgb,var(--paper) 97%,var(--bg));
+  border-radius:10px;
+  box-shadow:0 1px 2px rgba(0,0,0,.035);
+}
+.task-edit,.task-save{color:color-mix(in srgb,var(--focus) 72%,var(--muted))}
+.task-cancel{color:color-mix(in srgb,var(--muted) 88%,var(--ink))}
+.task-delete{color:color-mix(in srgb,#b42318 70%,var(--muted));border-color:color-mix(in srgb,#b42318 24%,var(--line))}
+@media (hover:hover) and (pointer:fine){.edit:hover,.del:hover{transform:translateY(-1px)}}
+.edit:active,.del:active{transform:translateY(0) scale(.96)}
 </style>
 </head>
 <body class="auth-locked">
@@ -1069,20 +1111,20 @@ body.main-keyboard-open form.add{
     <h1>Çentik</h1>
   </div>
   <button class="ubtn sync-refresh is-loading" id="refresh" type="button" aria-label="Yükleniyor" title="Yükleniyor">
-    <svg class="sync-icon sync-icon-refresh" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/></svg>
-    <svg class="sync-icon sync-icon-cloud" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 15.5h7.2a4.3 4.3 0 0 0 .53-8.57A5.35 5.35 0 0 0 4.13 5.8 3.85 3.85 0 0 0 6.5 15.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="m7.35 10.55 1.72 1.72 3.7-4.05" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <i class="ti ti-refresh sync-icon sync-icon-refresh" aria-hidden="true"></i>
+    <i class="ti ti-cloud-check sync-icon sync-icon-cloud" aria-hidden="true"></i>
     <span class="sync-error-mark" aria-hidden="true">!</span>
   </button>
   <span class="user-chip" id="userChip" hidden></span>
   <div class="account-menu-wrap">
-    <button class="ubtn" id="settings" type="button" aria-label="Hesap menüsü" title="Hesap" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="6.15" r="3.35" fill="currentColor"/><path d="M3.55 17.25c.18-3.72 2.72-5.82 6.45-5.82s6.27 2.1 6.45 5.82a.72.72 0 0 1-.72.75H4.27a.72.72 0 0 1-.72-.75Z" fill="currentColor"/></svg></button>
+    <button class="ubtn" id="settings" type="button" aria-label="Hesap menüsü" title="Hesap" aria-haspopup="menu" aria-expanded="false"><i class="ti ti-user" aria-hidden="true"></i></button>
     <div class="account-menu" id="accountMenu" role="menu" hidden>
       <div class="account-menu-user" id="accountMenuUser" title=""></div>
       <div class="account-menu-sep" aria-hidden="true"></div>
-      <button class="account-menu-item" id="menuSettings" type="button" role="menuitem"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="2.45"/><path d="M7.4 3.55 6.85 5.1a5.6 5.6 0 0 0-1.75 1.75l-1.55.55v5.2l1.55.55a5.6 5.6 0 0 0 1.75 1.75l.55 1.55h5.2l.55-1.55a5.6 5.6 0 0 0 1.75-1.75l1.55-.55V7.4l-1.55-.55a5.6 5.6 0 0 0-1.75-1.75l-.55-1.55h-5.2Z"/></svg><span>Ayarlar</span></button>
-      <button class="account-menu-item" id="menuAdmin" type="button" role="menuitem" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.8 16 5v4.3c0 3.8-2.35 6.45-6 7.9-3.65-1.45-6-4.1-6-7.9V5l6-2.2Z"/><path d="M7.2 9.8 9 11.6l3.8-4"/></svg><span>Yönetim</span></button>
+      <button class="account-menu-item" id="menuSettings" type="button" role="menuitem"><i class="ti ti-settings" aria-hidden="true"></i><span>Ayarlar</span></button>
+      <button class="account-menu-item" id="menuAdmin" type="button" role="menuitem" hidden><i class="ti ti-shield-check" aria-hidden="true"></i><span>Yönetim</span></button>
       <div class="account-menu-sep" aria-hidden="true"></div>
-      <button class="account-menu-item danger" id="logoutBtn" type="button" role="menuitem"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 3.2H4.7a1.5 1.5 0 0 0-1.5 1.5v10.6a1.5 1.5 0 0 0 1.5 1.5H8"/><path d="M12.2 6.5 15.7 10l-3.5 3.5M15.2 10H7.4"/></svg><span>Oturumu kapat</span></button>
+      <button class="account-menu-item danger" id="logoutBtn" type="button" role="menuitem"><i class="ti ti-logout" aria-hidden="true"></i><span>Oturumu kapat</span></button>
     </div>
   </div>
 </div></div>
@@ -1090,29 +1132,23 @@ body.main-keyboard-open form.add{
 <div class="app-stage" id="appStage">
 <main id="taskMain">
   <div class="day-head">
-    <button class="nav" id="prev" aria-label="Önceki gün">‹</button>
+    <button class="nav" id="prev" aria-label="Önceki gün"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
     <h2 id="dayTitle">Bugün</h2>
     <div class="day-head-actions">
       <div class="jump-notice tomorrow-notice upcoming-notice" id="tomorrowNotice" hidden>
         <div class="jump-notice-main upcoming-notice-main" aria-hidden="true">
-          <svg class="notice-icon" viewBox="0 0 20 20"><circle cx="10" cy="11" r="5.8"></circle><path d="M10 7.7v3.65l2.35 1.4M7.6 2.8h4.8M10 2.8v2.1"></path></svg>
+          <i class="ti ti-clock notice-icon" aria-hidden="true"></i>
           <span id="tomorrowNoticeText"></span>
         </div>
-        <div class="upcoming-chips" id="upcomingChips" aria-label="Yaklaşan görev günleri"></div>
+        <div class="upcoming-chips" id="upcomingChips" aria-label="Yaklaşan görev günleri"></div><i class="ti ti-chevron-right jump-notice-arrow" aria-hidden="true"></i>
       </div>
     </div>
-    <button class="nav" id="next" aria-label="Sonraki gün">›</button>
+    <button class="nav" id="next" aria-label="Sonraki gün"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
   </div>
   <div class="sub-row">
     <p class="sub" id="daySub"></p>
     <div class="sub-actions">
-      <button class="jump-notice today-inline" id="todayNotice" type="button" hidden>
-        <svg viewBox="0 0 20 20" aria-hidden="true">
-          <rect x="3.4" y="3.1" width="12.8" height="9.7" rx="2"></rect><path d="M6.3 1.9v2.8M13.7 1.9v2.8M3.4 6.3h12.8"></path>
-          <path class="today-return-arrow" d="M3.1 14.55 8.45 10.15c.3-.25.76-.04.76.35v2.05c3.3.12 5.78 1.55 7.5 4.72-2.25-1.53-4.63-2.02-7.5-1.94v2.18c0 .39-.46.6-.76.35L3.1 14.55Z"></path>
-        </svg>
-        <span>Bugün</span>
-      </button>
+      <button class="jump-notice today-inline" id="todayNotice" type="button" hidden><i class="ti ti-calendar" aria-hidden="true"></i><span>Bugün</span></button>
     </div>
   </div>
 
@@ -1136,7 +1172,7 @@ body.main-keyboard-open form.add{
 
   <dialog id="accountDialog">
     <div class="account-box modal-box">
-      <button type="button" class="modal-close" id="closeSettingsX" aria-label="Ayarları kapat" title="Kapat">×</button>
+      <button type="button" class="modal-close" id="closeSettingsX" aria-label="Ayarları kapat" title="Kapat"><i class="ti ti-x" aria-hidden="true"></i></button>
       <div class="modal-head"><h2>Ayarlar</h2></div>
       <p class="sub" id="accountText"></p>
       <section class="theme-settings" aria-labelledby="themeSettingsTitle">
@@ -1178,7 +1214,7 @@ body.main-keyboard-open form.add{
 
   <dialog id="managementDialog">
     <div class="management-box modal-box">
-      <button type="button" class="modal-close" id="closeManagementX" aria-label="Yönetimi kapat" title="Kapat">×</button>
+      <button type="button" class="modal-close" id="closeManagementX" aria-label="Yönetimi kapat" title="Kapat"><i class="ti ti-x" aria-hidden="true"></i></button>
       <div class="modal-head"><h2>Yönetim</h2></div>
       <section class="admin-panel" id="adminPanel">
         <div class="admin-head"><h3>Kullanıcı onayları</h3><span class="admin-badge" id="pendingBadge">0</span></div>
@@ -1220,12 +1256,12 @@ body.main-keyboard-open form.add{
 <section class="pinned-panel" id="pinnedPanel" aria-labelledby="pinnedTitle">
   <div class="panel-pull-handle" id="pinnedPullHandle" aria-hidden="true"></div>
   <div class="pinned-head">
-    <button class="pinned-back" id="pinnedBack" type="button" aria-label="Çakılı listelerine dön" title="Listelere dön" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 4.8-5.2 5.2 5.2 5.2"></path></svg></button>
-    <div class="pinned-head-copy"><div class="panel-title-line"><span class="panel-title-icon pinned-title-icon" aria-hidden="true"><svg class="pushpin-icon" viewBox="0 0 24 24"><g transform="rotate(18 12 12)"><ellipse class="pin-cap" cx="12" cy="4.4" rx="4.7" ry="2.2"></ellipse><path class="pin-body" d="M9.2 5.1h5.6l-.8 5.7c2.5.75 4.15 2.25 4.15 4.05 0 2.45-2.8 4.2-6.15 4.2s-6.15-1.75-6.15-4.2c0-1.8 1.65-3.3 4.15-4.05l-.8-5.7Z"></path><ellipse class="pin-cap" cx="12" cy="4.15" rx="4.25" ry="1.72" opacity=".72"></ellipse><path class="pin-highlight" d="M7.75 13.55c.38-1.12 1.15-1.9 2.05-2.25-.5.75-.8 1.55-.9 2.35-.08.58-.44.98-.83.86-.36-.11-.44-.44-.32-.96Z"></path><path class="pin-needle" d="M10.9 18.4h2.2L12 24Z"></path></g></svg></span><h2 id="pinnedTitle">Çakılı</h2></div><p id="pinnedSubtitle">Tarihten bağımsız listelerin.</p></div>
+    <button class="pinned-back" id="pinnedBack" type="button" aria-label="Çakılı listelerine dön" title="Listelere dön" hidden><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+    <div class="pinned-head-copy"><div class="panel-title-line"><span class="panel-title-icon pinned-title-icon" aria-hidden="true"><i class="ti ti-pin" aria-hidden="true"></i></span><h2 id="pinnedTitle">Çakılı</h2></div><p id="pinnedSubtitle">Tarihten bağımsız listelerin.</p></div>
     <div class="pinned-head-actions pinned-owner-tools" id="pinnedOwnerTools" hidden>
-      <button class="pinned-icon-btn" id="renamePinnedList" type="button" aria-label="Liste adını değiştir" title="Liste adını değiştir"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 14.8 3.3 17l2.2-.7L15.2 6.6 13.4 4.8 4 14.8Z"></path><path d="m12.4 5.8 1.8 1.8"></path></svg></button>
-      <button class="pinned-icon-btn" id="sharePinnedList" type="button" aria-label="Listeyi paylaş" title="Paylaş" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="7" cy="7" r="2.3"></circle><path d="M2.8 15.9c.25-3 1.9-4.6 4.2-4.6s3.95 1.6 4.2 4.6"></path><path d="M14.2 6.2v5.6M11.4 9h5.6"></path></svg></button>
-      <button class="pinned-icon-btn" id="deletePinnedList" type="button" aria-label="Listeyi sil" title="Listeyi sil"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 5.8h11M8 5.8V4h4v1.8M6 5.8l.7 10h6.6l.7-10"></path></svg></button>
+      <button class="pinned-icon-btn" id="renamePinnedList" type="button" aria-label="Liste adını değiştir" title="Liste adını değiştir"><i class="ti ti-pencil" aria-hidden="true"></i></button>
+      <button class="pinned-icon-btn" id="sharePinnedList" type="button" aria-label="Listeyi paylaş" title="Paylaş" hidden><i class="ti ti-user-plus" aria-hidden="true"></i></button>
+      <button class="pinned-icon-btn" id="deletePinnedList" type="button" aria-label="Listeyi sil" title="Listeyi sil"><i class="ti ti-trash" aria-hidden="true"></i></button>
     </div>
   </div>
 
@@ -1266,16 +1302,16 @@ body.main-keyboard-open form.add{
 <section class="journal-panel" id="journalPanel" aria-labelledby="journalTitle">
   <div class="panel-pull-handle" id="journalPullHandle" aria-hidden="true"></div>
   <div class="journal-head">
-    <div class="journal-head-copy"><div class="panel-title-line"><span class="panel-title-icon journal-title-icon" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M3.2 4.1c2.6-.65 4.8-.2 6.8 1.35v10.1c-2-1.55-4.2-2-6.8-1.35V4.1Z"></path><path d="M16.8 4.1c-2.6-.65-4.8-.2-6.8 1.35v10.1c2-1.55 4.2-2 6.8-1.35V4.1Z"></path></svg></span><h2 id="journalTitle">Çetele</h2></div><p>Gününü kaydet.</p></div>
+    <div class="journal-head-copy"><div class="panel-title-line"><span class="panel-title-icon journal-title-icon" aria-hidden="true"><i class="ti ti-book-2" aria-hidden="true"></i></span><h2 id="journalTitle">Çetele</h2></div><p>Gününü kaydet.</p></div>
   </div>
 
   <section class="journal-slide-view" id="journalUnlockView" hidden aria-labelledby="journalUnlockTitle">
     <div class="journal-card journal-unlock-card">
-      <div class="journal-field-label"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6.3 9V6.8a3.7 3.7 0 0 1 7.4 0V9"></path><rect x="4.6" y="8.8" width="10.8" height="8" rx="2"></rect></svg><span id="journalUnlockTitle">Çetele PIN'i</span></div>
+      <div class="journal-field-label"><i class="ti ti-lock" aria-hidden="true"></i><span id="journalUnlockTitle">Çetele PIN'i</span></div>
       <p class="pin-note">Bu Çeteleyi açmak için PIN'inizi girin. PIN hiçbir cihazda hatırlanmaz.</p>
       <div class="pin-fields"><label>PIN<input id="journalUnlockPin" class="pm-secret" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" autocapitalize="none" spellcheck="false" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-form-type="other"></label></div>
       <p class="pin-status" id="journalUnlockStatus" aria-live="polite"></p>
-      <button type="button" class="journal-save" id="confirmJournalUnlock"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v14M5 8l5-5 5 5"></path></svg><span>Aç</span></button>
+      <button type="button" class="journal-save" id="confirmJournalUnlock"><i class="ti ti-arrow-up" aria-hidden="true"></i><span>Aç</span></button>
     </div>
   </section>
 
@@ -1288,24 +1324,24 @@ body.main-keyboard-open form.add{
 
   <section class="journal-slide-view" id="journalEditorView" hidden>
     <div class="journal-card">
-      <div class="journal-field-label"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3.2" y="4.8" width="13.6" height="11.8" rx="2.2"></rect><path d="M6.3 2.9v3.4M13.7 2.9v3.4M3.2 8.1h13.6"></path></svg><span>Tarih</span></div>
+      <div class="journal-field-label"><i class="ti ti-calendar" aria-hidden="true"></i><span>Tarih</span></div>
       <input class="journal-date-input" id="journalDate" type="text" readonly tabindex="-1">
     </div>
     <div class="journal-card">
-      <div class="journal-field-label"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 2.8h7.1l3 3v11.4H5V2.8Z"></path><path d="M12.1 2.8v3h3M7.6 9h4.8M7.6 12h4.8"></path></svg><span>Çetele Notların</span></div>
+      <div class="journal-field-label"><i class="ti ti-file-text" aria-hidden="true"></i><span>Çetele Notların</span></div>
       <div class="journal-toolbar" id="journalToolbar" role="toolbar" aria-label="Çetele metin biçimlendirme">
-        <button type="button" data-journal-cmd="bold" aria-label="Kalın" title="Kalın"><strong>B</strong></button>
-        <button type="button" data-journal-cmd="italic" aria-label="İtalik" title="İtalik"><em>I</em></button>
-        <button type="button" data-journal-cmd="heading" aria-label="Başlık" title="Başlık"><span>H</span></button>
-        <button type="button" data-journal-cmd="ul" aria-label="Madde işaretli liste" title="Madde işaretli liste"><span>•</span></button>
-        <button type="button" data-journal-cmd="ol" aria-label="Numaralı liste" title="Numaralı liste"><span>1.</span></button>
-        <button type="button" data-journal-cmd="quote" aria-label="Alıntı" title="Alıntı"><span>“</span></button>
-        <button type="button" data-journal-cmd="link" aria-label="Bağlantı ekle" title="Bağlantı ekle"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.2 11.8 11.8 8.2"></path><path d="M6.6 13.4 5.1 14.9a3 3 0 0 1-4.2-4.2l2.8-2.8a3 3 0 0 1 4.2 0"></path><path d="m13.4 6.6 1.5-1.5a3 3 0 1 1 4.2 4.2l-2.8 2.8a3 3 0 0 1-4.2 0"></path></svg></button>
+        <button type="button" data-journal-cmd="bold" aria-label="Kalın" title="Kalın"><i class="ti ti-bold" aria-hidden="true"></i></button>
+        <button type="button" data-journal-cmd="italic" aria-label="İtalik" title="İtalik"><i class="ti ti-italic" aria-hidden="true"></i></button>
+        <button type="button" data-journal-cmd="heading" aria-label="Başlık" title="Başlık"><i class="ti ti-heading" aria-hidden="true"></i></button>
+        <button type="button" data-journal-cmd="ul" aria-label="Madde işaretli liste" title="Madde işaretli liste"><i class="ti ti-list" aria-hidden="true"></i></button>
+        <button type="button" data-journal-cmd="ol" aria-label="Numaralı liste" title="Numaralı liste"><i class="ti ti-list-numbers" aria-hidden="true"></i></button>
+        <button type="button" data-journal-cmd="quote" aria-label="Alıntı" title="Alıntı"><i class="ti ti-quote" aria-hidden="true"></i></button>
+        <button type="button" data-journal-cmd="link" aria-label="Bağlantı ekle" title="Bağlantı ekle"><i class="ti ti-link" aria-hidden="true"></i></button>
       </div>
       <div class="journal-rich-editor" id="journalText" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Çetele notu" data-placeholder="Bugünden aklında ne kalsın?" spellcheck="true"></div>
       <p class="journal-limit-status" id="journalLimitStatus" aria-live="polite" hidden>Çetele sınıra ulaştı</p>
     </div>
-    <button class="journal-save" id="saveJournal" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m4.3 10.2 3.5 3.5 7.9-8"></path></svg><span>Çetele tut</span></button>
+    <button class="journal-save" id="saveJournal" type="button"><i class="ti ti-check" aria-hidden="true"></i><span>Çetele tut</span></button>
     <p class="journal-save-status" id="journalSaveStatus" aria-live="polite"></p>
   </section>
 </section>
@@ -1313,7 +1349,7 @@ body.main-keyboard-open form.add{
     </div>
     <div class="cal-head" id="calendarHandle">
       <button class="drawer-launch pinned-launch" id="pinnedButton" type="button" aria-label="Çakılı görevleri aç">
-        <svg class="pushpin-icon" viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(18 12 12)"><ellipse class="pin-cap" cx="12" cy="4.4" rx="4.7" ry="2.2"></ellipse><path class="pin-body" d="M9.2 5.1h5.6l-.8 5.7c2.5.75 4.15 2.25 4.15 4.05 0 2.45-2.8 4.2-6.15 4.2s-6.15-1.75-6.15-4.2c0-1.8 1.65-3.3 4.15-4.05l-.8-5.7Z"></path><ellipse class="pin-cap" cx="12" cy="4.15" rx="4.25" ry="1.72" opacity=".72"></ellipse><path class="pin-highlight" d="M7.75 13.55c.38-1.12 1.15-1.9 2.05-2.25-.5.75-.8 1.55-.9 2.35-.08.58-.44.98-.83.86-.36-.11-.44-.44-.32-.96Z"></path><path class="pin-needle" d="M10.9 18.4h2.2L12 24Z"></path></g></svg>
+        <i class="ti ti-pin" aria-hidden="true"></i>
         <span>Çakılı</span><span class="pinned-unread-badge" id="pinnedUnreadBadge" hidden aria-hidden="true"></span>
       </button>
       <div class="calendar-month-slot">
@@ -1322,7 +1358,7 @@ body.main-keyboard-open form.add{
         <button class="nav" id="mNext" type="button" aria-label="Takvimi aç"></button>
       </div>
       <button class="drawer-launch journal-launch" id="journalButton" type="button" aria-label="Çeteleyi aç">
-        <svg class="journal-book" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.2 4.1c2.6-.65 4.8-.2 6.8 1.35v10.1c-2-1.55-4.2-2-6.8-1.35V4.1Z"></path><path d="M16.8 4.1c-2.6-.65-4.8-.2-6.8 1.35v10.1c2-1.55 4.2-2 6.8-1.35V4.1Z"></path></svg>
+        <i class="ti ti-book-2 journal-book" aria-hidden="true"></i>
         <span>Çetele</span><span class="journal-launch-state" id="journalButtonState" aria-hidden="true">+</span>
       </button>
     </div>
@@ -1350,7 +1386,7 @@ body.main-keyboard-open form.add{
 
 <dialog id="journalPinDialog">
   <div class="modal-box pin-box">
-    <button type="button" class="modal-close" id="closeJournalPinX" aria-label="PIN ayarını kapat" title="Kapat">×</button>
+    <button type="button" class="modal-close" id="closeJournalPinX" aria-label="PIN ayarını kapat" title="Kapat"><i class="ti ti-x" aria-hidden="true"></i></button>
     <div class="modal-head"><h2 id="journalPinDialogTitle">Çetele PIN'i</h2></div>
     <p class="pin-note" id="journalPinDialogNote">4 veya 6 haneli bir PIN belirleyin.</p>
     <div class="pin-fields">
@@ -1374,7 +1410,7 @@ body.main-keyboard-open form.add{
 
     <form class="auth-pane" id="loginPane" autocomplete="on">
       <label>E-posta<input id="loginEmail" name="username" type="email" autocomplete="username" required></label>
-      <label>Parola<span class="password-field"><input id="loginPassword" type="password" autocomplete="current-password" required minlength="10"><button class="password-toggle" type="button" id="toggleLoginPassword" aria-label="Parolayı göster" aria-pressed="false" title="Parolayı göster"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.7" fill="none" stroke="currentColor" stroke-width="1.7"/><path class="eye-slash" d="M4.2 4.2 19.8 19.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></span></label>
+      <label>Parola<span class="password-field"><input id="loginPassword" type="password" autocomplete="current-password" required minlength="10"><button class="password-toggle" type="button" id="toggleLoginPassword" aria-label="Parolayı göster" aria-pressed="false" title="Parolayı göster"><i class="ti ti-eye password-eye-on" aria-hidden="true"></i><i class="ti ti-eye-off password-eye-off" aria-hidden="true"></i></button></span></label>
       <button class="auth-primary" type="submit">Giriş yap</button>
       <button class="auth-link" type="button" id="forgotBtn">Parolamı unuttum</button>
     </form>
@@ -1415,7 +1451,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v95-r58-utility-bar-space-fix", CENTIK_EXPECTED_SERVER_BUILD="v33-beni-durt";
+const CENTIK_CLIENT_BUILD="v96-tabler-icons", CENTIK_EXPECTED_SERVER_BUILD="v33-beni-durt";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -2456,10 +2492,10 @@ const KeyboardManager=(()=>{
 // Çentik ve Çakılı aynı ikon/anlam eşlemesini kullanır:
 // görünüm: Düzenle + Sil; düzenleme: Kaydet + İptal.
 const TASK_ACTION_ICONS=Object.freeze({
-  edit:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/><path d="m15 5 4 4"/></svg>',
-  save:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4.2 4.2L19 6.5"/></svg>',
-  delete:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6.5 7 7.4 20h9.2l.9-13"/><path d="M10 11v5.5M14 11v5.5"/></svg>',
-  cancel:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>'
+  edit:'<i class="ti ti-pencil" aria-hidden="true"></i>',
+  save:'<i class="ti ti-check" aria-hidden="true"></i>',
+  delete:'<i class="ti ti-trash" aria-hidden="true"></i>',
+  cancel:'<i class="ti ti-x" aria-hidden="true"></i>'
 });
 function setTaskActionButton(btn,kind,handler,{disabled=false,label,title}={}){
   const secondary=kind==="delete"||kind==="cancel";
@@ -2557,8 +2593,8 @@ function render(){
     li.classList.add("task-row");li.dataset.taskId=it.id;li.dataset.parentId=it.parentId||"";
     if(it.parentId)li.classList.add("subtask");if(it.done)li.classList.add("done");if(it.id===lastPop)li.classList.add("pop");if(isDeleting)li.classList.add("deleting");
     const slot=document.createElement("span");slot.className="check-slot";
-    const c=document.createElement("button");c.className="check";c.setAttribute("aria-label",it.done?"Tamamlandı işaretini kaldır":"Tamamlandı olarak işaretle");c.setAttribute("aria-pressed",it.done);c.disabled=isDeleting;c.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3L13 4.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';c.onclick=()=>toggle(it.id);
-    const cue=document.createElement("span");cue.className="drag-cue";cue.setAttribute("aria-hidden","true");cue.innerHTML='<svg viewBox="0 0 20 20"><path d="M7.7 6.2 10 3l2.3 3.2Z"/><path d="M7.7 13.8 10 17l2.3-3.2Z"/><path d="M6.2 7.7 3 10l3.2 2.3Z"/><path d="M13.8 7.7 17 10l-3.2 2.3Z"/></svg>';slot.append(c,cue);
+    const c=document.createElement("button");c.className="check";c.setAttribute("aria-label",it.done?"Tamamlandı işaretini kaldır":"Tamamlandı olarak işaretle");c.setAttribute("aria-pressed",it.done);c.disabled=isDeleting;c.innerHTML='<i class="ti ti-check" aria-hidden="true"></i>';c.onclick=()=>toggle(it.id);
+    const cue=document.createElement("span");cue.className="drag-cue";cue.setAttribute("aria-hidden","true");cue.innerHTML='<i class="ti ti-arrows-move" aria-hidden="true"></i>';slot.append(c,cue);
     const span=document.createElement("span");span.className="txt";span.textContent=it.t;
     const hint=document.createElement("span");hint.className="hierarchy-hint";hint.textContent="Alt görev";
     const actions=document.createElement("div");actions.className="task-actions";
@@ -2588,7 +2624,7 @@ function renderCal(){
     if(total>0&&n===total)b.classList.add("all-done");
     if(total===0)b.classList.add("no-task");
     const monthKey=`${y}-${pad(m+1)}`,monthMeta=journalMonthCache.get(monthKey),hasCetele=!!monthMeta?.dates?.has(k);
-    const ceteleMark=hasCetele?'<svg class="cal-cetele-mark" viewBox="0 0 20 16" aria-hidden="true"><path d="M2.5 2.4c2.7-.7 5-.25 7.5 1.25v9.7c-2.5-1.5-4.8-1.95-7.5-1.25V2.4Z"></path><path d="M17.5 2.4c-2.7-.7-5-.25-7.5 1.25v9.7c2.5-1.5 4.8-1.95 7.5-1.25V2.4Z"></path><path d="M10 3.65v9.7"></path></svg>':"";
+    const ceteleMark=hasCetele?'<i class="ti ti-book-2 cal-cetele-mark" aria-hidden="true"></i>':"";
     b.innerHTML=`<span>${dd}</span><small>${total?`${n}/${total}`:"·"}</small>${ceteleMark}`;
     b.setAttribute("aria-label",`${dd} ${AYLAR[m]}: ${n}/${total} görev tamamlandı${hasCetele?", Çetele var":""}`);
     b.onclick=()=>{if(Date.now()<suppressCalendarClickUntil)return;setCalendarOpen(false);go(k)};
@@ -2653,8 +2689,8 @@ function renderPinnedOverview(){
     const b=document.createElement("button");b.type="button";b.className="pinned-list-card";b.dataset.listId=list.id;
     const shared=list.sharedUser?(list.isOwner?`${list.sharedUser.name||list.sharedUser.email} ile paylaşılıyor`:`${list.owner?.name||list.owner?.email||"Liste sahibi"} ile ortak`):"Yalnızca sen";
     const unread=Math.max(0,Math.floor(Number(list.unreadCount)||0)),unreadLabel=unread>99?"+99":`+${unread}`;
-    b.innerHTML='<span class="pinned-list-pin"><svg class="pushpin-icon" viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(18 12 12)"><ellipse class="pin-cap" cx="12" cy="4.4" rx="4.7" ry="2.2"></ellipse><path class="pin-body" d="M9.2 5.1h5.6l-.8 5.7c2.5.75 4.15 2.25 4.15 4.05 0 2.45-2.8 4.2-6.15 4.2s-6.15-1.75-6.15-4.2c0-1.8 1.65-3.3 4.15-4.05l-.8-5.7Z"></path><ellipse class="pin-cap" cx="12" cy="4.15" rx="4.25" ry="1.72" opacity=".72"></ellipse><path class="pin-highlight" d="M7.75 13.55c.38-1.12 1.15-1.9 2.05-2.25-.5.75-.8 1.55-.9 2.35-.08.58-.44.98-.83.86-.36-.11-.44-.44-.32-.96Z"></path><path class="pin-needle" d="M10.9 18.4h2.2L12 24Z"></path></g></svg></span>'+
-      `<span class="pinned-list-copy"><strong>${escapeHtml(list.title)}</strong><small>${escapeHtml(shared)}</small></span>${unread?`<span class="pinned-unread-badge" title="${unread} yeni görev" aria-label="${unread} yeni görev">${unreadLabel}</span>`:""}<span class="pinned-list-arrow">›</span>`;
+    b.innerHTML='<span class="pinned-list-pin"><i class="ti ti-pin" aria-hidden="true"></i></span>'+
+      `<span class="pinned-list-copy"><strong>${escapeHtml(list.title)}</strong><small>${escapeHtml(shared)}</small></span>${unread?`<span class="pinned-unread-badge" title="${unread} yeni görev" aria-label="${unread} yeni görev">${unreadLabel}</span>`:""}<i class="ti ti-chevron-right pinned-list-arrow" aria-hidden="true"></i>`;
     b.onclick=()=>openPinnedList(list.id);box.appendChild(b);
   });
 }
@@ -2728,7 +2764,7 @@ function renderPinnedTasks(){
   updatePinnedHeader();const items=normalizeItems(pinnedTasks);pinnedTasks=items;const done=items.filter(x=>x.done).length;$("pinnedDoneCount").textContent=done;$("pinnedTotalCount").textContent=items.length;$("pinnedOpenCount").textContent=items.length-done;
   const ul=$("pinnedTaskList");ul.innerHTML="";if(!items.length){const li=document.createElement("li");li.className="empty";li.textContent="Bu liste boş. İlk görevi ekleyin.";ul.appendChild(li);return}
   items.forEach(it=>{const li=document.createElement("li"),isDeleting=pinnedDeleteHas(it.id),isRoot=pinnedPendingDelete?.id===it.id;li.className="task-row";li.dataset.taskId=it.id;li.dataset.parentId=it.parentId||"";if(it.parentId)li.classList.add("subtask");if(it.done)li.classList.add("done");if(isDeleting)li.classList.add("deleting");
-    const slot=document.createElement("span");slot.className="check-slot";const c=document.createElement("button");c.className="check";c.disabled=isDeleting;c.setAttribute("aria-pressed",String(it.done));c.setAttribute("aria-label",it.done?"Tamamlandı işaretini kaldır":"Tamamlandı olarak işaretle");c.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3L13 4.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';c.onclick=()=>pinnedToggleTask(it.id);const cue=document.createElement("span");cue.className="drag-cue";cue.setAttribute("aria-hidden","true");cue.innerHTML='<svg viewBox="0 0 20 20"><path d="M7.7 6.2 10 3l2.3 3.2Z"/><path d="M7.7 13.8 10 17l2.3-3.2Z"/><path d="M6.2 7.7 3 10l3.2 2.3Z"/><path d="M13.8 7.7 17 10l-3.2 2.3Z"/></svg>';slot.append(c,cue);
+    const slot=document.createElement("span");slot.className="check-slot";const c=document.createElement("button");c.className="check";c.disabled=isDeleting;c.setAttribute("aria-pressed",String(it.done));c.setAttribute("aria-label",it.done?"Tamamlandı işaretini kaldır":"Tamamlandı olarak işaretle");c.innerHTML='<i class="ti ti-check" aria-hidden="true"></i>';c.onclick=()=>pinnedToggleTask(it.id);const cue=document.createElement("span");cue.className="drag-cue";cue.setAttribute("aria-hidden","true");cue.innerHTML='<i class="ti ti-arrows-move" aria-hidden="true"></i>';slot.append(c,cue);
     const span=document.createElement("span");span.className="txt";span.textContent=it.t;const hint=document.createElement("span");hint.className="hierarchy-hint";hint.textContent="Alt görev";const actions=document.createElement("div");actions.className="task-actions";
     const edit=document.createElement("button");setTaskActionButton(edit,"edit",()=>editPinnedTask(it.id,li),{disabled:isDeleting,label:"Görevi düzenle",title:"Düzenle"});
     const x=document.createElement("button");if(isRoot){x.className="undo-inline";x.type="button";x.textContent="Geri al";x.setAttribute("aria-label","Silmeyi geri al");x.title="Geri al";x.onclick=undoPinnedDelete}else{setTaskActionButton(x,"delete",()=>queuePinnedDelete(it.id),{disabled:isDeleting,label:isDeleting?"Ana görevle birlikte silinecek":"Sil",title:isDeleting?"Ana görevle birlikte silinecek":"Sil"})}actions.append(edit,x);li.append(slot,span,hint,actions);ul.append(li)});
@@ -2793,7 +2829,7 @@ function setCurrentUserPinEnabled(enabled){
 function renderJournalButton(){
   const b=$("journalButton"),state=$("journalButtonState");if(!b||!state)return;
   const known=journalStatusCache.has(current),exists=journalStatusCache.get(current)===true,pending=journalStatusPending.has(current);
-  b.classList.toggle("has-journal",exists);b.classList.toggle("is-loading",pending&&!known);state.textContent=exists?"✓":"+";
+  b.classList.toggle("has-journal",exists);b.classList.toggle("is-loading",pending&&!known);state.innerHTML=exists?'<i class="ti ti-check" aria-hidden="true"></i>':'<i class="ti ti-plus" aria-hidden="true"></i>';
   b.setAttribute("aria-label",exists?"Kayıtlı Çeteleyi aç":"Bu gün için Çetele yaz");b.title=exists?"Çetele yazılmış":"Çetele yaz";
 }
 function journalStatusFresh(date){return journalStatusCache.has(date)&&(Date.now()-(journalStatusSeenAt.get(date)||0))<JOURNAL_STATUS_FRESH_MS}
@@ -3800,11 +3836,11 @@ pinnedTaskList.addEventListener("contextmenu",e=>{if(pinnedTaskReorder?.active&&
 
 let calendarOpen=false,calendarAnimating=false,drawerGesture=null,suppressCalendarClickUntil=0;
 const prefersReducedMotion=()=>window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-const calendarSvg='<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3.2" y="4.8" width="13.6" height="11.8" rx="2.2"></rect><path d="M6.3 2.9v3.4M13.7 2.9v3.4M3.2 8.1h13.6"></path></svg>';
-const upSvg='<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 12.5 4.5-4.5 4.5 4.5"></path></svg>';
+const calendarSvg='<i class="ti ti-calendar" aria-hidden="true"></i>';
+const upSvg='<i class="ti ti-chevron-up" aria-hidden="true"></i>';
 function refreshCalendarHead(){
   const left=$("mPrev"),right=$("mNext");
-  left.innerHTML="‹";right.innerHTML="›";
+  left.innerHTML='<i class="ti ti-chevron-left" aria-hidden="true"></i>';right.innerHTML='<i class="ti ti-chevron-right" aria-hidden="true"></i>';
   left.setAttribute("aria-label",calendarOpen?"Önceki ay":"Takvimi aç");right.setAttribute("aria-label",calendarOpen?"Sonraki ay":"Takvimi aç");
 }
 function setCalendarOpen(open){
@@ -4239,10 +4275,7 @@ if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.add
 </script>
 
 <div class="pull-reload-indicator" id="pullReloadIndicator" aria-hidden="true">
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M20 6v5h-5"></path>
-    <path d="M19.1 11A7.2 7.2 0 1 0 20 15"></path>
-  </svg>
+  <i class="ti ti-refresh" aria-hidden="true"></i>
   <span>Sayfayı yenile</span>
 </div>
 </body>
