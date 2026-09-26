@@ -942,20 +942,26 @@ body.keyboard-open .utility-body-clip{
 /* r35 — klavye açıkken ortak alt barın efektif yüksekliği sıfırdır.
    KeyboardManager yalnız body.keyboard-open state'ini üretir; bar/geometri CSS'te
    tek değişken üzerinden çözülür. Ana ekranda boş .cal kabuğu da tamamen gizlenir. */
-/* r49/r50 GERİ ALINDI: çekmece içinde bu değişkeni/cal-head çöküşünü dondurmak
-   tilt'i düzeltmedi ve liste öğelerinin klavye altında kalmasına (regresyon)
-   yol açtı. Orijinal r35 davranışına dönüldü; tilt kaynağı ayrı bir
-   mekanizma olmalı — önce ölçüm yapılacak. */
-body.keyboard-open{
+/* r54-chatgpt: utility çekmecelerinde klavye açıldığında hem aktif bar değişkeni
+   hem de .cal-head'in fiziksel yüksekliği sabit tutulur. Ana ekranda mevcut
+   klavye davranışı korunur; Çakılı/Çetele açıkken bar yalnız görsel olarak
+   gizlenir, layout geometrisi değiştirilmez. */
+body.keyboard-open:not(.pinned-open):not(.journal-open){
   --centik-active-drawer-bar-h:0px;
 }
-body.keyboard-open .cal-head{
+body.keyboard-open:not(.pinned-open):not(.journal-open) .cal-head{
   min-height:0!important;
   height:0!important;
   padding-block:0!important;
   margin:0!important;
   border:0!important;
   overflow:hidden!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+body.keyboard-open.pinned-open .cal-head,
+body.keyboard-open.journal-open .cal-head{
   opacity:0!important;
   visibility:hidden!important;
   pointer-events:none!important;
@@ -1026,34 +1032,6 @@ body.main-keyboard-open .task-list,
 body.main-keyboard-open .task-row,
 body.main-keyboard-open form.add{
   overflow-anchor:none;
-}
-/* r50 — geçici tanılama paneli stili. Silinene kadar kalacak, üretimde
-   sorun değil (kullanıcı bir çekmecede textbox odaklamadıkça görünmez). */
-#centikKbDebug{
-  position:fixed;left:6px;right:6px;bottom:6px;z-index:9999;
-  max-height:42vh;display:flex;flex-direction:column;
-  background:rgba(0,0,0,.86);color:#7CFC9A;
-  font:10px/1.35 ui-monospace,Menlo,Consolas,monospace;
-  border-radius:8px;overflow:hidden;
-  pointer-events:auto;
-}
-#centikKbDebug[hidden]{display:none}
-#centikKbDebugBar{
-  display:flex;align-items:center;justify-content:space-between;gap:8px;
-  padding:5px 8px;background:rgba(255,255,255,.08);
-  font:11px/1.2 -apple-system,system-ui,sans-serif;color:#cfe;
-  flex:0 0 auto;
-}
-#centikKbDebugCopy{
-  appearance:none;border:1px solid #7CFC9A;background:transparent;color:#7CFC9A;
-  font:600 11px/1 -apple-system,system-ui,sans-serif;padding:5px 10px;border-radius:6px;
-}
-#centikKbDebugCopy:active{background:#7CFC9A;color:#000}
-#centikKbDebugLog{
-  overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:6px 8px;white-space:pre-wrap;word-break:break-word;
-  user-select:text;-webkit-user-select:text;
-  flex:1 1 auto;min-height:0;
 }
 </style>
 </head>
@@ -1411,7 +1389,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v95-debug-overlay-r53", CENTIK_EXPECTED_SERVER_BUILD="v33-beni-durt";
+const CENTIK_CLIENT_BUILD="v95-r54-chatgpt", CENTIK_EXPECTED_SERVER_BUILD="v33-beni-durt";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -2446,168 +2424,6 @@ const KeyboardManager=(()=>{
     getPolicy:()=>session?.policy?.name||null,
     refresh:()=>schedule({smooth:false})
   };
-})();
-
-// r52 — GEÇİCİ TANILAMA PANELİ (v2): r50'deki panel yalnız son 14 satırı tutup
-// üzerine yazıyordu; sıçrama/tilt odaklanmanın ilk 300-500ms'sinde olup bitiyor
-// ve ekran görüntüsü alınana kadar o pencere siliniyordu. Bu sürümde:
-//  - Odaklanma anından (0ms) itibaren HİÇBİR satır silinmiyor, yalnızca bir
-//    önceki örneğe göre bir şey DEĞİŞTİĞİNDE yeni satır ekleniyor (aynı
-//    değerler tekrar tekrar yazılmıyor, "x3" gibi tekrar sayacı ile özetleniyor).
-//  - Odak kaybolunca panel silinmiyor, bir sonraki odaklanmaya kadar ekranda
-//    kalıyor — olay bittikten sonra yukarı kaydırıp baştan okunabilir.
-//  - .cal kabuğunun kendi getBoundingClientRect().top/height değerleri de
-//    ekleniyor (tilt şüphesi doğrudan bu kabuğun konumunda).
-(function centikKbDebugOverlay(){
-  let box=null,logEl=null,raf=0,rows=[],last=null,repeat=0,sessionStart=0,active_prev=false;
-  const MAX_ROWS=600;
-
-  function ensureBox(){
-    if(box)return box;
-    box=document.createElement("div");
-    box.id="centikKbDebug";
-    const bar=document.createElement("div");
-    bar.id="centikKbDebugBar";
-    const label=document.createElement("span");
-    label.textContent="Klavye tanılama günlüğü";
-    const btn=document.createElement("button");
-    btn.type="button";
-    btn.id="centikKbDebugCopy";
-    btn.textContent="Kopyala";
-    btn.addEventListener("click",async()=>{
-      const text=rows.join("\n");
-      try{
-        if(navigator.clipboard?.writeText){
-          await navigator.clipboard.writeText(text);
-        }else{
-          throw new Error("clipboard api yok");
-        }
-        btn.textContent="Kopyalandı ✓";
-      }catch(e){
-        // Pano izni yoksa yedek yol: metni seçili hale getir, kullanıcı elle kopyalasın.
-        const range=document.createRange();
-        range.selectNodeContents(logEl);
-        const sel=window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-        btn.textContent="Seçildi, elle kopyala";
-      }
-      setTimeout(()=>{btn.textContent="Kopyala"},1600);
-    });
-    bar.appendChild(label);
-    bar.appendChild(btn);
-    logEl=document.createElement("div");
-    logEl.id="centikKbDebugLog";
-    box.appendChild(bar);
-    box.appendChild(logEl);
-    document.body.appendChild(box);
-    return box;
-  }
-
-  function nearestScroller(el){
-    let p=el?.parentElement;
-    while(p&&p!==document.body&&p!==document.documentElement){
-      const oy=getComputedStyle(p).overflowY;
-      if((oy==="auto"||oy==="scroll")&&p.scrollHeight>p.clientHeight+2)return p;
-      p=p.parentElement;
-    }
-    return document.scrollingElement||document.documentElement;
-  }
-
-  function fmt(n){return Number.isFinite(n)?Math.round(n):"—"}
-
-  function flushRepeat(){
-    if(repeat>1&&rows.length){
-      rows[rows.length-1]+="  (x"+repeat+")";
-    }
-    repeat=1;
-  }
-
-  function paint(autoscroll){
-    logEl.textContent=rows.join("\n");
-    if(autoscroll)logEl.scrollTop=logEl.scrollHeight;
-  }
-
-  function sample(){
-    raf=0;
-    const active=document.activeElement;
-    const inDrawer=document.body.classList.contains("pinned-open")||document.body.classList.contains("journal-open");
-    const active_ok=!!(inDrawer&&active&&active!==document.body&&(active.matches?.("input,textarea,[contenteditable='true']")));
-
-    if(active_ok&&!active_prev){
-      // yeni odaklanma oturumu başladı — sıfırdan logla
-      rows=[];
-      last=null;
-      repeat=1;
-      sessionStart=performance.now();
-      ensureBox().hidden=false;
-      rows.push("── yeni odak: "+(active.id||active.className||active.tagName)+" ──");
-    }
-    const justEnded=(!active_ok&&active_prev);
-    active_prev=active_ok;
-
-    if(!active_ok){
-      if(justEnded){
-        flushRepeat();
-        paint(false);
-      }
-      // panel'i SİLME — son durumu ekranda bırak, sadece örneklemeyi durdur.
-      // Burada scrollTop'u zorlamıyoruz ki kullanıcı yukarı kaydırıp
-      // baştan okuyabilsin.
-      return;
-    }
-
-    const scroller=nearestScroller(active);
-    const rect=active.getBoundingClientRect?.()||{};
-    const wrapId=document.body.classList.contains("pinned-open")?"pinnedBodyWrap":"journalBodyWrap";
-    const wrap=document.getElementById(wrapId);
-    const wrapRect=wrap?wrap.getBoundingClientRect():null;
-    const cal=document.getElementById("calendarDrawer");
-    const calRect=cal?cal.getBoundingClientRect():null;
-    const state=KeyboardManager?.getState?.();
-    const sig=[
-      "t="+fmt(performance.now()-sessionStart)+"ms",
-      "prov="+(KeyboardManager?.getProvider?.()||"-"),
-      "kb-open="+document.body.classList.contains("keyboard-open"),
-      "st.open="+(state?.open),
-      "st.bottom="+fmt(state?.bottom),
-      "elTop="+fmt(rect.top),
-      "elBot="+fmt(rect.bottom),
-      "wrapH="+fmt(wrapRect?.height),
-      "wrapTop="+fmt(wrapRect?.top),
-      "calTop="+fmt(calRect?.top),
-      "calH="+fmt(calRect?.height),
-      "scrTop="+fmt(scroller?.scrollTop),
-      "scrClientH="+fmt(scroller?.clientHeight)
-    ].join(" ");
-    // sadece "t=" hariç kısım değiştiyse yeni satır aç, değişmediyse tekrar say
-    const sigNoT=sig.replace(/^t=\S+\s*/,"");
-    if(sigNoT===last){
-      repeat++;
-    }else{
-      flushRepeat();
-      rows.push(sig);
-      last=sigNoT;
-    }
-    if(rows.length>MAX_ROWS)rows.splice(0,rows.length-MAX_ROWS);
-    paint(true);
-    raf=requestAnimationFrame(sample);
-  }
-
-  function kick(){
-    if(raf)return;
-    raf=requestAnimationFrame(sample);
-  }
-
-  document.addEventListener("focusin",kick,true);
-  document.addEventListener("focusout",()=>setTimeout(kick,0),true);
-  document.addEventListener("input",kick,true);
-  window.addEventListener("resize",kick,{passive:true});
-  if(window.visualViewport){
-    visualViewport.addEventListener("resize",kick,{passive:true});
-    visualViewport.addEventListener("scroll",kick,{passive:true});
-  }
-  kick();
 })();
 
 // V94 r28 — Görev satırı eylemleri için ortak durum motoru.
