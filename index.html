@@ -316,14 +316,17 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 .tally-month-button #monthCount{
   display:inline-grid;
   place-items:center;
-  min-width:30px;
-  height:30px;
-  padding:0 8px;
+  width:56px;
+  height:56px;
+  min-width:56px;
+  padding:0;
+  box-sizing:border-box;
   border:1.5px solid color-mix(in srgb,var(--focus) 38%,var(--line));
-  border-radius:999px;
+  border-radius:50%;
   background:color-mix(in srgb,var(--focus) 9%,var(--paper));
   color:color-mix(in srgb,var(--focus) 80%,var(--ink));
   box-shadow:0 1px 3px color-mix(in srgb,var(--focus) 10%,transparent);
+  line-height:1;
   transition:background .14s ease,border-color .14s ease,transform .14s ease;
 }
 @media (hover:hover) and (pointer:fine){
@@ -1216,7 +1219,7 @@ button,a[href],[role="button"]{
     <h1>Çentik</h1>
     <span class="beta-badge" aria-label="Beta sürümü">BETA</span>
   </div>
-  <a class="ubtn app-download" id="androidDownload" href="https://onurtrklmz.github.io/centik/com.centik.app-BETA1-web105.apk" download="com.centik.app-BETA1-web105.apk" aria-label="Uygulamayı indir" title="Uygulamayı indir">
+  <a class="ubtn app-download" id="androidDownload" href="https://onurtrklmz.github.io/centik/com.centik.app-BETA1-web103.apk" download="com.centik.app-BETA1-web103.apk" aria-label="Uygulamayı indir" title="Uygulamayı indir">
     <i class="ti ti-download" aria-hidden="true"></i>
   </a>
   <button class="ubtn sync-refresh is-loading" id="refresh" type="button" aria-label="Yükleniyor" title="Yükleniyor">
@@ -1581,7 +1584,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v105", CENTIK_EXPECTED_SERVER_BUILD="v36-sabah-saat-cache-fix";
+const CENTIK_CLIENT_BUILD="v106", CENTIK_EXPECTED_SERVER_BUILD="v36-sabah-saat-cache-fix";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
