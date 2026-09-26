@@ -2,7 +2,7 @@
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v96-tabler-icons";
+const SURUM = "centik-v97-beni-durt-sabah";
 const KABUK = [
   "./",
   "./index.html",

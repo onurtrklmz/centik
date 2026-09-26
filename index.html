@@ -1186,13 +1186,21 @@ body.main-keyboard-open form.add{
       </section>
       <section class="beni-durt-settings" aria-labelledby="beniDurtTitle">
         <h3 id="beniDurtTitle">Beni Dürt</h3>
-        <p>Belirlediğiniz saatte bugün işaretlenmemiş çentiklerinizi bildirim olarak hatırlatır. Açık çentik yoksa sessiz kalır.</p>
+        <p>Güne başlarken bugünün görevlerini bildirir; gün sonunda ise açık kalan çentikleri hatırlatır. İki bildirim birbirinden bağımsız açılıp kapatılabilir.</p>
         <div class="beni-durt-row">
-          <div class="beni-durt-label"><strong>Günlük dürtme</strong><span>Bildirim bu cihazda izin verildiğinde çalışır.</span></div>
-          <label class="switch" aria-label="Beni Dürt özelliğini aç"><input id="beniDurtEnabled" type="checkbox"><span aria-hidden="true"></span></label>
+          <div class="beni-durt-label"><strong>Güne başlarken</strong><span>Görev varsa listeler; görev yoksa yeni görev eklemenizi hatırlatır.</span></div>
+          <label class="switch" aria-label="Güne başlarken bildirimini aç"><input id="beniDurtMorningEnabled" type="checkbox"><span aria-hidden="true"></span></label>
         </div>
         <div class="beni-durt-row">
-          <div class="beni-durt-label"><strong>Saat</strong><span>Cihazınızın yerel saatine göre</span></div>
+          <div class="beni-durt-label"><strong>Sabah saati</strong><span>Cihazınızın yerel saatine göre</span></div>
+          <input class="beni-durt-time" id="beniDurtMorningTime" type="time" value="08:00" step="60">
+        </div>
+        <div class="beni-durt-row">
+          <div class="beni-durt-label"><strong>Gün sonunda</strong><span>Bugün tamamlanmamış çentikleri hatırlatır; açık çentik yoksa sessiz kalır.</span></div>
+          <label class="switch" aria-label="Gün sonu bildirimini aç"><input id="beniDurtEnabled" type="checkbox"><span aria-hidden="true"></span></label>
+        </div>
+        <div class="beni-durt-row">
+          <div class="beni-durt-label"><strong>Akşam saati</strong><span>Cihazınızın yerel saatine göre</span></div>
           <input class="beni-durt-time" id="beniDurtTime" type="time" value="20:00" step="60">
         </div>
         <p class="beni-durt-state" id="beniDurtState" aria-live="polite"></p>
@@ -1451,7 +1459,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v96-tabler-icons", CENTIK_EXPECTED_SERVER_BUILD="v33-beni-durt";
+const CENTIK_CLIENT_BUILD="v97-beni-durt-sabah", CENTIK_EXPECTED_SERVER_BUILD="v34-beni-durt-sabah";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -4073,12 +4081,16 @@ function beniDurtDeviceId(){
 function beniDurtTimeZone(){try{return Intl.DateTimeFormat().resolvedOptions().timeZone||"Europe/Istanbul"}catch(e){return "Europe/Istanbul"}}
 function setBeniDurtState(text,error=false){const el=$("beniDurtState");if(!el)return;el.textContent=text||"";el.classList.toggle("error",!!error)}
 function renderBeniDurtUI(){
-  const cfg=currentUser?.beniDurt||{};const active=!!cfg.active,time=/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(String(cfg.time||""))?cfg.time:"20:00";
+  const cfg=currentUser?.beniDurt||{};
+  const active=!!cfg.active,time=/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(String(cfg.time||""))?cfg.time:"20:00";
+  const morningActive=!!cfg.morningActive,morningTime=/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(String(cfg.morningTime||""))?cfg.morningTime:"08:00";
   $("beniDurtEnabled").checked=active;$("beniDurtTime").value=time;$("beniDurtTime").disabled=!active;
+  $("beniDurtMorningEnabled").checked=morningActive;$("beniDurtMorningTime").value=morningTime;$("beniDurtMorningTime").disabled=!morningActive;
+  const anyActive=active||morningActive;
   if(!("Notification" in window))setBeniDurtState("Bu tarayıcı bildirimleri desteklemiyor.",true);
   else if(Notification.permission==="denied")setBeniDurtState("Tarayıcı bildirim izni kapalı. Sistem/tarayıcı ayarlarından izin vermelisiniz.",true);
-  else if(active&&Notification.permission==="granted")setBeniDurtState("Beni Dürt açık · bu cihaz bildirim alabilir.");
-  else if(active)setBeniDurtState("Kaydederken bu cihaz için bildirim izni istenecek.");
+  else if(anyActive&&Notification.permission==="granted")setBeniDurtState("Beni Dürt açık · bu cihaz bildirim alabilir.");
+  else if(anyActive)setBeniDurtState("Kaydederken bu cihaz için bildirim izni istenecek.");
   else setBeniDurtState("Kapalı");
 }
 function loadScriptOnce(src){return new Promise((resolve,reject)=>{const old=[...document.scripts].find(s=>s.src===src);if(old){if(window.firebase)resolve();else old.addEventListener("load",resolve,{once:true});return}const s=document.createElement("script");s.src=src;s.async=true;s.onload=resolve;s.onerror=()=>reject(new Error("firebase_sdk"));document.head.appendChild(s)})}
@@ -4108,29 +4120,33 @@ async function prepareBeniDurtSubscription(permissionPromise=null){
   if(!token)throw new Error("durt_izin");return token;
 }
 async function saveBeniDurtPreference(permissionPromise=null){
-  if(!currentUser?.id)return false;const active=$("beniDurtEnabled").checked,time=$("beniDurtTime").value;
-  if(active&&!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time)){setBeniDurtState("Geçerli bir saat seçin.",true);return false}
-  let fcmToken="",deviceReady=!active,permissionError=false;
-  if(active){
+  if(!currentUser?.id)return false;
+  const active=$("beniDurtEnabled").checked,time=$("beniDurtTime").value;
+  const morningActive=$("beniDurtMorningEnabled").checked,morningTime=$("beniDurtMorningTime").value;
+  if(active&&!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time)){setBeniDurtState("Geçerli bir akşam saati seçin.",true);return false}
+  if(morningActive&&!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(morningTime)){setBeniDurtState("Geçerli bir sabah saati seçin.",true);return false}
+  const anyActive=active||morningActive;
+  let fcmToken="",deviceReady=!anyActive,permissionError=false;
+  if(anyActive){
     setBeniDurtState("Beni Dürt ayarı kaydediliyor…");
     try{fcmToken=await prepareBeniDurtSubscription(permissionPromise);deviceReady=!!fcmToken}catch(e){permissionError=true}
   }
-  const j=await api("beniDurtSave",{token:getToken(),active,time:time||"20:00",timeZone:beniDurtTimeZone(),deviceId:beniDurtDeviceId(),fcmToken},{timeout:30000});
+  const j=await api("beniDurtSave",{token:getToken(),active,time:time||"20:00",morningActive,morningTime:morningTime||"08:00",timeZone:beniDurtTimeZone(),deviceId:beniDurtDeviceId(),fcmToken},{timeout:30000});
   if(!j.ok){setBeniDurtState(authMessage(j.error),true);return false}
-  currentUser=j.user||{...currentUser,beniDurt:{active,time:time||"20:00",timeZone:beniDurtTimeZone()}};
+  currentUser=j.user||{...currentUser,beniDurt:{active,time:time||"20:00",morningActive,morningTime:morningTime||"08:00",timeZone:beniDurtTimeZone()}};
   beniDurtPreferenceVersion++;
   setSession(getToken(),currentUser);renderBeniDurtUI();
-  if(active&&!deviceReady){
-    const msg=Notification.permission==="denied"?"Saat kaydedildi · bu cihazda bildirim izni kapalı. Tarayıcı/sistem ayarlarından izin verin.":"Saat kaydedildi · bu cihaz henüz bildirim almaya hazır değil.";
+  if(anyActive&&!deviceReady){
+    const msg=Notification.permission==="denied"?"Saatler kaydedildi · bu cihazda bildirim izni kapalı. Tarayıcı/sistem ayarlarından izin verin.":"Saatler kaydedildi · bu cihaz henüz bildirim almaya hazır değil.";
     setBeniDurtState(msg,permissionError);
-  }else if(active){setBeniDurtState("Beni Dürt açık · saat kaydedildi ve bu cihaz bildirim alabilir.")}
+  }else if(anyActive){setBeniDurtState("Beni Dürt açık · ayarlar kaydedildi ve bu cihaz bildirim alabilir.")}
   return true;
 }
 
 function closeAccountMenu(){const m=$("accountMenu");if(!m)return;m.hidden=true;$("settings").setAttribute("aria-expanded","false")}
 function toggleAccountMenu(){const m=$("accountMenu");if(!m)return;const willOpen=m.hidden;closeAccountMenu();if(willOpen){m.hidden=false;$("settings").setAttribute("aria-expanded","true")}}
 function openSettingsDialog(){
-  closeJournalView(true);closeAccountMenu();updateUserUI();refreshThemeButtons();renderJournalPrivacyUI();settingsOriginalTheme=theme;settingsOriginalNudge=currentUser?.beniDurt?{...currentUser.beniDurt}:{active:false,time:"20:00",timeZone:beniDurtTimeZone()};renderBeniDurtUI();$("settingsSaveStatus").textContent="";$("accountDialog").showModal();
+  closeJournalView(true);closeAccountMenu();updateUserUI();refreshThemeButtons();renderJournalPrivacyUI();settingsOriginalTheme=theme;settingsOriginalNudge=currentUser?.beniDurt?{...currentUser.beniDurt}:{active:false,time:"20:00",morningActive:false,morningTime:"08:00",timeZone:beniDurtTimeZone()};renderBeniDurtUI();$("settingsSaveStatus").textContent="";$("accountDialog").showModal();
 }
 function discardSettingsAndClose(){
   if(settingsOriginalTheme){currentUser={...currentUser,theme:settingsOriginalTheme};setSession(getToken(),currentUser);rememberTheme(settingsOriginalTheme,currentUser,false);applyTheme(settingsOriginalTheme)}
@@ -4148,7 +4164,7 @@ async function openManagementDialog(){
   if(!registeredUsers||Date.now()-registeredUsersAt>60000)await loadRegisteredUsers();
 }
 async function saveSettings(){
-  const wantsNudge=$("beniDurtEnabled").checked;
+  const wantsNudge=$("beniDurtEnabled").checked||$("beniDurtMorningEnabled").checked;
   let permissionPromise=null;
   // Bildirim izni isteğini doğrudan Kaydet tıklamasının kullanıcı etkileşimi içinde başlat.
   // Promise daha sonra beklenir; böylece araya backend çağrısı girip tarayıcı gesture bağlamını bozmaz.
@@ -4164,7 +4180,15 @@ async function saveSettings(){
   }catch(e){$("settingsSaveStatus").textContent="Ayar kaydedilemedi. Yeniden deneyin."}
   finally{setBackendActionBusy(b,false)}
 }
-$("beniDurtEnabled").addEventListener("change",()=>{const on=$("beniDurtEnabled").checked;$("beniDurtTime").disabled=!on;if(!on){setBeniDurtState("Kapalı");return}if(!("Notification" in window)){setBeniDurtState("Bu tarayıcı bildirimleri desteklemiyor.",true);return}setBeniDurtState(Notification.permission==="granted"?"Beni Dürt açık · Kaydet ile etkinleştirilecek.":"Kaydederken bu cihaz için bildirim izni istenecek.")});
+function handleBeniDurtToggleChange(){
+  const evening=$("beniDurtEnabled").checked,morning=$("beniDurtMorningEnabled").checked;
+  $("beniDurtTime").disabled=!evening;$("beniDurtMorningTime").disabled=!morning;
+  if(!evening&&!morning){setBeniDurtState("Kapalı");return}
+  if(!("Notification" in window)){setBeniDurtState("Bu tarayıcı bildirimleri desteklemiyor.",true);return}
+  setBeniDurtState(Notification.permission==="granted"?"Beni Dürt açık · Kaydet ile etkinleştirilecek.":"Kaydederken bu cihaz için bildirim izni istenecek.");
+}
+$("beniDurtEnabled").addEventListener("change",handleBeniDurtToggleChange);
+$("beniDurtMorningEnabled").addEventListener("change",handleBeniDurtToggleChange);
 $("settings").onclick=e=>{e.stopPropagation();if(document.body.classList.contains("pinned-open"))closePinnedPanel(true);if(document.body.classList.contains("journal-open")&&!closeJournalView(false))return;toggleAccountMenu()};
 $("menuSettings").onclick=openSettingsDialog;$("menuAdmin").onclick=openManagementDialog;
 $("closeSettingsX").onclick=discardSettingsAndClose;$("saveSettings").onclick=saveSettings;
