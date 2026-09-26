@@ -803,17 +803,6 @@ body.journal-open{
 @media(prefers-reduced-motion:reduce){
   .utility-body-wrap{transition:none!important}
 }
-/* r54 — tanılama panelinden gelen veriyle doğrulandı: klavye açılırken tarayıcı
-   layout viewport'unu (dvh) anında küçültüyor; .cal position:fixed+bottom
-   olduğundan bu, kutunun üst kenarını TEK KAREDE ~350px yukarı sıçratıyor
-   (kaçınılmaz, native davranış). Asıl görünür "tilt" bundan sonra oluyor:
-   .utility-body-wrap'in height'ı .32s'lik transition ile bu sıçramadan geri
-   yavaşça toparlanıyor — kullanıcının gördüğü sallanma budur. Klavye açıkken
-   bu geçişi tamamen kapatıp anlık (tek kare) yerleşmesini sağlıyoruz; sürükleyerek
-   açma/kapama animasyonu (keyboard-open olmadığı durumlar) etkilenmiyor. */
-body.keyboard-open .utility-body-wrap{
-  transition:none!important;
-}
 
 
 /* r13 — Takvim üst ay başlığı + görünür çekme alanı */
@@ -953,20 +942,26 @@ body.keyboard-open .utility-body-clip{
 /* r35 — klavye açıkken ortak alt barın efektif yüksekliği sıfırdır.
    KeyboardManager yalnız body.keyboard-open state'ini üretir; bar/geometri CSS'te
    tek değişken üzerinden çözülür. Ana ekranda boş .cal kabuğu da tamamen gizlenir. */
-/* r49/r50 GERİ ALINDI: çekmece içinde bu değişkeni/cal-head çöküşünü dondurmak
-   tilt'i düzeltmedi ve liste öğelerinin klavye altında kalmasına (regresyon)
-   yol açtı. Orijinal r35 davranışına dönüldü; tilt kaynağı ayrı bir
-   mekanizma olmalı — önce ölçüm yapılacak. */
-body.keyboard-open{
+/* r54: utility çekmecelerinde klavye açıldığında hem aktif bar değişkeni
+   hem de .cal-head'in fiziksel yüksekliği sabit tutulur. Ana ekranda mevcut
+   klavye davranışı korunur; Çakılı/Çetele açıkken bar yalnız görsel olarak
+   gizlenir, layout geometrisi değiştirilmez. */
+body.keyboard-open:not(.pinned-open):not(.journal-open){
   --centik-active-drawer-bar-h:0px;
 }
-body.keyboard-open .cal-head{
+body.keyboard-open:not(.pinned-open):not(.journal-open) .cal-head{
   min-height:0!important;
   height:0!important;
   padding-block:0!important;
   margin:0!important;
   border:0!important;
   overflow:hidden!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+body.keyboard-open.pinned-open .cal-head,
+body.keyboard-open.journal-open .cal-head{
   opacity:0!important;
   visibility:hidden!important;
   pointer-events:none!important;
@@ -1038,34 +1033,18 @@ body.main-keyboard-open .task-row,
 body.main-keyboard-open form.add{
   overflow-anchor:none;
 }
-/* r50 — geçici tanılama paneli stili. Silinene kadar kalacak, üretimde
-   sorun değil (kullanıcı bir çekmecede textbox odaklamadıkça görünmez). */
-#centikKbDebug{
-  position:fixed;left:6px;right:6px;bottom:6px;z-index:9999;
-  max-height:42vh;display:flex;flex-direction:column;
-  background:rgba(0,0,0,.86);color:#7CFC9A;
-  font:10px/1.35 ui-monospace,Menlo,Consolas,monospace;
-  border-radius:8px;overflow:hidden;
-  pointer-events:auto;
-}
-#centikKbDebug[hidden]{display:none}
-#centikKbDebugBar{
-  display:flex;align-items:center;justify-content:space-between;gap:8px;
-  padding:5px 8px;background:rgba(255,255,255,.08);
-  font:11px/1.2 -apple-system,system-ui,sans-serif;color:#cfe;
-  flex:0 0 auto;
-}
-#centikKbDebugCopy{
-  appearance:none;border:1px solid #7CFC9A;background:transparent;color:#7CFC9A;
-  font:600 11px/1 -apple-system,system-ui,sans-serif;padding:5px 10px;border-radius:6px;
-}
-#centikKbDebugCopy:active{background:#7CFC9A;color:#000}
-#centikKbDebugLog{
-  overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:6px 8px;white-space:pre-wrap;word-break:break-word;
-  user-select:text;-webkit-user-select:text;
-  flex:1 1 auto;min-height:0;
-}
+
+
+/* r55-diagnostic — yalnız tanılama arayüzü */
+.keyboard-diag-card{margin:12px 0 4px;padding:14px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--paper) 88%,transparent)}
+.keyboard-diag-card h3{margin:0 0 4px;font-size:.96rem}
+.keyboard-diag-card>p{margin:0 0 10px;color:var(--muted);font-size:.82rem;line-height:1.45}
+.keyboard-diag-actions{display:flex;gap:8px;flex-wrap:wrap}
+.keyboard-diag-actions button{border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);padding:8px 10px;font-weight:700;font-size:.80rem}
+.keyboard-diag-actions button.primary{color:var(--focus);border-color:color-mix(in srgb,var(--focus) 38%,var(--line))}
+.keyboard-diag-actions button.danger{color:#b42318;border-color:color-mix(in srgb,#b42318 28%,var(--line))}
+.keyboard-diag-state{margin:9px 0 0!important;font-size:.76rem!important;color:var(--marka)!important;font-weight:650}
+.keyboard-diag-output{width:100%;min-height:160px;max-height:300px;margin-top:10px;padding:9px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font:500 .68rem/1.4 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;resize:vertical}
 </style>
 </head>
 <body class="auth-locked">
@@ -1167,6 +1146,18 @@ body.main-keyboard-open form.add{
           <input class="beni-durt-time" id="beniDurtTime" type="time" value="20:00" step="60">
         </div>
         <p class="beni-durt-state" id="beniDurtState" aria-live="polite"></p>
+      </section>
+      <section class="keyboard-diag-card" aria-labelledby="keyboardDiagTitle">
+        <h3 id="keyboardDiagTitle">Klavye / Çekmece Tanılama</h3>
+        <p>Davranışı değiştirmez. Sorun oluşurken klavye, viewport, çekmece ve scroll geometrisini kaydeder. Yazdığınız metin veya tuş içeriği kaydedilmez.</p>
+        <div class="keyboard-diag-actions">
+          <button class="primary" id="keyboardDiagStart" type="button">Kaydı başlat</button>
+          <button id="keyboardDiagStop" type="button">Durdur</button>
+          <button id="keyboardDiagCopy" type="button">Kaydı kopyala</button>
+          <button class="danger" id="keyboardDiagClear" type="button">Temizle</button>
+        </div>
+        <p class="keyboard-diag-state" id="keyboardDiagState" aria-live="polite">Kayıt kapalı.</p>
+        <textarea class="keyboard-diag-output" id="keyboardDiagOutput" readonly hidden aria-label="Klavye tanılama çıktısı"></textarea>
       </section>
       <section class="journal-privacy" aria-labelledby="journalPrivacyTitle">
         <h3 id="journalPrivacyTitle">Çetele Gizliliği</h3>
@@ -1422,7 +1413,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v95-kill-kb-transition-r54", CENTIK_EXPECTED_SERVER_BUILD="v33-beni-durt";
+const CENTIK_CLIENT_BUILD="v95-r55-diagnostic", CENTIK_EXPECTED_SERVER_BUILD="v33-beni-durt";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -2457,168 +2448,6 @@ const KeyboardManager=(()=>{
     getPolicy:()=>session?.policy?.name||null,
     refresh:()=>schedule({smooth:false})
   };
-})();
-
-// r52 — GEÇİCİ TANILAMA PANELİ (v2): r50'deki panel yalnız son 14 satırı tutup
-// üzerine yazıyordu; sıçrama/tilt odaklanmanın ilk 300-500ms'sinde olup bitiyor
-// ve ekran görüntüsü alınana kadar o pencere siliniyordu. Bu sürümde:
-//  - Odaklanma anından (0ms) itibaren HİÇBİR satır silinmiyor, yalnızca bir
-//    önceki örneğe göre bir şey DEĞİŞTİĞİNDE yeni satır ekleniyor (aynı
-//    değerler tekrar tekrar yazılmıyor, "x3" gibi tekrar sayacı ile özetleniyor).
-//  - Odak kaybolunca panel silinmiyor, bir sonraki odaklanmaya kadar ekranda
-//    kalıyor — olay bittikten sonra yukarı kaydırıp baştan okunabilir.
-//  - .cal kabuğunun kendi getBoundingClientRect().top/height değerleri de
-//    ekleniyor (tilt şüphesi doğrudan bu kabuğun konumunda).
-(function centikKbDebugOverlay(){
-  let box=null,logEl=null,raf=0,rows=[],last=null,repeat=0,sessionStart=0,active_prev=false;
-  const MAX_ROWS=600;
-
-  function ensureBox(){
-    if(box)return box;
-    box=document.createElement("div");
-    box.id="centikKbDebug";
-    const bar=document.createElement("div");
-    bar.id="centikKbDebugBar";
-    const label=document.createElement("span");
-    label.textContent="Klavye tanılama günlüğü";
-    const btn=document.createElement("button");
-    btn.type="button";
-    btn.id="centikKbDebugCopy";
-    btn.textContent="Kopyala";
-    btn.addEventListener("click",async()=>{
-      const text=rows.join("\n");
-      try{
-        if(navigator.clipboard?.writeText){
-          await navigator.clipboard.writeText(text);
-        }else{
-          throw new Error("clipboard api yok");
-        }
-        btn.textContent="Kopyalandı ✓";
-      }catch(e){
-        // Pano izni yoksa yedek yol: metni seçili hale getir, kullanıcı elle kopyalasın.
-        const range=document.createRange();
-        range.selectNodeContents(logEl);
-        const sel=window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-        btn.textContent="Seçildi, elle kopyala";
-      }
-      setTimeout(()=>{btn.textContent="Kopyala"},1600);
-    });
-    bar.appendChild(label);
-    bar.appendChild(btn);
-    logEl=document.createElement("div");
-    logEl.id="centikKbDebugLog";
-    box.appendChild(bar);
-    box.appendChild(logEl);
-    document.body.appendChild(box);
-    return box;
-  }
-
-  function nearestScroller(el){
-    let p=el?.parentElement;
-    while(p&&p!==document.body&&p!==document.documentElement){
-      const oy=getComputedStyle(p).overflowY;
-      if((oy==="auto"||oy==="scroll")&&p.scrollHeight>p.clientHeight+2)return p;
-      p=p.parentElement;
-    }
-    return document.scrollingElement||document.documentElement;
-  }
-
-  function fmt(n){return Number.isFinite(n)?Math.round(n):"—"}
-
-  function flushRepeat(){
-    if(repeat>1&&rows.length){
-      rows[rows.length-1]+="  (x"+repeat+")";
-    }
-    repeat=1;
-  }
-
-  function paint(autoscroll){
-    logEl.textContent=rows.join("\n");
-    if(autoscroll)logEl.scrollTop=logEl.scrollHeight;
-  }
-
-  function sample(){
-    raf=0;
-    const active=document.activeElement;
-    const inDrawer=document.body.classList.contains("pinned-open")||document.body.classList.contains("journal-open");
-    const active_ok=!!(inDrawer&&active&&active!==document.body&&(active.matches?.("input,textarea,[contenteditable='true']")));
-
-    if(active_ok&&!active_prev){
-      // yeni odaklanma oturumu başladı — sıfırdan logla
-      rows=[];
-      last=null;
-      repeat=1;
-      sessionStart=performance.now();
-      ensureBox().hidden=false;
-      rows.push("── yeni odak: "+(active.id||active.className||active.tagName)+" ──");
-    }
-    const justEnded=(!active_ok&&active_prev);
-    active_prev=active_ok;
-
-    if(!active_ok){
-      if(justEnded){
-        flushRepeat();
-        paint(false);
-      }
-      // panel'i SİLME — son durumu ekranda bırak, sadece örneklemeyi durdur.
-      // Burada scrollTop'u zorlamıyoruz ki kullanıcı yukarı kaydırıp
-      // baştan okuyabilsin.
-      return;
-    }
-
-    const scroller=nearestScroller(active);
-    const rect=active.getBoundingClientRect?.()||{};
-    const wrapId=document.body.classList.contains("pinned-open")?"pinnedBodyWrap":"journalBodyWrap";
-    const wrap=document.getElementById(wrapId);
-    const wrapRect=wrap?wrap.getBoundingClientRect():null;
-    const cal=document.getElementById("calendarDrawer");
-    const calRect=cal?cal.getBoundingClientRect():null;
-    const state=KeyboardManager?.getState?.();
-    const sig=[
-      "t="+fmt(performance.now()-sessionStart)+"ms",
-      "prov="+(KeyboardManager?.getProvider?.()||"-"),
-      "kb-open="+document.body.classList.contains("keyboard-open"),
-      "st.open="+(state?.open),
-      "st.bottom="+fmt(state?.bottom),
-      "elTop="+fmt(rect.top),
-      "elBot="+fmt(rect.bottom),
-      "wrapH="+fmt(wrapRect?.height),
-      "wrapTop="+fmt(wrapRect?.top),
-      "calTop="+fmt(calRect?.top),
-      "calH="+fmt(calRect?.height),
-      "scrTop="+fmt(scroller?.scrollTop),
-      "scrClientH="+fmt(scroller?.clientHeight)
-    ].join(" ");
-    // sadece "t=" hariç kısım değiştiyse yeni satır aç, değişmediyse tekrar say
-    const sigNoT=sig.replace(/^t=\S+\s*/,"");
-    if(sigNoT===last){
-      repeat++;
-    }else{
-      flushRepeat();
-      rows.push(sig);
-      last=sigNoT;
-    }
-    if(rows.length>MAX_ROWS)rows.splice(0,rows.length-MAX_ROWS);
-    paint(true);
-    raf=requestAnimationFrame(sample);
-  }
-
-  function kick(){
-    if(raf)return;
-    raf=requestAnimationFrame(sample);
-  }
-
-  document.addEventListener("focusin",kick,true);
-  document.addEventListener("focusout",()=>setTimeout(kick,0),true);
-  document.addEventListener("input",kick,true);
-  window.addEventListener("resize",kick,{passive:true});
-  if(window.visualViewport){
-    visualViewport.addEventListener("resize",kick,{passive:true});
-    visualViewport.addEventListener("scroll",kick,{passive:true});
-  }
-  kick();
 })();
 
 // V94 r28 — Görev satırı eylemleri için ortak durum motoru.
@@ -4414,5 +4243,339 @@ if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.add
   </svg>
   <span>Sayfayı yenile</span>
 </div>
+
+
+<script>
+/* r55-diagnostic
+   Salt gözlemci. Scroll/focus/layout yazmaz; kullanıcı metnini ve tuş içeriğini kaydetmez. */
+(()=>{
+  "use strict";
+
+  const MAX_EVENTS=900;
+  const events=[];
+  let recording=false;
+  let seq=0;
+  let rafToken=0;
+
+  const $d=id=>document.getElementById(id);
+  const n=v=>{
+    const x=Number(v);
+    return Number.isFinite(x)?Math.round(x*10)/10:null;
+  };
+  const rectOf=el=>{
+    if(!(el instanceof Element))return null;
+    const r=el.getBoundingClientRect();
+    return {top:n(r.top),bottom:n(r.bottom),left:n(r.left),right:n(r.right),width:n(r.width),height:n(r.height)};
+  };
+  const cssVal=(el,name)=>{
+    try{return getComputedStyle(el).getPropertyValue(name).trim()}catch(_){return ""}
+  };
+  const nodeName=el=>{
+    if(!(el instanceof HTMLElement))return null;
+    let s=(el.tagName||"").toLowerCase();
+    if(el.id)s+=`#${el.id}`;
+    if(el.classList?.length)s+="."+[...el.classList].slice(0,3).join(".");
+    return s;
+  };
+  const isEditable=el=>{
+    if(!(el instanceof HTMLElement))return false;
+    if(el.matches("textarea,[contenteditable='true']"))return true;
+    if(!el.matches("input"))return false;
+    const type=String(el.type||"text").toLowerCase();
+    return !["button","checkbox","radio","range","color","file","submit","reset","image","hidden"].includes(type);
+  };
+  const activePolicy=el=>{
+    if(!(el instanceof HTMLElement))return "none";
+    if(el.id==="newTask"||(el.matches("input.edit-input")&&el.closest("#list")))return "main";
+    if(el.closest("#pinnedBodyWrap,#journalBodyWrap,#pinnedPanel,#journalPanel,#pinnedShareDialog,#journalPinDialog"))return "utility";
+    return isEditable(el)?"legacy":"none";
+  };
+  const currentWrap=active=>{
+    const own=active?.closest?.(".utility-body-wrap");
+    if(own)return own;
+    if(document.body.classList.contains("pinned-open"))return document.getElementById("pinnedBodyWrap");
+    if(document.body.classList.contains("journal-open"))return document.getElementById("journalBodyWrap");
+    return null;
+  };
+  const currentClip=active=>{
+    const own=active?.closest?.(".utility-body-clip");
+    if(own)return own;
+    const wrap=currentWrap(active);
+    return wrap?.querySelector?.(".utility-body-clip")||null;
+  };
+  const vkRect=()=>{
+    try{
+      const r=navigator.virtualKeyboard?.boundingRect;
+      if(!r)return null;
+      return {top:n(r.top),bottom:n(r.bottom),left:n(r.left),right:n(r.right),width:n(r.width),height:n(r.height)};
+    }catch(_){return null}
+  };
+  const styleSnapshot=el=>{
+    if(!(el instanceof Element))return null;
+    const c=getComputedStyle(el);
+    return {
+      height:c.height,
+      minHeight:c.minHeight,
+      maxHeight:c.maxHeight,
+      paddingTop:c.paddingTop,
+      paddingBottom:c.paddingBottom,
+      marginTop:c.marginTop,
+      marginBottom:c.marginBottom,
+      overflowY:c.overflowY,
+      transitionProperty:c.transitionProperty,
+      transitionDuration:c.transitionDuration,
+      transform:c.transform,
+      visibility:c.visibility,
+      opacity:c.opacity
+    };
+  };
+
+  function snapshot(event,phase,target,extra={}){
+    const active=document.activeElement instanceof HTMLElement?document.activeElement:null;
+    const wrap=currentWrap(active);
+    const clip=currentClip(active);
+    const cal=document.querySelector(".cal");
+    const head=document.querySelector(".cal-head");
+    const vv=window.visualViewport;
+    const rootStyle=getComputedStyle(document.documentElement);
+    const bodyStyle=getComputedStyle(document.body);
+    return {
+      n:++seq,
+      ms:n(performance.now()),
+      event,
+      phase,
+      target:nodeName(target),
+      active:nodeName(active),
+      editable:isEditable(active),
+      policy:activePolicy(active),
+      provider:document.documentElement.dataset.keyboardProvider||"",
+      inputType:extra.inputType||null,
+      charKey:extra.charKey===true,
+      transitionProperty:extra.transitionProperty||null,
+      bodyClasses:[...document.body.classList],
+      root:{
+        keyboardInset:rootStyle.getPropertyValue("--keyboard-inset").trim(),
+        activeDrawerBarH:rootStyle.getPropertyValue("--centik-active-drawer-bar-h").trim(),
+        drawerBarH:rootStyle.getPropertyValue("--centik-drawer-bar-h").trim(),
+        topbarH:rootStyle.getPropertyValue("--centik-topbar-h").trim()
+      },
+      window:{
+        innerHeight:n(window.innerHeight),
+        innerWidth:n(window.innerWidth),
+        scrollY:n(window.scrollY),
+        devicePixelRatio:n(window.devicePixelRatio)
+      },
+      document:{
+        clientHeight:n(document.documentElement.clientHeight),
+        scrollTop:n(document.scrollingElement?.scrollTop),
+        scrollHeight:n(document.scrollingElement?.scrollHeight)
+      },
+      visualViewport:vv?{
+        height:n(vv.height),
+        width:n(vv.width),
+        offsetTop:n(vv.offsetTop),
+        offsetLeft:n(vv.offsetLeft),
+        pageTop:n(vv.pageTop),
+        pageLeft:n(vv.pageLeft),
+        scale:n(vv.scale)
+      }:null,
+      virtualKeyboard:vkRect(),
+      cal:{
+        rect:rectOf(cal),
+        style:styleSnapshot(cal)
+      },
+      calHead:{
+        rect:rectOf(head),
+        style:styleSnapshot(head)
+      },
+      utilityWrap:wrap?{
+        id:wrap.id,
+        rect:rectOf(wrap),
+        scrollTop:n(wrap.scrollTop),
+        clientHeight:n(wrap.clientHeight),
+        scrollHeight:n(wrap.scrollHeight),
+        style:styleSnapshot(wrap)
+      }:null,
+      utilityClip:clip?{
+        rect:rectOf(clip),
+        scrollTop:n(clip.scrollTop),
+        clientHeight:n(clip.clientHeight),
+        scrollHeight:n(clip.scrollHeight),
+        style:styleSnapshot(clip)
+      }:null,
+      activeEditable:active&&isEditable(active)?{
+        name:nodeName(active),
+        rect:rectOf(active),
+        scrollTop:n(active.scrollTop),
+        clientHeight:n(active.clientHeight),
+        scrollHeight:n(active.scrollHeight)
+      }:null
+    };
+  }
+
+  function push(event,phase,target,extra={}){
+    if(!recording)return;
+    try{
+      events.push(snapshot(event,phase,target,extra));
+      if(events.length>MAX_EVENTS)events.splice(0,events.length-MAX_EVENTS);
+      updateState();
+    }catch(_){}
+  }
+
+  function traceRafs(event,target,extra={}){
+    requestAnimationFrame(()=>{
+      push(event,"raf1",target,extra);
+      requestAnimationFrame(()=>push(event,"raf2",target,extra));
+    });
+  }
+
+  function eventExtra(e){
+    return {
+      inputType:e?.inputType||null,
+      charKey:e?.type==="keydown" && String(e.key||"").length===1
+    };
+  }
+
+  function onDoc(type,withRaf=false){
+    document.addEventListener(type,e=>{
+      const extra=eventExtra(e);
+      push(type,"event",e.target,extra);
+      if(withRaf)traceRafs(type,e.target,extra);
+    },true);
+  }
+
+  onDoc("focusin",true);
+  onDoc("focusout",true);
+  onDoc("keydown",true);
+  onDoc("beforeinput",true);
+  onDoc("input",true);
+
+  window.addEventListener("resize",()=>{
+    push("window.resize","event",document.activeElement,{});
+    traceRafs("window.resize",document.activeElement,{});
+  },{passive:true});
+  window.addEventListener("scroll",()=>{
+    push("window.scroll","event",document.activeElement,{});
+  },{passive:true});
+
+  if(window.visualViewport){
+    visualViewport.addEventListener("resize",()=>{
+      push("visualViewport.resize","event",document.activeElement,{});
+      traceRafs("visualViewport.resize",document.activeElement,{});
+    },{passive:true});
+    visualViewport.addEventListener("scroll",()=>{
+      push("visualViewport.scroll","event",document.activeElement,{});
+      traceRafs("visualViewport.scroll",document.activeElement,{});
+    },{passive:true});
+  }
+
+  if(navigator.virtualKeyboard){
+    try{
+      navigator.virtualKeyboard.addEventListener("geometrychange",()=>{
+        push("virtualKeyboard.geometrychange","event",document.activeElement,{});
+        traceRafs("virtualKeyboard.geometrychange",document.activeElement,{});
+      });
+    }catch(_){}
+  }
+
+  ["transitionrun","transitionstart","transitionend","transitioncancel"].forEach(type=>{
+    document.addEventListener(type,e=>{
+      const t=e.target;
+      if(!(t instanceof Element))return;
+      if(!t.matches(".utility-body-wrap,.utility-body-clip,.cal,.cal-head"))return;
+      const extra={transitionProperty:e.propertyName||null};
+      push(type,"event",t,extra);
+      traceRafs(type,t,extra);
+    },true);
+  });
+
+  const bodyObserver=new MutationObserver(ms=>{
+    for(const m of ms){
+      if(m.type==="attributes"&&m.attributeName==="class"){
+        push("body.class","mutation",document.body,{});
+        traceRafs("body.class",document.body,{});
+      }
+    }
+  });
+  bodyObserver.observe(document.body,{attributes:true,attributeFilter:["class"]});
+
+  const rootObserver=new MutationObserver(ms=>{
+    for(const m of ms){
+      if(m.type==="attributes"&&m.attributeName==="style"){
+        push("root.style","mutation",document.documentElement,{});
+        traceRafs("root.style",document.documentElement,{});
+      }
+    }
+  });
+  rootObserver.observe(document.documentElement,{attributes:true,attributeFilter:["style"]});
+
+  function updateState(msg=""){
+    const el=$d("keyboardDiagState");
+    if(!el)return;
+    el.textContent=msg || (recording?`Kayıt açık · ${events.length} olay`:`Kayıt kapalı · ${events.length} olay`);
+  }
+
+  function start(){
+    events.length=0;
+    seq=0;
+    recording=true;
+    push("diagnostic","start",document.activeElement,{});
+    updateState("Kayıt başladı. Ayarları kapatıp sorunu bir kez üretin.");
+  }
+
+  function stop(){
+    if(recording)push("diagnostic","stop",document.activeElement,{});
+    recording=false;
+    updateState();
+  }
+
+  function clear(){
+    events.length=0;
+    seq=0;
+    const out=$d("keyboardDiagOutput");
+    if(out){out.value="";out.hidden=true}
+    updateState("Kayıt temizlendi.");
+  }
+
+  function report(){
+    return {
+      build:"r55-diagnostic-on-r54",
+      generatedAt:new Date().toISOString(),
+      userAgent:navigator.userAgent,
+      standalone:!!window.matchMedia?.("(display-mode: standalone)")?.matches,
+      eventCount:events.length,
+      events:[...events]
+    };
+  }
+
+  async function copy(){
+    const data=JSON.stringify(report(),null,2);
+    const out=$d("keyboardDiagOutput");
+    if(out){out.value=data;out.hidden=false}
+    let ok=false;
+    try{
+      await navigator.clipboard.writeText(data);
+      ok=true;
+    }catch(_){
+      try{
+        if(out){
+          out.focus({preventScroll:true});
+          out.select();
+          ok=document.execCommand("copy");
+          out.blur();
+        }
+      }catch(__){}
+    }
+    updateState(ok?`Kayıt panoya kopyalandı · ${events.length} olay`:`Pano izni yok; kayıt aşağıdaki kutuda hazır · ${events.length} olay`);
+  }
+
+  $d("keyboardDiagStart")?.addEventListener("click",start);
+  $d("keyboardDiagStop")?.addEventListener("click",stop);
+  $d("keyboardDiagClear")?.addEventListener("click",clear);
+  $d("keyboardDiagCopy")?.addEventListener("click",copy);
+
+  updateState();
+})();
+</script>
 </body>
 </html>
