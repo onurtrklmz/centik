@@ -942,26 +942,14 @@ body.keyboard-open .utility-body-clip{
 /* r35 — klavye açıkken ortak alt barın efektif yüksekliği sıfırdır.
    KeyboardManager yalnız body.keyboard-open state'ini üretir; bar/geometri CSS'te
    tek değişken üzerinden çözülür. Ana ekranda boş .cal kabuğu da tamamen gizlenir. */
-/* r48 düzeltmesi: bu değişken eskiden .pinned-open/.journal-open sırasında da
-   değişiyordu — çekmece açıkken klavye her açıldığında #pinnedBodyWrap/
-   #journalBodyWrap'in height'ı (ve dolayısıyla iç scroll konteyneri
-   .utility-body-clip) ~58px animasyonlu şekilde yeniden boyutlanıyor, bu da
-   o an odaklı textbox'ın konumunu hesaplayan KeyboardManager için hareketli
-   bir hedef yaratıp en üste sıçramaya yol açıyordu. Artık yalnız ana ekranda
-   (çekmece kapalıyken) etkili oluyor; çekmece içindeyken bar yüksekliği
-   klavye durumundan tamamen bağımsız, sabit kalıyor. */
-body.keyboard-open:not(.pinned-open):not(.journal-open){
+/* r49/r50 GERİ ALINDI: çekmece içinde bu değişkeni/cal-head çöküşünü dondurmak
+   tilt'i düzeltmedi ve liste öğelerinin klavye altında kalmasına (regresyon)
+   yol açtı. Orijinal r35 davranışına dönüldü; tilt kaynağı ayrı bir
+   mekanizma olmalı — önce ölçüm yapılacak. */
+body.keyboard-open{
   --centik-active-drawer-bar-h:0px;
 }
-/* r50 düzeltmesi: cal-head çöküşü de aynı nedenle bar-h değişkeniyle
-   dengede tutulmalıydı (58px küçülen bar'ı wrap'in 58px büyümesi
-   telafi ediyordu; .cal'in toplam yüksekliği net değişmiyordu). Yalnız
-   değişkeni çekmeceye özgülemek bu dengeyi bozdu: cal-head hâlâ açılıp
-   kapanıyor ama wrap artık tepki vermiyor, .cal (position:fixed +
-   bottom-anchor) net yükseklik değiştikçe üst kenarından "tilt" yapıyor
-   görünüyordu. Artık çekmece açıkken cal-head de klavye durumundan
-   tamamen bağımsız — hiçbiri oynamıyor. */
-body.keyboard-open:not(.pinned-open):not(.journal-open) .cal-head{
+body.keyboard-open .cal-head{
   min-height:0!important;
   height:0!important;
   padding-block:0!important;
@@ -1039,6 +1027,17 @@ body.main-keyboard-open .task-row,
 body.main-keyboard-open form.add{
   overflow-anchor:none;
 }
+/* r50 — geçici tanılama paneli stili. Silinene kadar kalacak, üretimde
+   sorun değil (kullanıcı bir çekmecede textbox odaklamadıkça görünmez). */
+#centikKbDebug{
+  position:fixed;left:6px;right:6px;bottom:6px;z-index:9999;
+  max-height:38vh;overflow-y:auto;
+  background:rgba(0,0,0,.82);color:#7CFC9A;
+  font:10px/1.35 ui-monospace,Menlo,Consolas,monospace;
+  padding:6px 8px;border-radius:8px;white-space:pre-wrap;word-break:break-word;
+  pointer-events:none;
+}
+#centikKbDebug[hidden]{display:none}
 </style>
 </head>
 <body class="auth-locked">
@@ -1395,7 +1394,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v95-cal-head-tilt-fix-r50", CENTIK_EXPECTED_SERVER_BUILD="v33-beni-durt";
+const CENTIK_CLIENT_BUILD="v95-debug-overlay-r51", CENTIK_EXPECTED_SERVER_BUILD="v33-beni-durt";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -2430,6 +2429,89 @@ const KeyboardManager=(()=>{
     getPolicy:()=>session?.policy?.name||null,
     refresh:()=>schedule({smooth:false})
   };
+})();
+
+// r50 — GEÇİCİ TANILAMA PANELİ: çekmece klavye "tilt" sorununu gerçek verilerle
+// teşhis etmek için. Ekranın altında küçük, yarı saydam bir kutuda KeyboardManager
+// state'ini, odaklı elemanın konumunu ve en yakın scroll edilebilir atanın
+// scrollTop/clientHeight/scrollHeight değerlerini canlı gösterir. Sadece bir
+// çekmece açıkken VE içinde bir textbox odaklıyken görünür. İşimiz bitince
+// bu bloğu (ve CSS'teki #centikKbDebug kuralını) kaldırabiliriz.
+(function centikKbDebugOverlay(){
+  let box=null,raf=0,rows=[];
+  const MAX_ROWS=14;
+
+  function ensureBox(){
+    if(box)return box;
+    box=document.createElement("div");
+    box.id="centikKbDebug";
+    document.body.appendChild(box);
+    return box;
+  }
+
+  function nearestScroller(el){
+    let p=el?.parentElement;
+    while(p&&p!==document.body&&p!==document.documentElement){
+      const oy=getComputedStyle(p).overflowY;
+      if((oy==="auto"||oy==="scroll")&&p.scrollHeight>p.clientHeight+2)return p;
+      p=p.parentElement;
+    }
+    return document.scrollingElement||document.documentElement;
+  }
+
+  function fmt(n){return Number.isFinite(n)?Math.round(n):"—"}
+
+  function sample(){
+    raf=0;
+    const active=document.activeElement;
+    const inDrawer=document.body.classList.contains("pinned-open")||document.body.classList.contains("journal-open");
+    const active_ok=active&&active!==document.body&&(active.matches?.("input,textarea,[contenteditable='true']"));
+    if(!inDrawer||!active_ok){
+      if(box)box.hidden=true;
+      rows=[];
+      return;
+    }
+    ensureBox().hidden=false;
+    const scroller=nearestScroller(active);
+    const rect=active.getBoundingClientRect?.()||{};
+    const wrapId=document.body.classList.contains("pinned-open")?"pinnedBodyWrap":"journalBodyWrap";
+    const wrap=document.getElementById(wrapId);
+    const wrapH=wrap?Math.round(wrap.getBoundingClientRect().height):null;
+    const state=KeyboardManager?.getState?.();
+    const line=[
+      new Date().toISOString().slice(11,19)+"."+String(performance.now()|0).slice(-3),
+      "prov="+(KeyboardManager?.getProvider?.()||"-"),
+      "pol="+(KeyboardManager?.getPolicy?.()||"-"),
+      "kb-open="+document.body.classList.contains("keyboard-open"),
+      "st.open="+(state?.open),
+      "st.inset="+fmt(state?.inset),
+      "st.bottom="+fmt(state?.bottom),
+      "elTop="+fmt(rect.top),
+      "elBottom="+fmt(rect.bottom),
+      "wrapH="+wrapH,
+      "scrTop="+fmt(scroller?.scrollTop),
+      "scrClientH="+fmt(scroller?.clientHeight),
+      "scrScrollH="+fmt(scroller?.scrollHeight)
+    ].join(" ");
+    rows.push(line);
+    if(rows.length>MAX_ROWS)rows.shift();
+    box.textContent=rows.join("\n");
+    raf=requestAnimationFrame(sample);
+  }
+
+  function kick(){
+    if(raf)return;
+    raf=requestAnimationFrame(sample);
+  }
+
+  document.addEventListener("focusin",kick,true);
+  document.addEventListener("input",kick,true);
+  window.addEventListener("resize",kick,{passive:true});
+  if(window.visualViewport){
+    visualViewport.addEventListener("resize",kick,{passive:true});
+    visualViewport.addEventListener("scroll",kick,{passive:true});
+  }
+  kick();
 })();
 
 // V94 r28 — Görev satırı eylemleri için ortak durum motoru.
