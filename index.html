@@ -126,6 +126,29 @@ body::before{
 .brand:focus-visible{outline:2px solid var(--marka);outline-offset:4px;border-radius:6px}
 .brand-logo{width:2.35rem;height:2.35rem;object-fit:contain;flex-shrink:0}
 .brand h1{margin:0;font-family:var(--serif);font-weight:600;font-size:1.88rem;line-height:1;letter-spacing:-.02em;color:var(--ink)}
+.beta-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:none;
+  min-height:24px;
+  padding:2px 9px 1px;
+  border:1.5px solid color-mix(in srgb,var(--focus) 58%,transparent);
+  border-radius:10px;
+  color:color-mix(in srgb,var(--focus) 82%,var(--ink));
+  background:color-mix(in srgb,var(--focus) 7%,transparent);
+  font:700 .68rem/1 var(--sans);
+  letter-spacing:.08em;
+}
+.app-download{
+  width:36px;
+  height:36px;
+  padding:0;
+  justify-content:center;
+  text-decoration:none;
+  flex:0 0 36px;
+}
+.app-download>.ti{font-size:18px;line-height:1}
 .brand .count{font-size:.74rem;font-weight:600;letter-spacing:.02em;color:var(--marka);background:var(--accent-soft);border-radius:999px;padding:4px 11px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .ubtn{
   font:600 .78rem/1 var(--sans);color:var(--marka);
@@ -1106,6 +1129,14 @@ body.main-keyboard-open form.add{
 .task-delete{color:color-mix(in srgb,#b42318 70%,var(--muted));border-color:color-mix(in srgb,#b42318 24%,var(--line))}
 @media (hover:hover) and (pointer:fine){.edit:hover,.del:hover{transform:translateY(-1px)}}
 .edit:active,.del:active{transform:translateY(0) scale(.96)}
+
+@media (max-width:390px){
+  .ust-cubuk .wrap{gap:8px;padding-inline:12px}
+  .brand{gap:7px}
+  .brand h1{font-size:1.72rem}
+  .beta-badge{min-height:22px;padding-inline:7px;font-size:.62rem}
+  .app-download{width:34px;height:34px;flex-basis:34px}
+}
 </style>
 </head>
 <body class="auth-locked">
@@ -1114,7 +1145,11 @@ body.main-keyboard-open form.add{
   <div class="brand" id="brand" role="button" tabindex="0" aria-label="Bugüne dön">
     <img class="brand-logo" src="icon-192.png" alt="">
     <h1>Çentik</h1>
+    <span class="beta-badge" aria-label="Beta sürümü">BETA</span>
   </div>
+  <a class="ubtn app-download" id="androidDownload" href="https://onurtrklmz.github.io/centik/com.centik.app-BETA1-web101.apk" download="com.centik.app-BETA1-web101.apk" aria-label="Çentik Android Beta APK indir" title="Android uygulamasını indir">
+    <i class="ti ti-download" aria-hidden="true"></i>
+  </a>
   <button class="ubtn sync-refresh is-loading" id="refresh" type="button" aria-label="Yükleniyor" title="Yükleniyor">
     <i class="ti ti-refresh sync-icon sync-icon-refresh" aria-hidden="true"></i>
     <i class="ti ti-cloud-check sync-icon sync-icon-cloud" aria-hidden="true"></i>
@@ -1464,7 +1499,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v101-sabah-saat-cache-fix", CENTIK_EXPECTED_SERVER_BUILD="v36-sabah-saat-cache-fix";
+const CENTIK_CLIENT_BUILD="v102-beta-apk-link", CENTIK_EXPECTED_SERVER_BUILD="v36-sabah-saat-cache-fix";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
