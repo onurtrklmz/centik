@@ -8,6 +8,11 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <title>Çentik</title>
+<!--
+  Geliştirici / Developer: Onur Türkölmez
+  Telif Hakkı / Copyright © 2026 Onur Türkölmez
+  Tüm hakları saklıdır / All rights reserved.
+-->
 <meta name="theme-color" content="#0B1226">
 <meta name="color-scheme" content="light dark">
 <link rel="manifest" href="manifest.json">
@@ -1459,7 +1464,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v98-bildirim-metni", CENTIK_EXPECTED_SERVER_BUILD="v35-bildirim-metni";
+const CENTIK_CLIENT_BUILD="v100-copyright-placement", CENTIK_EXPECTED_SERVER_BUILD="v35-bildirim-metni";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
