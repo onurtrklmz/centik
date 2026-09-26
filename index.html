@@ -299,6 +299,23 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 .tally-side{min-width:0}
 .tally-day{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;text-align:left;min-height:78px}
 .tally-month{display:flex;align-items:baseline;justify-content:flex-end;gap:8px;text-align:right;white-space:nowrap;align-self:center}
+.tally-month-button{
+  width:100%;
+  margin:0;
+  padding:7px 8px;
+  border:0;
+  border-radius:12px;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:background .14s ease,transform .14s ease;
+}
+.tally-month-button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+@media (hover:hover) and (pointer:fine){
+  .tally-month-button:hover{background:color-mix(in srgb,var(--focus) 7%,transparent);transform:translateY(-1px)}
+}
 .tally-unit{display:inline-flex;align-items:baseline;gap:8px;white-space:nowrap}
 .tally-progress{gap:0}
 .tally-progress .count-sep{margin:0 .075em;color:var(--ink);font-family:var(--serif);font-size:2.9rem;line-height:.95;font-weight:500;opacity:.92}
@@ -570,8 +587,8 @@ body.auth-locked{overflow:hidden!important}body.auth-locked .ust-cubuk,body.auth
 .account-menu-item.danger{color:#c63232}
 .account-menu-sep{height:1px;background:var(--line);margin:5px 7px}
 
-#accountDialog,#managementDialog,#journalPinDialog{width:min(92vw,500px);max-height:min(88vh,760px);padding:0;border:0;background:transparent;color:var(--ink);overflow:visible}
-#accountDialog::backdrop,#managementDialog::backdrop,#journalPinDialog::backdrop{background:rgba(5,9,20,.46);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+#accountDialog,#managementDialog,#journalPinDialog,#monthDoneDialog{width:min(92vw,500px);max-height:min(88vh,760px);padding:0;border:0;background:transparent;color:var(--ink);overflow:visible}
+#accountDialog::backdrop,#managementDialog::backdrop,#journalPinDialog::backdrop,#monthDoneDialog::backdrop{background:rgba(5,9,20,.46);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
 .modal-box{position:relative;max-height:min(88vh,760px);overflow:auto;padding:20px;border:1px solid var(--line);border-radius:18px;background:var(--paper);box-shadow:0 22px 70px rgba(0,0,0,.28)}
 .modal-head{display:flex;align-items:flex-start;gap:10px;padding-right:42px;margin-bottom:4px}.modal-head h2{font-size:1.45rem}.modal-close{position:absolute;right:13px;top:13px;width:40px;height:40px;border:1px solid var(--line);border-radius:50%;background:var(--bg);color:var(--muted);display:grid;place-items:center;font-size:1.25rem;line-height:1;padding:0}@media (hover:hover) and (pointer:fine){.modal-close:hover{color:var(--ink);background:color-mix(in srgb,var(--focus) 7%,var(--bg))}}
 .modal-footer{display:flex;justify-content:flex-end;margin-top:20px;padding-top:14px;border-top:1px solid var(--line)}
@@ -1137,6 +1154,37 @@ body.main-keyboard-open form.add{
   .beta-badge{min-height:22px;padding-inline:7px;font-size:.62rem}
   .app-download{width:34px;height:34px;flex-basis:34px}
 }
+
+
+/* V104 — Aylık tamamlanan görevler */
+.month-done-head{margin-bottom:14px}
+.month-done-meta{margin:5px 0 0;color:var(--muted);font-size:.82rem;font-weight:600}
+.month-done-box{padding-bottom:14px}
+.month-done-list{display:grid;gap:8px;max-height:min(62vh,520px);overflow:auto;overscroll-behavior:contain;padding-right:2px}
+.month-done-item{padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--paper) 93%,var(--bg))}
+.month-done-task{display:block;color:var(--ink);font-size:.90rem;font-weight:650;line-height:1.35;overflow-wrap:anywhere}
+.month-done-date{display:block;margin-top:5px;color:var(--muted);font-size:.76rem;font-weight:600}
+.month-done-empty{margin:0;padding:18px 8px;color:var(--muted);font-size:.88rem;text-align:center}
+
+/* V104 — dokunmatik/sticky-hover temizliği.
+   Mobil tarayıcıların dokunma sonrası bıraktığı kare tap-highlight ve odak izi evrensel olarak kapatılır.
+   Gerçek klavye kullanımı için :focus-visible kuralları korunur. */
+button,a[href],[role="button"],summary,label,.cell{
+  -webkit-tap-highlight-color:transparent;
+}
+button,a[href],[role="button"]{
+  touch-action:manipulation;
+}
+@media (hover:none), (pointer:coarse){
+  button,a[href],[role="button"],summary,label,.cell{
+    -webkit-tap-highlight-color:transparent!important;
+  }
+  button:focus:not(:focus-visible),
+  a[href]:focus:not(:focus-visible),
+  [role="button"]:focus:not(:focus-visible){
+    outline:none!important;
+  }
+}
 </style>
 </head>
 <body class="auth-locked">
@@ -1147,7 +1195,7 @@ body.main-keyboard-open form.add{
     <h1>Çentik</h1>
     <span class="beta-badge" aria-label="Beta sürümü">BETA</span>
   </div>
-  <a class="ubtn app-download" id="androidDownload" href="https://onurtrklmz.github.io/centik/com.centik.app-BETA1-web103.apk" download="com.centik.app-BETA1-web103.apk" aria-label="Uygulamayı indir" title="Uygulamayı indir">
+  <a class="ubtn app-download" id="androidDownload" href="https://onurtrklmz.github.io/centik/com.centik.app-BETA1-web104.apk" download="com.centik.app-BETA1-web104.apk" aria-label="Uygulamayı indir" title="Uygulamayı indir">
     <i class="ti ti-download" aria-hidden="true"></i>
   </a>
   <button class="ubtn sync-refresh is-loading" id="refresh" type="button" aria-label="Yükleniyor" title="Yükleniyor">
@@ -1197,7 +1245,7 @@ body.main-keyboard-open form.add{
       <span class="tally-unit tally-progress"><b id="count">0</b><span class="count-sep">/</span><b id="totalCount">0</b><span class="tally-label">görev bitti</span></span>
       <span class="planned-wrap" id="plannedWrap" hidden><span class="slash">/</span><span class="tally-unit planned-unit"><b id="plannedCount">0</b><span>planlanan görev</span></span></span>
     </div>
-    <div class="tally-side tally-month"><span>bu ay biten:</span><b id="monthCount">0</b></div>
+    <button class="tally-side tally-month tally-month-button" id="monthDoneOpen" type="button" aria-haspopup="dialog" aria-controls="monthDoneDialog" aria-label="Bu ay tamamlanan görevleri göster"><span>bu ay biten:</span><b id="monthCount">0</b></button>
   </div>
 
   <section class="sheet">
@@ -1208,6 +1256,19 @@ body.main-keyboard-open form.add{
     <ul id="list" class="task-list"></ul>
   </section>
 
+
+  <dialog id="monthDoneDialog">
+    <div class="modal-box month-done-box">
+      <button type="button" class="modal-close" id="closeMonthDoneX" aria-label="Tamamlanan görevleri kapat" title="Kapat"><i class="ti ti-x" aria-hidden="true"></i></button>
+      <div class="modal-head month-done-head">
+        <div>
+          <h2 id="monthDoneTitle">Bu ay tamamlanan görevler</h2>
+          <p class="month-done-meta" id="monthDoneMeta"></p>
+        </div>
+      </div>
+      <div class="month-done-list" id="monthDoneList"></div>
+    </div>
+  </dialog>
 
 
   <dialog id="accountDialog">
@@ -1499,7 +1560,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v103", CENTIK_EXPECTED_SERVER_BUILD="v36-sabah-saat-cache-fix";
+const CENTIK_CLIENT_BUILD="v104", CENTIK_EXPECTED_SERVER_BUILD="v36-sabah-saat-cache-fix";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -2624,6 +2685,54 @@ function renderTomorrowNotice(){
     });
   }
 }
+
+function monthDoneRowsFor(dateKey=current){
+  const d=fromKey(dateKey),prefix=`${d.getFullYear()}-${pad(d.getMonth()+1)}`;
+  const rows=[];
+  Object.keys(days).filter(key=>key.startsWith(prefix)).sort().forEach(key=>{
+    normalizeItems(days[key]||[]).forEach(item=>{
+      if(item.done)rows.push({date:key,text:String(item.t||"").trim()});
+    });
+  });
+  return rows;
+}
+function monthDoneDateLabel(dateKey){
+  const d=fromKey(dateKey);
+  return `${d.getDate()} ${AYLAR[d.getMonth()]} ${d.getFullYear()}, ${DAYNAMES[d.getDay()]}`;
+}
+function openMonthDoneDialog(){
+  const dialog=$("monthDoneDialog"),list=$("monthDoneList"),meta=$("monthDoneMeta"),title=$("monthDoneTitle");
+  if(!dialog||!list||!meta||!title)return;
+  const d=fromKey(current),rows=monthDoneRowsFor(current);
+  title.textContent=`${AYLAR[d.getMonth()]} ayında tamamlanan görevler`;
+  meta.textContent=`${rows.length} görev tamamlandı`;
+  list.innerHTML="";
+  if(!rows.length){
+    const empty=document.createElement("p");
+    empty.className="month-done-empty";
+    empty.textContent="Bu ay henüz tamamlanan görev yok.";
+    list.appendChild(empty);
+  }else{
+    rows.slice().reverse().forEach(row=>{
+      const item=document.createElement("div");
+      item.className="month-done-item";
+      const task=document.createElement("span");
+      task.className="month-done-task";
+      task.textContent=row.text;
+      const date=document.createElement("span");
+      date.className="month-done-date";
+      date.textContent=monthDoneDateLabel(row.date);
+      item.append(task,date);
+      list.appendChild(item);
+    });
+  }
+  dialog.showModal();
+}
+function closeMonthDoneDialog(){
+  const dialog=$("monthDoneDialog");
+  if(dialog?.open)dialog.close();
+}
+
 function render(){
   const d=fromKey(current),tk=todayKey(),rel=current===tk?"Bugün":current===addDays(tk,-1)?"Dün":current===addDays(tk,1)?"Yarın":null;
   $("dayTitle").textContent=rel||`${d.getDate()} ${AYLAR[d.getMonth()]}`;const sub=$("daySub");sub.textContent=`${d.getDate()} ${AYLAR[d.getMonth()]} ${d.getFullYear()}, ${DAYNAMES[d.getDay()]}`;
@@ -4227,6 +4336,9 @@ function handleBeniDurtToggleChange(){
   if(!("Notification" in window)){setBeniDurtState("Bu tarayıcı bildirimleri desteklemiyor.",true);return}
   setBeniDurtState(Notification.permission==="granted"?"Beni Dürt açık · Kaydet ile etkinleştirilecek.":"Kaydederken bu cihaz için bildirim izni istenecek.");
 }
+$("monthDoneOpen").addEventListener("click",openMonthDoneDialog);
+$("closeMonthDoneX").addEventListener("click",closeMonthDoneDialog);
+$("monthDoneDialog").addEventListener("click",e=>{if(e.target===$("monthDoneDialog"))closeMonthDoneDialog()});
 $("beniDurtEnabled").addEventListener("change",handleBeniDurtToggleChange);
 $("beniDurtMorningEnabled").addEventListener("change",handleBeniDurtToggleChange);
 $("settings").onclick=e=>{e.stopPropagation();if(document.body.classList.contains("pinned-open"))closePinnedPanel(true);if(document.body.classList.contains("journal-open")&&!closeJournalView(false))return;toggleAccountMenu()};
@@ -4334,6 +4446,14 @@ async function boot(){
   currentUser=null;days={};pending=new Set();serverRevision=null;resetPinnedState();journalStatusCache.clear();journalStatusSeenAt.clear();journalStatusPending.clear();journalMonthCache.clear();journalMonthPending.clear();
   applyTheme("lacivert");setSyncStatus("idle");showGate(true);showPane("loginPane");
 }
+
+document.addEventListener("pointerup",e=>{
+  if(e.pointerType!=="touch"&&e.pointerType!=="pen")return;
+  const el=e.target?.closest?.('button,a[href],[role="button"]');
+  if(!el)return;
+  requestAnimationFrame(()=>{if(document.activeElement===el)el.blur()});
+},{passive:true});
+
 boot();
 if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>r.update().catch(()=>{})).catch(()=>{}));
 </script>
