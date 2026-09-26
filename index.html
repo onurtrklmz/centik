@@ -1035,16 +1035,75 @@ body.main-keyboard-open form.add{
 }
 
 
-/* r55-diagnostic — yalnız tanılama arayüzü */
-.keyboard-diag-card{margin:12px 0 4px;padding:14px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--paper) 88%,transparent)}
-.keyboard-diag-card h3{margin:0 0 4px;font-size:.96rem}
-.keyboard-diag-card>p{margin:0 0 10px;color:var(--muted);font-size:.82rem;line-height:1.45}
-.keyboard-diag-actions{display:flex;gap:8px;flex-wrap:wrap}
-.keyboard-diag-actions button{border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);padding:8px 10px;font-weight:700;font-size:.80rem}
-.keyboard-diag-actions button.primary{color:var(--focus);border-color:color-mix(in srgb,var(--focus) 38%,var(--line))}
-.keyboard-diag-actions button.danger{color:#b42318;border-color:color-mix(in srgb,#b42318 28%,var(--line))}
-.keyboard-diag-state{margin:9px 0 0!important;font-size:.76rem!important;color:var(--marka)!important;font-weight:650}
-.keyboard-diag-output{width:100%;min-height:160px;max-height:300px;margin-top:10px;padding:9px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font:500 .68rem/1.4 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;resize:vertical}
+
+
+/* r56-diagnostic — sabit, görünür, sayfa akışını etkilemeyen tanılama paneli */
+.keyboard-diag-float{
+  position:fixed;
+  left:8px;
+  right:8px;
+  top:max(8px,env(safe-area-inset-top));
+  z-index:20050;
+  width:auto;
+  max-width:520px;
+  margin:0 auto;
+  color:#111827;
+  font:600 12px/1.3 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  contain:layout paint style;
+  pointer-events:auto;
+}
+body.auth-locked .keyboard-diag-float{display:none!important}
+.keyboard-diag-bar{
+  min-height:36px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 8px;
+  border:1px solid rgba(17,24,39,.24);
+  border-radius:11px;
+  background:rgba(255,255,255,.94);
+  box-shadow:0 4px 18px rgba(0,0,0,.15);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+.keyboard-diag-bar strong{font-weight:900;letter-spacing:.04em}
+.keyboard-diag-state{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.keyboard-diag-bar button,.keyboard-diag-actions button{
+  border:1px solid rgba(17,24,39,.20);
+  border-radius:8px;
+  background:#fff;
+  color:#111827;
+  min-height:28px;
+  padding:4px 8px;
+  font:800 11px/1 ui-sans-serif,system-ui,sans-serif;
+}
+.keyboard-diag-panel{
+  margin-top:5px;
+  padding:8px;
+  border:1px solid rgba(17,24,39,.24);
+  border-radius:11px;
+  background:rgba(255,255,255,.97);
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+}
+.keyboard-diag-panel[hidden]{display:none!important}
+.keyboard-diag-actions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px}
+.keyboard-diag-log{
+  display:block;
+  width:100%;
+  height:170px;
+  min-height:120px;
+  max-height:32vh;
+  resize:vertical;
+  box-sizing:border-box;
+  border:1px solid rgba(17,24,39,.18);
+  border-radius:8px;
+  background:#f8fafc;
+  color:#111827;
+  padding:7px;
+  font:500 10px/1.35 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  white-space:pre;
+  overflow:auto;
+}
 </style>
 </head>
 <body class="auth-locked">
@@ -1146,18 +1205,6 @@ body.main-keyboard-open form.add{
           <input class="beni-durt-time" id="beniDurtTime" type="time" value="20:00" step="60">
         </div>
         <p class="beni-durt-state" id="beniDurtState" aria-live="polite"></p>
-      </section>
-      <section class="keyboard-diag-card" aria-labelledby="keyboardDiagTitle">
-        <h3 id="keyboardDiagTitle">Klavye / Çekmece Tanılama</h3>
-        <p>Davranışı değiştirmez. Sorun oluşurken klavye, viewport, çekmece ve scroll geometrisini kaydeder. Yazdığınız metin veya tuş içeriği kaydedilmez.</p>
-        <div class="keyboard-diag-actions">
-          <button class="primary" id="keyboardDiagStart" type="button">Kaydı başlat</button>
-          <button id="keyboardDiagStop" type="button">Durdur</button>
-          <button id="keyboardDiagCopy" type="button">Kaydı kopyala</button>
-          <button class="danger" id="keyboardDiagClear" type="button">Temizle</button>
-        </div>
-        <p class="keyboard-diag-state" id="keyboardDiagState" aria-live="polite">Kayıt kapalı.</p>
-        <textarea class="keyboard-diag-output" id="keyboardDiagOutput" readonly hidden aria-label="Klavye tanılama çıktısı"></textarea>
       </section>
       <section class="journal-privacy" aria-labelledby="journalPrivacyTitle">
         <h3 id="journalPrivacyTitle">Çetele Gizliliği</h3>
@@ -1413,7 +1460,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v95-r55-diagnostic", CENTIK_EXPECTED_SERVER_BUILD="v33-beni-durt";
+const CENTIK_CLIENT_BUILD="v95-r56-diagnostic", CENTIK_EXPECTED_SERVER_BUILD="v33-beni-durt";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -4245,17 +4292,35 @@ if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.add
 </div>
 
 
+
+
+<div class="keyboard-diag-float" id="keyboardDiagFloat" aria-label="Klavye ve çekmece tanılama">
+  <div class="keyboard-diag-bar">
+    <strong>DEBUG</strong>
+    <span class="keyboard-diag-state" id="keyboardDiagState">Kayıt açık · 0 olay</span>
+    <button type="button" id="keyboardDiagToggle">Log</button>
+  </div>
+  <div class="keyboard-diag-panel" id="keyboardDiagPanel" hidden>
+    <div class="keyboard-diag-actions">
+      <button type="button" id="keyboardDiagClear">Temizle</button>
+      <button type="button" id="keyboardDiagPause">Durdur</button>
+      <button type="button" id="keyboardDiagCopy">Kopyala</button>
+    </div>
+    <textarea class="keyboard-diag-log" id="keyboardDiagOutput" readonly aria-label="Canlı tanılama kaydı"></textarea>
+  </div>
+</div>
+
+
 <script>
-/* r55-diagnostic
-   Salt gözlemci. Scroll/focus/layout yazmaz; kullanıcı metnini ve tuş içeriğini kaydetmez. */
+/* r56-diagnostic — yalnız gözlemci; uygulama scroll/focus/layout durumuna yazmaz. */
 (()=>{
   "use strict";
 
   const MAX_EVENTS=900;
   const events=[];
-  let recording=false;
+  let recording=true;
   let seq=0;
-  let rafToken=0;
+  let paintQueued=false;
 
   const $d=id=>document.getElementById(id);
   const n=v=>{
@@ -4266,9 +4331,6 @@ if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.add
     if(!(el instanceof Element))return null;
     const r=el.getBoundingClientRect();
     return {top:n(r.top),bottom:n(r.bottom),left:n(r.left),right:n(r.right),width:n(r.width),height:n(r.height)};
-  };
-  const cssVal=(el,name)=>{
-    try{return getComputedStyle(el).getPropertyValue(name).trim()}catch(_){return ""}
   };
   const nodeName=el=>{
     if(!(el instanceof HTMLElement))return null;
@@ -4314,19 +4376,12 @@ if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.add
     if(!(el instanceof Element))return null;
     const c=getComputedStyle(el);
     return {
-      height:c.height,
-      minHeight:c.minHeight,
-      maxHeight:c.maxHeight,
-      paddingTop:c.paddingTop,
-      paddingBottom:c.paddingBottom,
-      marginTop:c.marginTop,
-      marginBottom:c.marginBottom,
-      overflowY:c.overflowY,
-      transitionProperty:c.transitionProperty,
-      transitionDuration:c.transitionDuration,
-      transform:c.transform,
-      visibility:c.visibility,
-      opacity:c.opacity
+      height:c.height,minHeight:c.minHeight,maxHeight:c.maxHeight,
+      paddingTop:c.paddingTop,paddingBottom:c.paddingBottom,
+      marginTop:c.marginTop,marginBottom:c.marginBottom,
+      overflowY:c.overflowY,transitionProperty:c.transitionProperty,
+      transitionDuration:c.transitionDuration,transform:c.transform,
+      visibility:c.visibility,opacity:c.opacity
     };
   };
 
@@ -4338,17 +4393,16 @@ if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.add
     const head=document.querySelector(".cal-head");
     const vv=window.visualViewport;
     const rootStyle=getComputedStyle(document.documentElement);
-    const bodyStyle=getComputedStyle(document.body);
     return {
       n:++seq,
       ms:n(performance.now()),
-      event,
-      phase,
+      event,phase,
       target:nodeName(target),
       active:nodeName(active),
       editable:isEditable(active),
       policy:activePolicy(active),
       provider:document.documentElement.dataset.keyboardProvider||"",
+      kbOpen:document.body.classList.contains("keyboard-open"),
       inputType:extra.inputType||null,
       charKey:extra.charKey===true,
       transitionProperty:extra.transitionProperty||null,
@@ -4360,10 +4414,8 @@ if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.add
         topbarH:rootStyle.getPropertyValue("--centik-topbar-h").trim()
       },
       window:{
-        innerHeight:n(window.innerHeight),
-        innerWidth:n(window.innerWidth),
-        scrollY:n(window.scrollY),
-        devicePixelRatio:n(window.devicePixelRatio)
+        innerHeight:n(window.innerHeight),innerWidth:n(window.innerWidth),
+        scrollY:n(window.scrollY),devicePixelRatio:n(window.devicePixelRatio)
       },
       document:{
         clientHeight:n(document.documentElement.clientHeight),
@@ -4371,54 +4423,81 @@ if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.add
         scrollHeight:n(document.scrollingElement?.scrollHeight)
       },
       visualViewport:vv?{
-        height:n(vv.height),
-        width:n(vv.width),
-        offsetTop:n(vv.offsetTop),
-        offsetLeft:n(vv.offsetLeft),
-        pageTop:n(vv.pageTop),
-        pageLeft:n(vv.pageLeft),
-        scale:n(vv.scale)
+        height:n(vv.height),width:n(vv.width),
+        offsetTop:n(vv.offsetTop),offsetLeft:n(vv.offsetLeft),
+        pageTop:n(vv.pageTop),pageLeft:n(vv.pageLeft),scale:n(vv.scale)
       }:null,
       virtualKeyboard:vkRect(),
-      cal:{
-        rect:rectOf(cal),
-        style:styleSnapshot(cal)
-      },
-      calHead:{
-        rect:rectOf(head),
-        style:styleSnapshot(head)
-      },
+      cal:{rect:rectOf(cal),style:styleSnapshot(cal)},
+      calHead:{rect:rectOf(head),style:styleSnapshot(head)},
       utilityWrap:wrap?{
-        id:wrap.id,
-        rect:rectOf(wrap),
-        scrollTop:n(wrap.scrollTop),
-        clientHeight:n(wrap.clientHeight),
-        scrollHeight:n(wrap.scrollHeight),
+        id:wrap.id,rect:rectOf(wrap),scrollTop:n(wrap.scrollTop),
+        clientHeight:n(wrap.clientHeight),scrollHeight:n(wrap.scrollHeight),
         style:styleSnapshot(wrap)
       }:null,
       utilityClip:clip?{
-        rect:rectOf(clip),
-        scrollTop:n(clip.scrollTop),
-        clientHeight:n(clip.clientHeight),
-        scrollHeight:n(clip.scrollHeight),
+        rect:rectOf(clip),scrollTop:n(clip.scrollTop),
+        clientHeight:n(clip.clientHeight),scrollHeight:n(clip.scrollHeight),
         style:styleSnapshot(clip)
       }:null,
       activeEditable:active&&isEditable(active)?{
-        name:nodeName(active),
-        rect:rectOf(active),
-        scrollTop:n(active.scrollTop),
-        clientHeight:n(active.clientHeight),
-        scrollHeight:n(active.scrollHeight)
+        name:nodeName(active),rect:rectOf(active),scrollTop:n(active.scrollTop),
+        clientHeight:n(active.clientHeight),scrollHeight:n(active.scrollHeight)
       }:null
     };
+  }
+
+  function compact(s){
+    const vv=s.visualViewport||{};
+    const c=s.cal?.rect||{};
+    const w=s.utilityWrap?.rect||{};
+    const clip=s.utilityClip||{};
+    const e=s.activeEditable?.rect||{};
+    return [
+      `#${s.n}`,
+      `${s.ms}ms`,
+      `${s.event}/${s.phase}`,
+      `p=${s.provider||"-"}`,
+      `kb=${s.kbOpen?1:0}`,
+      `ih=${s.window.innerHeight}`,
+      `ch=${s.document.clientHeight}`,
+      `vvH=${vv.height??"-"}`,
+      `vvTop=${vv.offsetTop??"-"}`,
+      `cal=${c.top??"-"}/${c.height??"-"}`,
+      `wrap=${w.top??"-"}/${w.height??"-"}`,
+      `scr=${clip.scrollTop??"-"}/${clip.clientHeight??"-"}`,
+      `el=${e.top??"-"}/${e.bottom??"-"}`,
+      s.transitionProperty?`tr=${s.transitionProperty}`:""
+    ].filter(Boolean).join(" ");
+  }
+
+  function renderState(msg=""){
+    const el=$d("keyboardDiagState");
+    if(el)el.textContent=msg||(recording?`Kayıt açık · ${events.length} olay`:`Kayıt durdu · ${events.length} olay`);
+  }
+
+  function renderLog(){
+    paintQueued=false;
+    const out=$d("keyboardDiagOutput");
+    const panel=$d("keyboardDiagPanel");
+    if(!out||panel?.hidden)return;
+    out.value=events.slice(-180).map(compact).join("\n");
+  }
+
+  function queueLog(){
+    if(paintQueued)return;
+    paintQueued=true;
+    requestAnimationFrame(renderLog);
   }
 
   function push(event,phase,target,extra={}){
     if(!recording)return;
     try{
-      events.push(snapshot(event,phase,target,extra));
+      const s=snapshot(event,phase,target,extra);
+      events.push(s);
       if(events.length>MAX_EVENTS)events.splice(0,events.length-MAX_EVENTS);
-      updateState();
+      renderState();
+      queueLog();
     }catch(_){}
   }
 
@@ -4427,6 +4506,10 @@ if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.add
       push(event,"raf1",target,extra);
       requestAnimationFrame(()=>push(event,"raf2",target,extra));
     });
+  }
+
+  function fromDebugUI(target){
+    return !!target?.closest?.("#keyboardDiagFloat");
   }
 
   function eventExtra(e){
@@ -4438,6 +4521,7 @@ if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.add
 
   function onDoc(type,withRaf=false){
     document.addEventListener(type,e=>{
+      if(fromDebugUI(e.target))return;
       const extra=eventExtra(e);
       push(type,"event",e.target,extra);
       if(withRaf)traceRafs(type,e.target,extra);
@@ -4454,9 +4538,7 @@ if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.add
     push("window.resize","event",document.activeElement,{});
     traceRafs("window.resize",document.activeElement,{});
   },{passive:true});
-  window.addEventListener("scroll",()=>{
-    push("window.scroll","event",document.activeElement,{});
-  },{passive:true});
+  window.addEventListener("scroll",()=>push("window.scroll","event",document.activeElement,{}),{passive:true});
 
   if(window.visualViewport){
     visualViewport.addEventListener("resize",()=>{
@@ -4481,7 +4563,7 @@ if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.add
   ["transitionrun","transitionstart","transitionend","transitioncancel"].forEach(type=>{
     document.addEventListener(type,e=>{
       const t=e.target;
-      if(!(t instanceof Element))return;
+      if(!(t instanceof Element)||fromDebugUI(t))return;
       if(!t.matches(".utility-body-wrap,.utility-body-clip,.cal,.cal-head"))return;
       const extra={transitionProperty:e.propertyName||null};
       push(type,"event",t,extra);
@@ -4509,37 +4591,24 @@ if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.add
   });
   rootObserver.observe(document.documentElement,{attributes:true,attributeFilter:["style"]});
 
-  function updateState(msg=""){
-    const el=$d("keyboardDiagState");
-    if(!el)return;
-    el.textContent=msg || (recording?`Kayıt açık · ${events.length} olay`:`Kayıt kapalı · ${events.length} olay`);
-  }
-
-  function start(){
-    events.length=0;
-    seq=0;
-    recording=true;
-    push("diagnostic","start",document.activeElement,{});
-    updateState("Kayıt başladı. Ayarları kapatıp sorunu bir kez üretin.");
-  }
-
-  function stop(){
-    if(recording)push("diagnostic","stop",document.activeElement,{});
-    recording=false;
-    updateState();
-  }
-
   function clear(){
     events.length=0;
     seq=0;
-    const out=$d("keyboardDiagOutput");
-    if(out){out.value="";out.hidden=true}
-    updateState("Kayıt temizlendi.");
+    recording=true;
+    renderState("Temizlendi · kayıt açık");
+    renderLog();
+  }
+
+  function togglePause(){
+    recording=!recording;
+    const b=$d("keyboardDiagPause");
+    if(b)b.textContent=recording?"Durdur":"Başlat";
+    renderState();
   }
 
   function report(){
     return {
-      build:"r55-diagnostic-on-r54",
+      build:"r56-diagnostic-on-r54",
       generatedAt:new Date().toISOString(),
       userAgent:navigator.userAgent,
       standalone:!!window.matchMedia?.("(display-mode: standalone)")?.matches,
@@ -4550,31 +4619,39 @@ if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.add
 
   async function copy(){
     const data=JSON.stringify(report(),null,2);
-    const out=$d("keyboardDiagOutput");
-    if(out){out.value=data;out.hidden=false}
     let ok=false;
     try{
       await navigator.clipboard.writeText(data);
       ok=true;
-    }catch(_){
-      try{
-        if(out){
+    }catch(_){}
+    if(!ok){
+      const out=$d("keyboardDiagOutput");
+      const panel=$d("keyboardDiagPanel");
+      if(panel)panel.hidden=false;
+      if(out){
+        out.value=data;
+        try{
           out.focus({preventScroll:true});
           out.select();
           ok=document.execCommand("copy");
           out.blur();
-        }
-      }catch(__){}
+        }catch(__){}
+      }
     }
-    updateState(ok?`Kayıt panoya kopyalandı · ${events.length} olay`:`Pano izni yok; kayıt aşağıdaki kutuda hazır · ${events.length} olay`);
+    renderState(ok?`Kopyalandı · ${events.length} olay`:`Kopyalanamadı · log kutusunda ${events.length} olay`);
   }
 
-  $d("keyboardDiagStart")?.addEventListener("click",start);
-  $d("keyboardDiagStop")?.addEventListener("click",stop);
+  $d("keyboardDiagToggle")?.addEventListener("click",()=>{
+    const panel=$d("keyboardDiagPanel");
+    if(!panel)return;
+    panel.hidden=!panel.hidden;
+    if(!panel.hidden)renderLog();
+  });
   $d("keyboardDiagClear")?.addEventListener("click",clear);
+  $d("keyboardDiagPause")?.addEventListener("click",togglePause);
   $d("keyboardDiagCopy")?.addEventListener("click",copy);
 
-  updateState();
+  renderState();
 })();
 </script>
 </body>
