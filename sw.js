@@ -1,9 +1,8 @@
-// r54-chatgpt: utility cal-head geometry remains fixed while keyboard is open.
 // v94-ui-r47: KeyboardCore + bağımsız Main/Utility policies; utility r41, main r44 davranışı.
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v95-r54-chatgpt";
+const SURUM = "centik-v95-kill-kb-transition-r54";
 const KABUK = [
   "./",
   "./index.html",
