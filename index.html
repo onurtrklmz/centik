@@ -1147,7 +1147,7 @@ body.main-keyboard-open form.add{
     <h1>Çentik</h1>
     <span class="beta-badge" aria-label="Beta sürümü">BETA</span>
   </div>
-  <a class="ubtn app-download" id="androidDownload" href="https://onurtrklmz.github.io/centik/com.centik.app-BETA1-web102.apk" download="com.centik.app-BETA1-web102.apk" aria-label="Çentik Android Beta APK indir" title="Android uygulamasını indir">
+  <a class="ubtn app-download" id="androidDownload" href="https://onurtrklmz.github.io/centik/com.centik.app-BETA1-web103.apk" download="com.centik.app-BETA1-web103.apk" aria-label="Uygulamayı indir" title="Uygulamayı indir">
     <i class="ti ti-download" aria-hidden="true"></i>
   </a>
   <button class="ubtn sync-refresh is-loading" id="refresh" type="button" aria-label="Yükleniyor" title="Yükleniyor">
@@ -1499,7 +1499,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v102-beta-apk-link", CENTIK_EXPECTED_SERVER_BUILD="v36-sabah-saat-cache-fix";
+const CENTIK_CLIENT_BUILD="v103", CENTIK_EXPECTED_SERVER_BUILD="v36-sabah-saat-cache-fix";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
