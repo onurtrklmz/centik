@@ -2,7 +2,7 @@
 // v94: Beni Dürt push bildirimi eklendi; mevcut PWA/offline kabuğu korunur.
 // Çentik service worker — sayfayı çevrimdışı açılabilir kılar.
 // v78: Takvim/Çakılı/Çetele boş yüzeyden aşağı çekilerek kapanabilir; Çetele editörü tam görünüm için kompaktlaştırıldı.
-const SURUM = "centik-v95-r57-keyboard-fix";
+const SURUM = "centik-v95-r58-utility-bar-space-fix";
 const KABUK = [
   "./",
   "./index.html",
