@@ -1031,13 +1031,30 @@ body.main-keyboard-open form.add{
    sorun değil (kullanıcı bir çekmecede textbox odaklamadıkça görünmez). */
 #centikKbDebug{
   position:fixed;left:6px;right:6px;bottom:6px;z-index:9999;
-  max-height:42vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  max-height:42vh;display:flex;flex-direction:column;
   background:rgba(0,0,0,.86);color:#7CFC9A;
   font:10px/1.35 ui-monospace,Menlo,Consolas,monospace;
-  padding:6px 8px;border-radius:8px;white-space:pre-wrap;word-break:break-word;
+  border-radius:8px;overflow:hidden;
   pointer-events:auto;
 }
 #centikKbDebug[hidden]{display:none}
+#centikKbDebugBar{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:5px 8px;background:rgba(255,255,255,.08);
+  font:11px/1.2 -apple-system,system-ui,sans-serif;color:#cfe;
+  flex:0 0 auto;
+}
+#centikKbDebugCopy{
+  appearance:none;border:1px solid #7CFC9A;background:transparent;color:#7CFC9A;
+  font:600 11px/1 -apple-system,system-ui,sans-serif;padding:5px 10px;border-radius:6px;
+}
+#centikKbDebugCopy:active{background:#7CFC9A;color:#000}
+#centikKbDebugLog{
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:6px 8px;white-space:pre-wrap;word-break:break-word;
+  user-select:text;-webkit-user-select:text;
+  flex:1 1 auto;min-height:0;
+}
 </style>
 </head>
 <body class="auth-locked">
@@ -1394,7 +1411,7 @@ const addDays=(k,n)=>{const d=fromKey(k);d.setDate(d.getDate()+n);return key(d)}
 
 // Google Apps Script web uygulamasının /exec adresi.
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqDOY-7M3NIaAUv6bhqrzMJBYt-9RelqxdDPn17yUsWiLWI-hkRfMwTJl1lOpGIkQQ/exec";
-const CENTIK_CLIENT_BUILD="v95-debug-overlay-r52", CENTIK_EXPECTED_SERVER_BUILD="v33-beni-durt";
+const CENTIK_CLIENT_BUILD="v95-debug-overlay-r53", CENTIK_EXPECTED_SERVER_BUILD="v33-beni-durt";
 const AUTH_TOKEN="centik-auth-token-v2", AUTH_USER="centik-auth-user-v2", LS_PREFIX="centik-user-v2-";
 let days={}, current=todayKey(), viewMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})(), lastPop=null;
 let pending=new Set(), timers={}, currentUser=null, resetStage=1, connectPromise=null, serverRevision=null, lastSyncAt=0, lastSyncAttemptAt=0, forcedSyncTimer=null;
@@ -2442,13 +2459,47 @@ const KeyboardManager=(()=>{
 //  - .cal kabuğunun kendi getBoundingClientRect().top/height değerleri de
 //    ekleniyor (tilt şüphesi doğrudan bu kabuğun konumunda).
 (function centikKbDebugOverlay(){
-  let box=null,raf=0,rows=[],last=null,repeat=0,sessionStart=0,active_prev=false;
+  let box=null,logEl=null,raf=0,rows=[],last=null,repeat=0,sessionStart=0,active_prev=false;
   const MAX_ROWS=600;
 
   function ensureBox(){
     if(box)return box;
     box=document.createElement("div");
     box.id="centikKbDebug";
+    const bar=document.createElement("div");
+    bar.id="centikKbDebugBar";
+    const label=document.createElement("span");
+    label.textContent="Klavye tanılama günlüğü";
+    const btn=document.createElement("button");
+    btn.type="button";
+    btn.id="centikKbDebugCopy";
+    btn.textContent="Kopyala";
+    btn.addEventListener("click",async()=>{
+      const text=rows.join("\n");
+      try{
+        if(navigator.clipboard?.writeText){
+          await navigator.clipboard.writeText(text);
+        }else{
+          throw new Error("clipboard api yok");
+        }
+        btn.textContent="Kopyalandı ✓";
+      }catch(e){
+        // Pano izni yoksa yedek yol: metni seçili hale getir, kullanıcı elle kopyalasın.
+        const range=document.createRange();
+        range.selectNodeContents(logEl);
+        const sel=window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        btn.textContent="Seçildi, elle kopyala";
+      }
+      setTimeout(()=>{btn.textContent="Kopyala"},1600);
+    });
+    bar.appendChild(label);
+    bar.appendChild(btn);
+    logEl=document.createElement("div");
+    logEl.id="centikKbDebugLog";
+    box.appendChild(bar);
+    box.appendChild(logEl);
     document.body.appendChild(box);
     return box;
   }
@@ -2473,8 +2524,8 @@ const KeyboardManager=(()=>{
   }
 
   function paint(autoscroll){
-    box.textContent=rows.join("\n");
-    if(autoscroll)box.scrollTop=box.scrollHeight;
+    logEl.textContent=rows.join("\n");
+    if(autoscroll)logEl.scrollTop=logEl.scrollHeight;
   }
 
   function sample(){
